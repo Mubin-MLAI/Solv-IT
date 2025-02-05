@@ -176,7 +176,7 @@ class CatogaryItemSearchListView(CatogaryItemListView):
             )
         return result
 
-class ItemSearchListView(CatogaryItemListView):
+class ItemSearchListView(ProductListView):
     """
     View class to search and display a filtered list of items.
 
@@ -187,14 +187,14 @@ class ItemSearchListView(CatogaryItemListView):
     paginate_by = 10
 
     def get_queryset(self):
-        result = super(ItemSearchListView, self).get_queryset()
+        result = super(ProductListView, self).get_queryset()
 
         query = self.request.GET.get("q")
         if query:
             query_list = query.split()
             result = result.filter(
                 reduce(
-                    operator.and_, (Q(name__icontains=q) for q in query_list)
+                    operator.and_, (Q(name__icontains=q) | Q(serialno__icontains=q) | Q(make_and_models__icontains=q) for q in query_list)
                 )
             )
         return result
@@ -304,21 +304,25 @@ Attributes:
 - form_class: The form class used for data input.
 - success_url: The URL to redirect to upon successful form submission.
 """
+# def productcreateview(request):
+#     if request.method == 'POST':
+#         form = ItemForm(request.POST)
+#         if form.is_valid():
+#             # Save the product to the database
+#             form.save()
+#             return redirect('productslist')  # Redirect to the product list or success page
+#     else:
+#         form = ItemForm()
+#     return render(request, 'store/productcreate.html', {'form': form})
+
 def productcreateview(request):
-    if request.method == 'POST':
-        print('request.POST', request.POST)
+    if request.method == "POST":
         form = ItemForm(request.POST)
         if form.is_valid():
-            # Save the product to the database
-            print('valid form')
             form.save()
-            return redirect('productslist')  # Redirect to the product list or success page
-        print('invalid form')
+            return redirect('productslist')  # Redirect to a list page or wherever needed
     else:
-        form = ItemForm()
-
-
-    print('form', form)
+        form = Item()
     return render(request, 'store/productcreate.html', {'form': form})
 
 
@@ -595,7 +599,23 @@ def search_suggestions(request):
             Q(name__icontains=query) | 
             Q(serial_no__icontains=query)
         )  # or filter based on other fields as needed
-        suggestions = [f"{item.category} - {item.name} - {item.serial_no}" for item in items]  # or other fields like item.serial_no, etc.
+        suggestions = [f"{item.name}" for item in items]  # or other fields like item.serial_no, etc.
+
+    return JsonResponse({'suggestions': suggestions})
+
+def search_suggestions_product(request):
+    query = request.GET.get('q', '')
+    items = Item.objects.all()  # Start by getting all items
+    suggestions = []
+    
+    if query:
+        # Filter items based on the query's initial letters
+        items = Item.objects.filter(
+            Q(serialno__icontains=query) | 
+            Q(name__icontains=query) | 
+            Q(make_and_models__icontains=query)
+        )  # or filter based on other fields as needed
+        suggestions = [f"{item.name}" for item in items]  # or other fields like item.serial_no, etc.
 
     return JsonResponse({'suggestions': suggestions})
 

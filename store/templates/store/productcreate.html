@@ -11,131 +11,124 @@ Add Product
         <div class="col-lg-8 col-md-10">
             <div class="card shadow-sm border-light">
                 <div class="card-body">
-                    <h1 class="text-center mb-4">
-                        Add Product
-                    </h1>
-                    <form method="POST" enctype="multipart/form-data">
+                    <form method="POST" enctype="multipart/form-data" action="{% url 'product-create' %}">
                         {% csrf_token %}
                         <div class="row mb-3">
+                            <!-- Product Name -->
                             <div class="col-md-4">
                                 <label for="{{ form.name.id_for_label }}" class="form-label">
                                     Product Name
                                 </label>
-                                {{ form.name }}
+                                <input type="text" name="name" id="product_name" class="form-control"
+                                    value="{{ form.name.value }}" placeholder="Enter Product Name">
                                 <div class="text-danger">{{ form.name.errors }}</div>
                             </div>
+
+                            <!-- Serial No -->
                             <div class="col-md-4">
                                 <label for="{{ form.serialno.id_for_label }}" class="form-label">
                                     Serial No
                                 </label>
-                                {{ form.serialno }}
+                                <input type="text" name="serialno" id="serial_no" class="form-control"
+                                    value="{{ form.serialno.value }}" placeholder="Enter Serial Number">
                                 <div class="text-danger">{{ form.serialno.errors }}</div>
                             </div>
+
+                            <!-- Make & Models -->
                             <div class="col-md-4">
                                 <label for="{{ form.make_and_models.id_for_label }}" class="form-label">
                                     Make & Models
                                 </label>
-                                {{ form.make_and_models }}
+                                <input type="text" name="make_and_models" id="make_and_models" class="form-control"
+                                    value="{{ form.make_and_models.value }}" placeholder="Enter Make & Models">
                                 <div class="text-danger">{{ form.make_and_models.errors }}</div>
                             </div>
                         </div>
 
                         <div class="row mb-3">
+                            <!-- Processor Details -->
                             <div class="col-md-3">
-                                <label for="processor" class="form-label">
-                                    Processor
-                                </label>
-                                <div class="form-check">
-                                    <input type="checkbox" class="form-check-input" id="processor" name="processor" onclick="toggleProcessorFields()">
-                                    <label class="form-check-label" for="processor">Select Processor</label>
-                                </div>
-                                <div id="processor_fields" style="display: none;">
+                                <div id="processor_fields">
                                     <label for="processor" class="form-label">
                                         Processor Details
                                     </label>
-                                    <input type="text" id="processor" name="processor" class="form-control">
-                                    <label for="processor_qty" class="form-label">
-                                        Processor Quantity
-                                    </label>
-                                    <input type="number" id="processor_qty" name="processor_qty" class="form-control" value="1">
+                                    <input id="searchbox" name="processor" type="text"
+                                        class="form-control border-0 rounded-pill shadow-sm"
+                                        placeholder="Find Processor" autocomplete="off">
+                                    <div id="suggestions" class="list-group position-absolute"
+                                        style="z-index: 9999; width: 100%;"></div>
+                                    <label for="processor_qty" class="form-label">Processor Quantity</label>
+                                    <input type="number" id="processor_qty" name="processor_qty" class="form-control">
                                 </div>
                             </div>
+
+                            <!-- RAM Details -->
                             <div class="col-md-3">
-                                <label for="ram" class="form-label">
-                                    RAM
-                                </label>
-                                <div class="form-check">
-                                    <input type="checkbox" class="form-check-input" id="ram" name="ram" onclick="toggleRamFields()">
-                                    <label class="form-check-label" for="ram">Select RAM</label>
-                                </div>
-                                <div id="ram_fields" style="display: none;">
+                                <div id="ram_fields">
                                     <label for="ram" class="form-label">
                                         RAM Details
                                     </label>
-                                    <input type="text" id="ram" name="ram" class="form-control">
-                                    <label for="ram_qty" class="form-label">
-                                        RAM Quantity
-                                    </label>
-                                    <input type="number" id="ram_qty" name="ram_qty" class="form-control" value="1">
+                                    <input id="searchbox1" name="ram" type="text"
+                                        class="form-control border-0 rounded-pill shadow-sm" placeholder="Find RAM"
+                                        autocomplete="off">
+                                    <div id="suggestions1" class="list-group position-absolute"
+                                        style="z-index: 9999; width: 100%;"></div>
+                                    <label for="ram_qty" class="form-label">RAM Quantity</label>
+                                    <input type="number" id="ram_qty" name="ram_qty" class="form-control">
                                 </div>
                             </div>
+
+                            <!-- HDD Details -->
                             <div class="col-md-3">
-                                <label for="hdd" class="form-label">
-                                    HDD
-                                </label>
-                                <div class="form-check">
-                                    <input type="checkbox" class="form-check-input" id="hdd" name="hdd" onclick="toggleHddFields()">
-                                    <label class="form-check-label" for="hdd">Select HDD</label>
-                                </div>
-                                <div id="hdd_fields" style="display: none;">
+                                <div id="hdd_fields">
                                     <label for="hdd" class="form-label">
                                         HDD Details
                                     </label>
-                                    <input type="text" id="hdd" name="hdd" class="form-control">
-                                    <label for="hdd_qty" class="form-label">
-                                        HDD Quantity
-                                    </label>
-                                    <input type="number" id="hdd_qty" name="hdd_qty" class="form-control" value="1">
+                                    <input id="searchbox2" name="hdd" type="text"
+                                        class="form-control border-0 rounded-pill shadow-sm" placeholder="Find HDD"
+                                        autocomplete="off">
+                                    <div id="suggestions2" class="list-group position-absolute"
+                                        style="z-index: 9999; width: 100%;"></div>
+                                    <label for="hdd_qty" class="form-label">HDD Quantity</label>
+                                    <input type="number" id="hdd_qty" name="hdd_qty" class="form-control">
                                 </div>
                             </div>
+
+                            <!-- SSD Details -->
                             <div class="col-md-3">
-                                <label for="ssd" class="form-label">
-                                    SSD
-                                </label>
-                                <div class="form-check">
-                                    <input type="checkbox" class="form-check-input" id="ssd" name="ssd" onclick="toggleSsdFields()">
-                                    <label class="form-check-label" for="ssd">Select SSD</label>
-                                </div>
-                                <div id="ssd_fields" style="display: none;">
-                                    <label for="sdd" class="form-label">
+                                <div id="ssd_fields">
+                                    <label for="ssd" class="form-label">
                                         SSD Details
                                     </label>
-                                    <input type="text" id="sdd" name="sdd" class="form-control">
-                                    <label for="ssd_qty" class="form-label">
-                                        SSD Quantity
-                                    </label>
-                                    <input type="number" id="ssd_qty" name="ssd_qty" class="form-control" value="1">
+                                    <input id="searchbox3" name="ssd" type="text"
+                                        class="form-control border-0 rounded-pill shadow-sm" placeholder="Find SSD"
+                                        autocomplete="off">
+                                    <div id="suggestions3" class="list-group position-absolute"
+                                        style="z-index: 9999; width: 100%;"></div>
+                                    <label for="ssd_qty" class="form-label">SSD Quantity</label>
+                                    <input type="number" id="ssd_qty" name="ssd_qty" class="form-control">
                                 </div>
                             </div>
                         </div>
 
                         <div class="row mb-3">
+                            <!-- SMPS Status -->
                             <div class="col-md-4">
-                                <label for="{{ form.smps.id_for_label }}" class="form-label">
-                                    SMPS Status
-                                </label>
-                                <select id="smps_status" name="smps_status" class="form-control" onchange="toggleReplacementDescription()">
+                                <label for="smps_status" class="form-label">SMPS Status</label>
+                                <select id="smps_status" name="smps_status" class="form-control"
+                                    onchange="toggleReplacementDescription()">
                                     <option value="available">Available</option>
                                     <option value="not_available">Not Available</option>
                                     <option value="replacement">Replacement</option>
                                 </select>
                                 <div class="text-danger">{{ form.smps.errors }}</div>
                             </div>
+
+                            <!-- Motherboard Status -->
                             <div class="col-md-4" id="motherboard_status_div">
-                                <label for="{{ form.motherboard.id_for_label }}" class="form-label">
-                                    Motherboard Status
-                                </label>
-                                <select id="motherboard_status" name="motherboard_status" class="form-control" onchange="toggleMotherboardReplacementDescription()">
+                                <label for="motherboard_status" class="form-label">Motherboard Status</label>
+                                <select id="motherboard_status" name="motherboard_status" class="form-control"
+                                    onchange="toggleMotherboardReplacementDescription()">
                                     <option value="available">Available</option>
                                     <option value="not_available">Not Available</option>
                                     <option value="replacement">Replacement</option>
@@ -145,17 +138,20 @@ Add Product
                         </div>
 
                         <div class="row mb-3">
+                            <!-- SMPS Replacement Description -->
                             <div class="col-md-4" id="smps_replacement_description_div" style="display: none;">
-                                <label for="smps_replacement_description" class="form-label">
-                                    SMPS Replacement Description
-                                </label>
-                                <input type="text" id="smps_replacement_description" name="smps_replacement_description" class="form-control">
+                                <label for="smps_replacement_description" class="form-label">SMPS Replacement
+                                    Description</label>
+                                <input type="text" id="smps_replacement_description" name="smps_replacement_description"
+                                    class="form-control">
                             </div>
+
+                            <!-- Motherboard Replacement Description -->
                             <div class="col-md-4" id="motherboard_replacement_description_div" style="display: none;">
-                                <label for="motherboard_replacement_description" class="form-label">
-                                    Motherboard Replacement Description
-                                </label>
-                                <input type="text" id="motherboard_replacement_description" name="motherboard_replacement_description" class="form-control">
+                                <label for="motherboard_replacement_description" class="form-label">Motherboard
+                                    Replacement Description</label>
+                                <input type="text" id="motherboard_replacement_description"
+                                    name="motherboard_replacement_description" class="form-control">
                             </div>
                         </div>
 
@@ -172,47 +168,76 @@ Add Product
 </div>
 
 <script>
-    // Toggle visibility of the fields related to the selected component (Processor, RAM, HDD, SSD)
-    function toggleProcessorFields() {
-        var processorChecked = document.getElementById("processor").checked;
-        var processorFields = document.getElementById("processor_fields");
-        processorFields.style.display = processorChecked ? "block" : "none";
-    }
-
-    function toggleRamFields() {
-        var ramChecked = document.getElementById("ram").checked;
-        var ramFields = document.getElementById("ram_fields");
-        ramFields.style.display = ramChecked ? "block" : "none";
-    }
-
-    function toggleHddFields() {
-        var hddChecked = document.getElementById("hdd").checked;
-        var hddFields = document.getElementById("hdd_fields");
-        hddFields.style.display = hddChecked ? "block" : "none";
-    }
-
-    function toggleSsdFields() {
-        var ssdChecked = document.getElementById("ssd").checked;
-        var ssdFields = document.getElementById("ssd_fields");
-        ssdFields.style.display = ssdChecked ? "block" : "none";
-    }
-
-    // Toggle visibility of replacement description fields based on dropdown selection
+    // Toggle the replacement description fields
     function toggleReplacementDescription() {
         var smpsStatus = document.getElementById("smps_status").value;
         var replacementDescriptionDiv = document.getElementById("smps_replacement_description_div");
-
         replacementDescriptionDiv.style.display = smpsStatus === "replacement" ? "block" : "none";
     }
 
-    // Call on page load to ensure the description fields are correctly shown/hidden
-    window.onload = function() {
-        toggleProcessorFields();
-        toggleRamFields();
-        toggleHddFields();
-        toggleSsdFields();
+    window.onload = function () {
         toggleReplacementDescription();
     };
+
+    // Function to handle search suggestions for a specific field
+    // Function to handle search suggestions for a specific field
+    function searchSuggestions(inputId, suggestionsId) {
+        const searchBox = document.getElementById(inputId);
+        const suggestionsBox = document.getElementById(suggestionsId);
+
+        searchBox.addEventListener('input', function () {
+            const query = searchBox.value;
+            if (query.length >= 2) { // Trigger after at least 2 characters
+                fetch(`/search-suggestions-product/?q=${query}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        suggestionsBox.innerHTML = ''; // Clear previous suggestions
+                        if (data.suggestions.length > 0) {
+                            data.suggestions.forEach(suggestion => {
+                                const item = document.createElement('a');
+                                item.href = "#"; // Stay on the same page
+                                item.classList.add('list-group-item', 'list-group-item-action');
+                                item.textContent = suggestion;
+
+                                // Add event listener to each suggestion
+                                item.addEventListener('click', function (event) {
+                                    event.preventDefault();  // Prevent default anchor behavior
+                                    searchBox.value = suggestion; // Set value of the corresponding input field
+                                    suggestionsBox.innerHTML = ''; // Clear suggestions box after selection
+                                });
+
+                                suggestionsBox.appendChild(item);
+                            });
+                        } else {
+                            suggestionsBox.innerHTML = '<a class="list-group-item list-group-item-action">No suggestions found! Click Here To Add</a>';
+                            // Redirect to Add Item form after a delay (optional, for user experience)
+                            setTimeout(function () {
+                                window.location.href = "{% url 'category-create' %}";  // Replace with your add item form URL
+                            }, 3000); // Adjust time as needed (here, 3 seconds)
+                        }
+                    })
+                    .catch(error => console.error('Error fetching suggestions:', error));
+            } else {
+                suggestionsBox.innerHTML = ''; // Clear suggestions if input is less than 2 characters
+            }
+        });
+    }
+
+
+    // Initialize search suggestions for each input field (Processor, RAM, HDD, SSD)
+    searchSuggestions('searchbox', 'suggestions');
+    searchSuggestions('searchbox1', 'suggestions1');
+    searchSuggestions('searchbox2', 'suggestions2');
+    searchSuggestions('searchbox3', 'suggestions3');
+
+    // Hide suggestions when clicking outside the input
+    document.addEventListener('click', function (event) {
+        if (!event.target.closest('.form-group') && !event.target.closest('.list-group')) {
+            document.querySelectorAll('.list-group').forEach(function (suggestionsBox) {
+                suggestionsBox.innerHTML = ''; // Clear all suggestion boxes
+            });
+        }
+    });
 </script>
 
 {% endblock content %}

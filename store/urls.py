@@ -157,6 +157,7 @@ urlpatterns = [
         name='category-delete'
     ),
     path('search-suggestions/', search_suggestions, name='search-suggestions'),
+    path('search-suggestions-product/', search_suggestions, name='search-suggestions'),
 ]
 
 # Static media files configuration for development
