@@ -1,42 +1,41 @@
 {% extends 'store/base.html' %}
 
 {% block content %}
+<br>
 <!-- Header Section -->
-<div class="container my-4">
-    <div class="card shadow-sm rounded p-3">
-        <div class="row align-items-center">
-            <div class="col-md-6">
-                <h4 class="display-6 mb-0 text-success">Item List</h4>
-            </div>
-            <div class="col-md-6 d-flex justify-content-end gap-2">
-                <a class="btn btn-success btn-sm rounded-pill shadow-sm" href="{% url 'category-create' %}">
-                    <i class="fa-solid fa-plus"></i> Add Item Entry
-                </a>
-            </div>
+<div class="my-4">
+    <div class="row align-items-center">
+        <div class="col-md-6">
+            <h4 class="display-6 mb-0 text-success">Item List</h4>
         </div>
-
-        <form class="input-group mt-4" role="search" id="searchform" action="{% url 'catogary_item_search_list_view' %}"
-            method="get" accept-charset="utf-8">
-            <input id="searchbox" name="q" type="text" class="form-control border-0 rounded-pill shadow-sm"
-                placeholder="Find products" value="{{ request.GET.q }}" autocomplete="off">
-            <button class="btn btn-outline-success rounded-pill shadow-sm" type="submit">
-                <i class="fa-solid fa-search"></i>
-            </button>
-            <button class="btn btn-outline-secondary rounded-pill shadow-sm" type="button" id="clearSearch">
-                <i class="fa-solid fa-times"></i>
-            </button>
-        </form>
-
-        <!-- Search suggestions dropdown
-        <div id="suggestions" class="list-group position-absolute" style="z-index: 9999; width: 100%;"></div> -->
+        <div class="col-md-6 d-flex justify-content-end gap-2">
+            <a class="btn btn-success btn-sm rounded-pill shadow-sm" href="{% url 'category-create' %}">
+                <i class="fa-solid fa-plus"></i> Add Item Entry
+            </a>
+        </div>
     </div>
+
+    <form class="input-group mt-4" role="search" id="searchform" action="{% url 'catogary_item_search_list_view' %}"
+        method="get" accept-charset="utf-8">
+        <input id="searchbox" name="q" type="text" class="form-control border-2 rounded-pill shadow-sm"
+            placeholder="Find products" value="{{ request.GET.q }}" autocomplete="off">
+        <button class="btn btn-outline-success rounded-pill shadow-sm" type="submit">
+            <i class="fa-solid fa-search"></i>
+        </button>
+        <button class="btn btn-outline-secondary rounded-pill shadow-sm" type="button" id="clearSearch">
+            <i class="fa-solid fa-times"></i>
+        </button>
+    </form>
+
+    <!-- Search suggestions dropdown
+        <div id="suggestions" class="list-group position-absolute" style="z-index: 9999; width: 100%;"></div> -->
     <!-- Search suggestions dropdown -->
     <div id="suggestions" class="list-group position-absolute" style="z-index: 9999; width: 100%;"></div>
 
 </div>
 
 <!-- Table Section -->
-<div class="container px-3">
+<!-- <div class="container px-3"> -->
     <style>
         .table th,
         .table td {
@@ -45,7 +44,8 @@
     </style>
 
     {% if page_obj.object_list %}
-        <!-- Table displaying items if they are found -->
+    <!-- Table displaying items if they are found -->
+    <div class="table-responsive">
         <table class="table table-sm table-striped table-bordered">
             <thead class="thead-light">
                 <tr>
@@ -76,14 +76,16 @@
                 {% endfor %}
             </tbody>
         </table>
+    </div>
     {% else %}
-        <!-- Display this message if no items are found -->
-        <div class="alert alert-warning text-center">
-            <p>No items found for "{{ request.GET.q }}". You can <a href="{% url 'category-create' %}" class="btn btn-success btn-sm rounded-pill shadow-sm">
+    <!-- Display this message if no items are found -->
+    <div class="alert alert-warning text-center">
+        <p>No items found for "{{ request.GET.q }}". You can <a href="{% url 'category-create' %}"
+                class="btn btn-success btn-sm rounded-pill shadow-sm">
                 Add a new item</a>.</p>
-        </div>
+    </div>
     {% endif %}
-</div>
+<!-- </div> -->
 
 <script>
     // JavaScript for search suggestions
@@ -92,7 +94,7 @@
     const searchForm = document.getElementById('searchform');
     const clearButton = document.getElementById('clearSearch');
 
-    searchBox.addEventListener('input', function() {
+    searchBox.addEventListener('input', function () {
         const query = searchBox.value;
         if (query.length >= 2) { // trigger after at least 2 characters
             fetch(`/search-suggestions/?q=${query}`)
@@ -118,14 +120,14 @@
     });
 
     // Hide suggestions when clicking outside the input
-    document.addEventListener('click', function(event) {
+    document.addEventListener('click', function (event) {
         if (!searchBox.contains(event.target) && !suggestionsBox.contains(event.target)) {
             suggestionsBox.innerHTML = '';
         }
     });
 
     // Handle the clearing of the search input
-    clearButton.addEventListener('click', function() {
+    clearButton.addEventListener('click', function () {
         // Clear the search box and submit the form to show all items
         searchBox.value = '';
         searchForm.submit(); // Submit the form to refresh the page

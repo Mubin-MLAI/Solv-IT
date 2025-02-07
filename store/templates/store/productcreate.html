@@ -177,6 +177,19 @@ Add Product
 
     window.onload = function () {
         toggleReplacementDescription();
+
+        document.getElementById('processor_qty').value = document.getElementById('processor_qty').value || 0;
+        document.getElementById('ram_qty').value = document.getElementById('ram_qty').value || 0;
+        document.getElementById('hdd_qty').value = document.getElementById('hdd_qty').value || 0;
+        document.getElementById('ssd_qty').value = document.getElementById('ssd_qty').value || 0;
+        document.getElementById('searchbox').value = document.getElementById('searchbox').value || 'None';
+        document.getElementById('searchbox1').value = document.getElementById('searchbox1').value || 'None';
+        document.getElementById('searchbox2').value = document.getElementById('searchbox2').value || 'None';
+        document.getElementById('searchbox3').value = document.getElementById('searchbox3').value || 'None';
+        document.getElementById('smps_replacement_description').value = document.getElementById('smps_replacement_description').value || null;
+        document.getElementById('motherboard_replacement_description').value = document.getElementById('motherboard_replacement_description').value || null;
+
+
     };
 
     // Function to handle search suggestions for a specific field
@@ -186,41 +199,36 @@ Add Product
         const suggestionsBox = document.getElementById(suggestionsId);
 
         searchBox.addEventListener('input', function () {
-            const query = searchBox.value;
-            if (query.length >= 2) { // Trigger after at least 2 characters
+            const query = searchBox.value.trim();
+            suggestionsBox.innerHTML = ''; // Clear suggestions if input is less than 2 characters
+
+            if (query.length >= 2) {
                 fetch(`/search-suggestions-product/?q=${query}`)
                     .then(response => response.json())
                     .then(data => {
-                        suggestionsBox.innerHTML = ''; // Clear previous suggestions
                         if (data.suggestions.length > 0) {
                             data.suggestions.forEach(suggestion => {
                                 const item = document.createElement('a');
-                                item.href = "#"; // Stay on the same page
+                                item.href = `?q=${suggestion}`;
                                 item.classList.add('list-group-item', 'list-group-item-action');
                                 item.textContent = suggestion;
-
-                                // Add event listener to each suggestion
-                                item.addEventListener('click', function (event) {
-                                    event.preventDefault();  // Prevent default anchor behavior
-                                    searchBox.value = suggestion; // Set value of the corresponding input field
-                                    suggestionsBox.innerHTML = ''; // Clear suggestions box after selection
-                                });
-
                                 suggestionsBox.appendChild(item);
                             });
                         } else {
-                            suggestionsBox.innerHTML = '<a class="list-group-item list-group-item-action">No suggestions found! Click Here To Add</a>';
-                            // Redirect to Add Item form after a delay (optional, for user experience)
-                            setTimeout(function () {
-                                window.location.href = "{% url 'category-create' %}";  // Replace with your add item form URL
-                            }, 3000); // Adjust time as needed (here, 3 seconds)
+                            const noResultsItem = document.createElement('a');
+                            noResultsItem.classList.add('list-group-item', 'list-group-item-action', 'text-danger');
+                            noResultsItem.textContent = 'No suggestions found! Click here to add item';
+                            noResultsItem.style.cursor = 'pointer'; // Make it look clickable
+                            noResultsItem.addEventListener('click', function () {
+                                window.location.href = "{% url 'category-create' %}"; // Redirect to the add item form
+                            });
+                            suggestionsBox.appendChild(noResultsItem);
                         }
                     })
                     .catch(error => console.error('Error fetching suggestions:', error));
-            } else {
-                suggestionsBox.innerHTML = ''; // Clear suggestions if input is less than 2 characters
             }
         });
+
     }
 
 
