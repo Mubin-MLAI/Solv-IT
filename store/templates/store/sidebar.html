@@ -6,24 +6,33 @@
 <style>
     /* Navbar Custom Styles */
     .navbar {
+        height: 70px;
         padding: 0.8rem 1rem;
         background-color: #222; /* Dark background */
         transition: background-color 0.3s ease-in-out, transform 0.3s ease-in-out; /* Smooth transition for color and animation */
     }
 
+    /* Zoom effect on hover for navbar */
     .navbar:hover {
-        transform: translateY(-5px); /* Subtle floating animation */
+        transform: scale(1.05); /* Slight zoom effect */
     }
 
     .navbar-brand img {
         width: 45px;
         height: 45px;
         object-fit: cover;
+        transition: transform 0.3s ease-in-out;
+    }
+
+    /* Zoom effect on the profile picture */
+    .navbar-brand:hover img {
+        transform: scale(1.1); /* Slight zoom effect on profile image */
     }
 
     /* Active Navbar Link */
     .nav-link.active {
-        background-color: #e67e22; /* Orange */
+        height: 78px;
+        background-color: #3802fa; /* Active background color */
         border-radius: 5px;
     }
 
@@ -31,13 +40,16 @@
     .nav-item .nav-link {
         font-size: 14px;
         padding: 10px 15px;
-        transition: background-color 0.3s ease-in-out;
+        transition: background-color 0.3s ease-in-out, transform 0.3s ease-in-out;
         color: #fff;
     }
 
+    /* Zoom and color change effect on hover for nav links */
     .nav-item .nav-link:hover {
-        background-color: #e67e22; /* Orange */
+        height: 78px;
+        background-color: #2904fc; /* Hover background color */
         color: #222;
+        transform: scale(1.05); /* Zoom effect on hover */
     }
 
     /* Dropdown Styling */
@@ -46,7 +58,7 @@
     }
 
     .dropdown-item:hover {
-        background-color: #e67e22 !important;
+        background-color: #2f02fc !important;
         color: #222 !important;
     }
 
@@ -61,7 +73,6 @@
         }
     }
 </style>
-
 
 <!-- Horizontal Navbar -->
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
