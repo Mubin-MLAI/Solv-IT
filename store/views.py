@@ -319,10 +319,21 @@ def productcreateview(request):
     if request.method == "POST":
         form = ItemForm(request.POST)
         if form.is_valid():
-            form.save()
+            item = form.save()
+
+            # # Now create the corresponding Product record
+            # product = catogaryitem(
+            #     # category=item.category,  # Use the category from Item
+            #     name=item.name,  # Use the same name from Item
+            #     serial_no=item.serialno,  # Same serial number from Item
+            #     quantity=item.processor_qty + item.ram_qty + item.hdd_qty + item.ssd_qty,  # This could vary depending on your quantity logic
+            #     unit_price=100.00  # Assuming a fixed price for the product, this can be dynamic too
+            # )
+            # product.save()  # Save the product to the Product table
+
             return redirect('productslist')  # Redirect to a list page or wherever needed
     else:
-        form = Item()
+        form = ItemForm()
     return render(request, 'store/productcreate.html', {'form': form})
 
 

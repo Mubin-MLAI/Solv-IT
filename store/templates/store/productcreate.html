@@ -21,7 +21,7 @@ Add Product
                                     Product Name
                                 </label>
                                 <input type="text" name="name" id="product_name" class="form-control"
-                                    value="{{ form.name.value }}" placeholder="Enter Product Name">
+                                     placeholder="Enter Product Name">
                                 <div class="text-danger">{{ form.name.errors }}</div>
                             </div>
 
@@ -31,7 +31,7 @@ Add Product
                                     Serial No
                                 </label>
                                 <input type="text" name="serialno" id="serial_no" class="form-control"
-                                    value="{{ form.serialno.value }}" placeholder="Enter Serial Number">
+                                     placeholder="Enter Serial Number">
                                 <div class="text-danger">{{ form.serialno.errors }}</div>
                             </div>
 
@@ -41,76 +41,87 @@ Add Product
                                     Make & Models
                                 </label>
                                 <input type="text" name="make_and_models" id="make_and_models" class="form-control"
-                                    value="{{ form.make_and_models.value }}" placeholder="Enter Make & Models">
+                                     placeholder="Enter Make & Models">
                                 <div class="text-danger">{{ form.make_and_models.errors }}</div>
                             </div>
                         </div>
 
                         <div class="row mb-3">
-                            <!-- Processor Details -->
-                            <div class="col-md-3">
-                                <div id="processor_fields">
-                                    <label for="processor" class="form-label">
-                                        Processor Details
-                                    </label>
-                                    <input id="searchbox" name="processor" type="text"
-                                        class="form-control border-0 rounded-pill shadow-sm"
-                                        placeholder="Find Processor" autocomplete="off">
-                                    <div id="suggestions" class="list-group position-absolute"
-                                        style="z-index: 9999; width: 100%;"></div>
-                                    <label for="processor_qty" class="form-label">Processor Quantity</label>
-                                    <input type="number" id="processor_qty" name="processor_qty" class="form-control">
-                                </div>
+                            <!-- Processor Details (75% width) -->
+                            <div class="col-md-9">
+                                <label for="processor" class="form-label">
+                                    Processor Details
+                                </label>
+                                <input id="searchbox" name="processor" type="text"
+                                    class="form-control border- square-pill shadow-sm" placeholder="Find Processor"
+                                    autocomplete="off">
+                                <div id="suggestions" class="list-group position-absolute"></div>
                             </div>
 
-                            <!-- RAM Details -->
+                            <!-- Processor Quantity (25% width) -->
                             <div class="col-md-3">
-                                <div id="ram_fields">
-                                    <label for="ram" class="form-label">
-                                        RAM Details
-                                    </label>
-                                    <input id="searchbox1" name="ram" type="text"
-                                        class="form-control border-0 rounded-pill shadow-sm" placeholder="Find RAM"
-                                        autocomplete="off">
-                                    <div id="suggestions1" class="list-group position-absolute"
-                                        style="z-index: 9999; width: 100%;"></div>
-                                    <label for="ram_qty" class="form-label">RAM Quantity</label>
-                                    <input type="number" id="ram_qty" name="ram_qty" class="form-control">
-                                </div>
-                            </div>
-
-                            <!-- HDD Details -->
-                            <div class="col-md-3">
-                                <div id="hdd_fields">
-                                    <label for="hdd" class="form-label">
-                                        HDD Details
-                                    </label>
-                                    <input id="searchbox2" name="hdd" type="text"
-                                        class="form-control border-0 rounded-pill shadow-sm" placeholder="Find HDD"
-                                        autocomplete="off">
-                                    <div id="suggestions2" class="list-group position-absolute"
-                                        style="z-index: 9999; width: 100%;"></div>
-                                    <label for="hdd_qty" class="form-label">HDD Quantity</label>
-                                    <input type="number" id="hdd_qty" name="hdd_qty" class="form-control">
-                                </div>
-                            </div>
-
-                            <!-- SSD Details -->
-                            <div class="col-md-3">
-                                <div id="ssd_fields">
-                                    <label for="ssd" class="form-label">
-                                        SSD Details
-                                    </label>
-                                    <input id="searchbox3" name="ssd" type="text"
-                                        class="form-control border-0 rounded-pill shadow-sm" placeholder="Find SSD"
-                                        autocomplete="off">
-                                    <div id="suggestions3" class="list-group position-absolute"
-                                        style="z-index: 9999; width: 100%;"></div>
-                                    <label for="ssd_qty" class="form-label">SSD Quantity</label>
-                                    <input type="number" id="ssd_qty" name="ssd_qty" class="form-control">
-                                </div>
+                                <label for="processor_qty" class="form-label">Processor Quantity</label>
+                                <input type="number" id="processor_qty" name="processor_qty" class="form-control" value="1">
                             </div>
                         </div>
+
+                        <div class="row mb-3">
+                            <!-- RAM Details (75% width) -->
+                            <div class="col-md-9">
+                                <label for="ram" class="form-label">
+                                    RAM Details
+                                </label>
+                                <input id="searchbox1" name="ram" type="text"
+                                    class="form-control border- square-pill shadow-sm" placeholder="Find RAM"
+                                    autocomplete="off">
+                                <div id="suggestions1" class="list-group position-absolute"></div>
+                            </div>
+
+                            <!-- RAM Quantity (25% width) -->
+                            <div class="col-md-3">
+                                <label for="ram_qty" class="form-label">RAM Quantity</label>
+                                <input type="number" id="ram_qty" name="ram_qty" class="form-control" value="1">
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <!-- HDD Details (75% width) -->
+                            <div class="col-md-9">
+                                <label for="hdd" class="form-label">
+                                    HDD Details
+                                </label>
+                                <input id="searchbox2" name="hdd" type="text"
+                                    class="form-control border- square-pill shadow-sm" placeholder="Find HDD"
+                                    autocomplete="off">
+                                <div id="suggestions2" class="list-group position-absolute"></div>
+                            </div>
+
+                            <!-- HDD Quantity (25% width) -->
+                            <div class="col-md-3">
+                                <label for="hdd_qty" class="form-label">HDD Quantity</label>
+                                <input type="number" id="hdd_qty" name="hdd_qty" class="form-control" value="1">
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <!-- SSD Details (75% width) -->
+                            <div class="col-md-9">
+                                <label for="ssd" class="form-label">
+                                    SSD Details
+                                </label>
+                                <input id="searchbox3" name="ssd" type="text"
+                                    class="form-control border- square-pill shadow-sm" placeholder="Find SSD"
+                                    autocomplete="off">
+                                <div id="suggestions3" class="list-group position-absolute"></div>
+                            </div>
+
+                            <!-- SSD Quantity (25% width) -->
+                            <div class="col-md-3">
+                                <label for="ssd_qty" class="form-label">SSD Quantity</label>
+                                <input type="number" id="ssd_qty" name="ssd_qty" class="form-control" value="1">
+                            </div>
+                        </div>
+
 
                         <div class="row mb-3">
                             <!-- SMPS Status -->
@@ -175,26 +186,14 @@ Add Product
         var replacementDescriptionDiv = document.getElementById("smps_replacement_description_div");
         replacementDescriptionDiv.style.display = smpsStatus === "replacement" ? "block" : "none";
     }
+    function toggleMotherboardReplacementDescription() {
+        var motherboardStatus = document.getElementById("motherboard_status").value;
+        var toggleMotherboardReplacementDescriptionDiv = document.getElementById("motherboard_replacement_description_div");
+        toggleMotherboardReplacementDescriptionDiv.style.display = motherboardStatus === "replacement" ? "block" : "none";
+    }
 
-    window.onload = function () {
-        toggleReplacementDescription();
+    
 
-        document.getElementById('processor_qty').value = document.getElementById('processor_qty').value || 0;
-        document.getElementById('ram_qty').value = document.getElementById('ram_qty').value || 0;
-        document.getElementById('hdd_qty').value = document.getElementById('hdd_qty').value || 0;
-        document.getElementById('ssd_qty').value = document.getElementById('ssd_qty').value || 0;
-        document.getElementById('searchbox').value = document.getElementById('searchbox').value || 'None';
-        document.getElementById('searchbox1').value = document.getElementById('searchbox1').value || 'None';
-        document.getElementById('searchbox2').value = document.getElementById('searchbox2').value || 'None';
-        document.getElementById('searchbox3').value = document.getElementById('searchbox3').value || 'None';
-        document.getElementById('smps_replacement_description').value = document.getElementById('smps_replacement_description').value || null;
-        document.getElementById('motherboard_replacement_description').value = document.getElementById('motherboard_replacement_description').value || null;
-
-
-    };
-
-    // Function to handle search suggestions for a specific field
-    // Function to handle search suggestions for a specific field
     function searchSuggestions(inputId, suggestionsId) {
         const searchBox = document.getElementById(inputId);
         const suggestionsBox = document.getElementById(suggestionsId);
@@ -210,10 +209,16 @@ Add Product
                         if (data.suggestions.length > 0) {
                             data.suggestions.forEach(suggestion => {
                                 const item = document.createElement('a');
-                                item.href = `?q=${suggestion}`;
+                                item.href = `#`;
                                 item.classList.add('list-group-item', 'list-group-item-action');
                                 item.textContent = suggestion;
                                 suggestionsBox.appendChild(item);
+
+                                // Click handler to populate the input field with the suggestion
+                                item.addEventListener('click', function (event) {
+                                    searchBox.value = suggestion;
+                                    suggestionsBox.innerHTML = ''; // Clear suggestions after selection
+                                });
                             });
                         } else {
                             const noResultsItem = document.createElement('a');
@@ -221,7 +226,7 @@ Add Product
                             noResultsItem.textContent = 'No suggestions found! Click here to add item';
                             noResultsItem.style.cursor = 'pointer'; // Make it look clickable
                             noResultsItem.addEventListener('click', function () {
-                                window.location.href = "{% url 'category-create' %}"; // Redirect to the add item form
+                                window.location.href = "{% url 'category-create' %}"; // Redirect to add item form
                             });
                             suggestionsBox.appendChild(noResultsItem);
                         }
@@ -229,24 +234,13 @@ Add Product
                     .catch(error => console.error('Error fetching suggestions:', error));
             }
         });
-
     }
-
 
     // Initialize search suggestions for each input field (Processor, RAM, HDD, SSD)
     searchSuggestions('searchbox', 'suggestions');
     searchSuggestions('searchbox1', 'suggestions1');
     searchSuggestions('searchbox2', 'suggestions2');
     searchSuggestions('searchbox3', 'suggestions3');
-
-    // Hide suggestions when clicking outside the input
-    document.addEventListener('click', function (event) {
-        if (!event.target.closest('.form-group') && !event.target.closest('.list-group')) {
-            document.querySelectorAll('.list-group').forEach(function (suggestionsBox) {
-                suggestionsBox.innerHTML = ''; // Clear all suggestion boxes
-            });
-        }
-    });
 </script>
 
 {% endblock content %}
