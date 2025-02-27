@@ -28,7 +28,8 @@ from .views import (
     HddCategoryDetailView,
     HddCategoryUpdateView,
     CatogaryItemSearchListView,
-    search_suggestions
+    search_suggestions,
+    search_suggestions_product
 )
 
 # URL patterns
@@ -157,7 +158,7 @@ urlpatterns = [
         name='category-delete'
     ),
     path('search-suggestions/', search_suggestions, name='search-suggestions'),
-    path('search-suggestions-product/', search_suggestions, name='search-suggestions'),
+    path('search-suggestions-product/', search_suggestions_product, name='search-search-suggestions-product'),
 ]
 
 # Static media files configuration for development

@@ -643,18 +643,20 @@ def search_suggestions(request):
     query = request.GET.get('q', '')
     items = catogaryitem.objects.all()  # Start by getting all items
     suggestions = []
-    
+
     if query:
         # Filter items based on the query's initial letters
-        items = catogaryitem.objects.filter(
-            Q(category__icontains=query) | 
-            Q(name__icontains=query) | 
-            Q(serial_no__icontains=query)
-        )  # or filter based on other fields as needed
-        suggestions = list(set([f"{item.name}" for item in items]))  # or other fields like item.serial_no, etc.
-        print(suggestions)
+        items = catogaryitem.objects.filter(name__icontains=query)  # or filter based on other fields as needed
+        item1 = catogaryitem.objects.filter(serial_no__icontains=query)
+        item2 = catogaryitem.objects.filter(category__icontains=query)
+        if items:
+            suggestions = list(set([f"{item.name}" for item in items]))
+        elif item1:
+            suggestions = list(set([f"{item.serial_no}" for item in item1]))
+        else:
+            suggestions = list(set([f"{item.category}" for item in item2])) # or other fields like item.serial_no, etc.
     return JsonResponse({'suggestions': suggestions})
-
+    
 def search_suggestions_product(request):
     query = request.GET.get('q', '')
     items = Item.objects.all()  # Start by getting all items
@@ -662,12 +664,14 @@ def search_suggestions_product(request):
     
     if query:
         # Filter items based on the query's initial letters
-        items = Item.objects.filter(
-            Q(serialno__icontains=query) | 
-            Q(name__icontains=query) | 
-            Q(make_and_models__icontains=query)
-        )  # or filter based on other fields as needed
-        suggestions = list(set([f"{item.name}" for item in items])) # or other fields like item.serial_no, etc.
-        print(suggestions)
+        items = Item.objects.filter(name__icontains=query)  # or filter based on other fields as needed
+        item1 = Item.objects.filter(serialno__icontains=query)
+        item2 = Item.objects.filter(make_and_models__icontains=query)
+        if items:
+            suggestions = list(set([f"{item.name}" for item in items]))
+        elif item1:
+            suggestions = list(set([f"{item.serialno}" for item in item1]))
+        else:
+            suggestions = list(set([f"{item.make_and_models}" for item in item2])) # or other fields like item.serial_no, etc.
     return JsonResponse({'suggestions': suggestions})
 

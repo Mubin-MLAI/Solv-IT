@@ -236,6 +236,17 @@ Add Product
         });
     }
 
+    document.addEventListener('click', function (event) {
+        if (!searchBox.contains(event.target) && !suggestionsBox.contains(event.target)) {
+            suggestionsBox.innerHTML = '';
+        }
+    });
+
+    clearButton.addEventListener('click', function () {
+        searchBox.value = '';
+        searchForm.submit();
+    });
+
     // Initialize search suggestions for each input field (Processor, RAM, HDD, SSD)
     searchSuggestions('searchbox', 'suggestions');
     searchSuggestions('searchbox1', 'suggestions1');
