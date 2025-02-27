@@ -56,7 +56,8 @@
             <i class="fa-solid fa-times"></i>
         </button>
     </form>
-    <div id="suggestions1" class="list-group position-absolute" style="z-index: 9999; width: 100%; background-color: rgb(254, 254, 253);"></div>
+    <div id="suggestions1" class="list-group position-absolute"
+        style="z-index: 9999; width: 100%; background-color: rgb(254, 254, 253);"></div>
 </div>
 
 <!-- Product Table Section -->
@@ -180,20 +181,24 @@
                     if (data.suggestions.length > 0) {
                         data.suggestions.forEach(suggestion => {
                             const item = document.createElement('a');
-                            item.href = `?q=${suggestion}`; // Link to filtered search results
+                            item.href = "javascript:void(0);"; // Prevent immediate navigation
                             item.classList.add('list-group-item', 'list-group-item-action');
                             item.textContent = suggestion;
+                            item.addEventListener('click', function () {
+                                searchBox.value = suggestion; // Fill input with clicked suggestion
+                                suggestionsBox.innerHTML = ''; // Hide suggestions
+                            });
                             suggestionsBox.appendChild(item);
                         });
                     } else {
-                            const noResultsItem = document.createElement('a');
-                            noResultsItem.classList.add('list-group-item', 'list-group-item-action', 'text-danger');
-                            noResultsItem.textContent = 'No suggestions found! Click here to add item';
-                            noResultsItem.style.cursor = 'pointer'; // Make it look clickable
-                            noResultsItem.addEventListener('click', function () {
-                                window.location.href = "{% url 'product-create' %}"; // Redirect to add item form
-                            });
-                            suggestionsBox.appendChild(noResultsItem);
+                        const noResultsItem = document.createElement('a');
+                        noResultsItem.classList.add('list-group-item', 'list-group-item-action', 'text-danger');
+                        noResultsItem.textContent = 'No suggestions found! Click here to add item';
+                        noResultsItem.style.cursor = 'pointer'; // Make it look clickable
+                        noResultsItem.addEventListener('click', function () {
+                            window.location.href = "{% url 'product-create' %}"; // Redirect to add item form
+                        });
+                        suggestionsBox.appendChild(noResultsItem);
                     }
                 })
                 .catch(error => console.error('Error fetching suggestions:', error));
@@ -201,6 +206,7 @@
             suggestionsBox.innerHTML = ''; // Clear suggestions if input is less than 2 characters
         }
     });
+
 
     // Hide suggestions when clicking outside the input
     document.addEventListener('click', function (event) {
