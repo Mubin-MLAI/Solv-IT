@@ -321,15 +321,56 @@ def productcreateview(request):
         if form.is_valid():
             item = form.save()
 
-            # # Now create the corresponding Product record
-            # product = catogaryitem(
-            #     # category=item.category,  # Use the category from Item
-            #     name=item.name,  # Use the same name from Item
-            #     serial_no=item.serialno,  # Same serial number from Item
-            #     quantity=item.processor_qty + item.ram_qty + item.hdd_qty + item.ssd_qty,  # This could vary depending on your quantity logic
-            #     unit_price=100.00  # Assuming a fixed price for the product, this can be dynamic too
-            # )
-            # product.save()  # Save the product to the Product table
+            quantity=item.processor_qty + item.ram_qty + item.hdd_qty + item.ssd_qty
+
+            # for i in range(0,quantity):
+            if item.processor_qty <= 1:
+                # Now create the corresponding Product record
+                product = catogaryitem(
+                    category='Processor',  # Use the category from Item
+                    name=item.processor,  # Use the same name from Item
+                    serial_no=item.serialno,  # Same serial number from Item
+                    quantity=item.processor_qty,  # This could vary depending on your quantity logic
+                    unit_price=0.00  # Assuming a fixed price for the product, this can be dynamic too
+                    )
+                product.save()  # Save the product to the Product table
+                
+            if item.ram_qty <= 1:
+                # Now create the corresponding Product record
+                product = catogaryitem(
+                    category='RAM',  # Use the category from Item
+                    name=item.ram,  # Use the same name from Item
+                    serial_no=item.serialno,  # Same serial number from Item
+                    quantity=item.ram_qty,  # This could vary depending on your quantity logic
+                    unit_price=0.00  # Assuming a fixed price for the product, this can be dynamic too
+                    )
+            
+                product.save()  # Save the product to the Product table
+            
+            if item.hdd_qty <= 1:
+                # Now create the corresponding Product record
+                product = catogaryitem(
+                    category='HDD',  # Use the category from Item
+                    name=item.hdd,  # Use the same name from Item
+                    serial_no=item.serialno,  # Same serial number from Item
+                    quantity=item.hdd_qty,  # This could vary depending on your quantity logic
+                    unit_price=0.00  # Assuming a fixed price for the product, this can be dynamic too
+                    )
+            
+                product.save()  # Save the product to the Product table
+            
+            if item.ssd_qty <= 1:
+                # Now create the corresponding Product record
+                product = catogaryitem(
+                    category='SSD',  # Use the category from Item
+                    name=item.ssd,  # Use the same name from Item
+                    serial_no=item.serialno,  # Same serial number from Item
+                    quantity=item.ssd_qty,  # This could vary depending on your quantity logic
+                    unit_price=0.00  # Assuming a fixed price for the product, this can be dynamic too
+                    )
+            
+                product.save()  # Save the product to the Product table
+                
 
             return redirect('productslist')  # Redirect to a list page or wherever needed
     else:
@@ -610,8 +651,8 @@ def search_suggestions(request):
             Q(name__icontains=query) | 
             Q(serial_no__icontains=query)
         )  # or filter based on other fields as needed
-        suggestions = [f"{item.name}" for item in items]  # or other fields like item.serial_no, etc.
-
+        suggestions = list(set([f"{item.name}" for item in items]))  # or other fields like item.serial_no, etc.
+        print(suggestions)
     return JsonResponse({'suggestions': suggestions})
 
 def search_suggestions_product(request):
@@ -626,7 +667,7 @@ def search_suggestions_product(request):
             Q(name__icontains=query) | 
             Q(make_and_models__icontains=query)
         )  # or filter based on other fields as needed
-        suggestions = [f"{item.name}" for item in items]  # or other fields like item.serial_no, etc.
-
+        suggestions = list(set([f"{item.name}" for item in items])) # or other fields like item.serial_no, etc.
+        print(suggestions)
     return JsonResponse({'suggestions': suggestions})
 

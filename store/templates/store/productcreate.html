@@ -9,174 +9,174 @@ Add Product
 <br>
 <div class="container my-5">
     <div class="row justify-content-center">
-        <div class="col-lg-8 col-md-10">
-            <div class="card shadow-sm border-light">
-                <div class="card-body">
-                    <form method="POST" enctype="multipart/form-data" action="{% url 'product-create' %}">
-                        {% csrf_token %}
-                        <div class="row mb-3">
-                            <!-- Product Name -->
-                            <div class="col-md-4">
-                                <label for="{{ form.name.id_for_label }}" class="form-label">
-                                    Product Name
-                                </label>
-                                <input type="text" name="name" id="product_name" class="form-control"
-                                     placeholder="Enter Product Name">
-                                <div class="text-danger">{{ form.name.errors }}</div>
-                            </div>
-
-                            <!-- Serial No -->
-                            <div class="col-md-4">
-                                <label for="{{ form.serialno.id_for_label }}" class="form-label">
-                                    Serial No
-                                </label>
-                                <input type="text" name="serialno" id="serial_no" class="form-control"
-                                     placeholder="Enter Serial Number">
-                                <div class="text-danger">{{ form.serialno.errors }}</div>
-                            </div>
-
-                            <!-- Make & Models -->
-                            <div class="col-md-4">
-                                <label for="{{ form.make_and_models.id_for_label }}" class="form-label">
-                                    Make & Models
-                                </label>
-                                <input type="text" name="make_and_models" id="make_and_models" class="form-control"
-                                     placeholder="Enter Make & Models">
-                                <div class="text-danger">{{ form.make_and_models.errors }}</div>
-                            </div>
+        <!-- <div class="col-lg-8 col-md-10"> -->
+        <div class="card shadow-sm border-light">
+            <div class="card-body">
+                <form method="POST" enctype="multipart/form-data" action="{% url 'product-create' %}">
+                    {% csrf_token %}
+                    <div class="row mb-3">
+                        <!-- Product Name -->
+                        <div class="col-md-4">
+                            <label for="{{ form.name.id_for_label }}" class="form-label">
+                                Product Name
+                            </label>
+                            <input type="text" name="name" id="product_name" class="form-control"
+                                placeholder="Enter Product Name">
+                            <div class="text-danger">{{ form.name.errors }}</div>
                         </div>
 
-                        <div class="row mb-3">
-                            <!-- Processor Details (75% width) -->
-                            <div class="col-md-9">
-                                <label for="processor" class="form-label">
-                                    Processor Details
-                                </label>
-                                <input id="searchbox" name="processor" type="text"
-                                    class="form-control border- square-pill shadow-sm" placeholder="Find Processor"
-                                    autocomplete="off">
-                                <div id="suggestions" class="list-group position-absolute"></div>
-                            </div>
-
-                            <!-- Processor Quantity (25% width) -->
-                            <div class="col-md-3">
-                                <label for="processor_qty" class="form-label">Processor Quantity</label>
-                                <input type="number" id="processor_qty" name="processor_qty" class="form-control" value="1">
-                            </div>
+                        <!-- Serial No -->
+                        <div class="col-md-4">
+                            <label for="{{ form.serialno.id_for_label }}" class="form-label">
+                                Serial No
+                            </label>
+                            <input type="text" name="serialno" id="serial_no" class="form-control"
+                                placeholder="Enter Serial Number">
+                            <div class="text-danger">{{ form.serialno.errors }}</div>
                         </div>
 
-                        <div class="row mb-3">
-                            <!-- RAM Details (75% width) -->
-                            <div class="col-md-9">
-                                <label for="ram" class="form-label">
-                                    RAM Details
-                                </label>
-                                <input id="searchbox1" name="ram" type="text"
-                                    class="form-control border- square-pill shadow-sm" placeholder="Find RAM"
-                                    autocomplete="off">
-                                <div id="suggestions1" class="list-group position-absolute"></div>
-                            </div>
+                        <!-- Make & Models -->
+                        <div class="col-md-4">
+                            <label for="{{ form.make_and_models.id_for_label }}" class="form-label">
+                                Make & Models
+                            </label>
+                            <input type="text" name="make_and_models" id="make_and_models" class="form-control"
+                                placeholder="Enter Make & Models">
+                            <div class="text-danger">{{ form.make_and_models.errors }}</div>
+                        </div>
+                    </div>
 
-                            <!-- RAM Quantity (25% width) -->
-                            <div class="col-md-3">
-                                <label for="ram_qty" class="form-label">RAM Quantity</label>
-                                <input type="number" id="ram_qty" name="ram_qty" class="form-control" value="1">
-                            </div>
+                    <div class="row mb-3">
+                        <!-- Processor Details (75% width) -->
+                        <div class="col-md-9">
+                            <label for="processor" class="form-label">
+                                Processor Details
+                            </label>
+                            <input id="searchbox" name="processor" type="text"
+                                class="form-control border- square-pill shadow-sm" placeholder="Find Processor"
+                                autocomplete="off">
+                            <div id="suggestions" class="list-group position-absolute"></div>
                         </div>
 
-                        <div class="row mb-3">
-                            <!-- HDD Details (75% width) -->
-                            <div class="col-md-9">
-                                <label for="hdd" class="form-label">
-                                    HDD Details
-                                </label>
-                                <input id="searchbox2" name="hdd" type="text"
-                                    class="form-control border- square-pill shadow-sm" placeholder="Find HDD"
-                                    autocomplete="off">
-                                <div id="suggestions2" class="list-group position-absolute"></div>
-                            </div>
+                        <!-- Processor Quantity (25% width) -->
+                        <div class="col-md-3">
+                            <label for="processor_qty" class="form-label">Processor Quantity</label>
+                            <input type="number" id="processor_qty" name="processor_qty" class="form-control" value="1">
+                        </div>
+                    </div>
 
-                            <!-- HDD Quantity (25% width) -->
-                            <div class="col-md-3">
-                                <label for="hdd_qty" class="form-label">HDD Quantity</label>
-                                <input type="number" id="hdd_qty" name="hdd_qty" class="form-control" value="1">
-                            </div>
+                    <div class="row mb-3">
+                        <!-- RAM Details (75% width) -->
+                        <div class="col-md-9">
+                            <label for="ram" class="form-label">
+                                RAM Details
+                            </label>
+                            <input id="searchbox1" name="ram" type="text"
+                                class="form-control border- square-pill shadow-sm" placeholder="Find RAM"
+                                autocomplete="off">
+                            <div id="suggestions1" class="list-group position-absolute"></div>
                         </div>
 
-                        <div class="row mb-3">
-                            <!-- SSD Details (75% width) -->
-                            <div class="col-md-9">
-                                <label for="ssd" class="form-label">
-                                    SSD Details
-                                </label>
-                                <input id="searchbox3" name="ssd" type="text"
-                                    class="form-control border- square-pill shadow-sm" placeholder="Find SSD"
-                                    autocomplete="off">
-                                <div id="suggestions3" class="list-group position-absolute"></div>
-                            </div>
+                        <!-- RAM Quantity (25% width) -->
+                        <div class="col-md-3">
+                            <label for="ram_qty" class="form-label">RAM Quantity</label>
+                            <input type="number" id="ram_qty" name="ram_qty" class="form-control" value="1">
+                        </div>
+                    </div>
 
-                            <!-- SSD Quantity (25% width) -->
-                            <div class="col-md-3">
-                                <label for="ssd_qty" class="form-label">SSD Quantity</label>
-                                <input type="number" id="ssd_qty" name="ssd_qty" class="form-control" value="1">
-                            </div>
+                    <div class="row mb-3">
+                        <!-- HDD Details (75% width) -->
+                        <div class="col-md-9">
+                            <label for="hdd" class="form-label">
+                                HDD Details
+                            </label>
+                            <input id="searchbox2" name="hdd" type="text"
+                                class="form-control border- square-pill shadow-sm" placeholder="Find HDD"
+                                autocomplete="off">
+                            <div id="suggestions2" class="list-group position-absolute"></div>
                         </div>
 
+                        <!-- HDD Quantity (25% width) -->
+                        <div class="col-md-3">
+                            <label for="hdd_qty" class="form-label">HDD Quantity</label>
+                            <input type="number" id="hdd_qty" name="hdd_qty" class="form-control" value="1">
+                        </div>
+                    </div>
 
-                        <div class="row mb-3">
-                            <!-- SMPS Status -->
-                            <div class="col-md-4">
-                                <label for="smps_status" class="form-label">SMPS Status</label>
-                                <select id="smps_status" name="smps_status" class="form-control"
-                                    onchange="toggleReplacementDescription()">
-                                    <option value="available">Available</option>
-                                    <option value="not_available">Not Available</option>
-                                    <option value="replacement">Replacement</option>
-                                </select>
-                                <div class="text-danger">{{ form.smps.errors }}</div>
-                            </div>
-
-                            <!-- Motherboard Status -->
-                            <div class="col-md-4" id="motherboard_status_div">
-                                <label for="motherboard_status" class="form-label">Motherboard Status</label>
-                                <select id="motherboard_status" name="motherboard_status" class="form-control"
-                                    onchange="toggleMotherboardReplacementDescription()">
-                                    <option value="available">Available</option>
-                                    <option value="not_available">Not Available</option>
-                                    <option value="replacement">Replacement</option>
-                                </select>
-                                <div class="text-danger">{{ form.motherboard.errors }}</div>
-                            </div>
+                    <div class="row mb-3">
+                        <!-- SSD Details (75% width) -->
+                        <div class="col-md-9">
+                            <label for="ssd" class="form-label">
+                                SSD Details
+                            </label>
+                            <input id="searchbox3" name="ssd" type="text"
+                                class="form-control border- square-pill shadow-sm" placeholder="Find SSD"
+                                autocomplete="off">
+                            <div id="suggestions3" class="list-group position-absolute"></div>
                         </div>
 
-                        <div class="row mb-3">
-                            <!-- SMPS Replacement Description -->
-                            <div class="col-md-4" id="smps_replacement_description_div" style="display: none;">
-                                <label for="smps_replacement_description" class="form-label">SMPS Replacement
-                                    Description</label>
-                                <input type="text" id="smps_replacement_description" name="smps_replacement_description"
-                                    class="form-control">
-                            </div>
+                        <!-- SSD Quantity (25% width) -->
+                        <div class="col-md-3">
+                            <label for="ssd_qty" class="form-label">SSD Quantity</label>
+                            <input type="number" id="ssd_qty" name="ssd_qty" class="form-control" value="1">
+                        </div>
+                    </div>
 
-                            <!-- Motherboard Replacement Description -->
-                            <div class="col-md-4" id="motherboard_replacement_description_div" style="display: none;">
-                                <label for="motherboard_replacement_description" class="form-label">Motherboard
-                                    Replacement Description</label>
-                                <input type="text" id="motherboard_replacement_description"
-                                    name="motherboard_replacement_description" class="form-control">
-                            </div>
+
+                    <div class="row mb-3">
+                        <!-- SMPS Status -->
+                        <div class="col-md-4">
+                            <label for="smps_status" class="form-label">SMPS Status</label>
+                            <select id="smps_status" name="smps_status" class="form-control"
+                                onchange="toggleReplacementDescription()">
+                                <option value="available">Available</option>
+                                <option value="not_available">Not Available</option>
+                                <option value="replacement">Replacement</option>
+                            </select>
+                            <div class="text-danger">{{ form.smps.errors }}</div>
                         </div>
 
-                        <div class="form-group text-center">
-                            <button class="btn btn-success btn-lg" type="submit">
-                                <i class="fas fa-check"></i> Submit
-                            </button>
+                        <!-- Motherboard Status -->
+                        <div class="col-md-4" id="motherboard_status_div">
+                            <label for="motherboard_status" class="form-label">Motherboard Status</label>
+                            <select id="motherboard_status" name="motherboard_status" class="form-control"
+                                onchange="toggleMotherboardReplacementDescription()">
+                                <option value="available">Available</option>
+                                <option value="not_available">Not Available</option>
+                                <option value="replacement">Replacement</option>
+                            </select>
+                            <div class="text-danger">{{ form.motherboard.errors }}</div>
                         </div>
-                    </form>
-                </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <!-- SMPS Replacement Description -->
+                        <div class="col-md-4" id="smps_replacement_description_div" style="display: none;">
+                            <label for="smps_replacement_description" class="form-label">SMPS Replacement
+                                Description</label>
+                            <input type="text" id="smps_replacement_description" name="smps_replacement_description"
+                                class="form-control">
+                        </div>
+
+                        <!-- Motherboard Replacement Description -->
+                        <div class="col-md-4" id="motherboard_replacement_description_div" style="display: none;">
+                            <label for="motherboard_replacement_description" class="form-label">Motherboard
+                                Replacement Description</label>
+                            <input type="text" id="motherboard_replacement_description"
+                                name="motherboard_replacement_description" class="form-control">
+                        </div>
+                    </div>
+
+                    <div class="form-group text-center">
+                        <button class="btn btn-success btn-lg" type="submit">
+                            <i class="fas fa-check"></i> Submit
+                        </button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
+</div>
 </div>
 
 <script>
@@ -192,7 +192,7 @@ Add Product
         toggleMotherboardReplacementDescriptionDiv.style.display = motherboardStatus === "replacement" ? "block" : "none";
     }
 
-    
+
 
     function searchSuggestions(inputId, suggestionsId) {
         const searchBox = document.getElementById(inputId);

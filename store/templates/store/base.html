@@ -25,8 +25,30 @@
       display: flex;
       justify-content: center;
     }
+
+    /* Ensure dropdown is fully visible */
+    .dropdown-menu {
+      min-width: 200px;
+      z-index: 1050;
+    }
+
+    /* Improve navbar on mobile */
+    @media (max-width: 767px) {
+      .navbar {
+        padding: 10px;
+      }
+
+      .navbar-collapse {
+        background-color: black !important;
+        padding: 10px;
+      }
+
+      .dropdown-menu {
+        background-color: black !important;
+      }
+    }
   </style>
-  
+
   <!-- <section id="wrapper"> -->
   <nav class="navbar navbar-expand-md bg-success">
     <div class="container-fluid mx-2">
