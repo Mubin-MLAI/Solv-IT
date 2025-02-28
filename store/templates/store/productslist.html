@@ -110,7 +110,7 @@
     </div>
     {% else %}
     <div class="alert alert-warning text-center">
-        <p>No products found. You can <a href="{% url 'product-create' %}"
+        <p>No products found for "{{ request.GET.q }}". You can <a href="{% url 'product-create' %}"
                 class="btn btn-success btn-sm rounded-pill shadow-sm">Add a new product</a>.</p>
     </div>
     {% endif %}
@@ -206,6 +206,7 @@
             suggestionsBox.innerHTML = ''; // Clear suggestions if input is less than 2 characters
         }
     });
+    
 
 
     // Hide suggestions when clicking outside the input

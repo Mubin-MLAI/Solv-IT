@@ -162,7 +162,14 @@
                             suggestionsBox.appendChild(item);
                         });
                     } else {
-                        suggestionsBox.innerHTML = '<a class="list-group-item list-group-item-action">No suggestions found</a>';
+                        const noResultsItem = document.createElement('a');
+                        noResultsItem.classList.add('list-group-item', 'list-group-item-action', 'text-danger');
+                        noResultsItem.textContent = 'No suggestions found! Click here to add item';
+                        noResultsItem.style.cursor = 'pointer'; // Make it look clickable
+                        noResultsItem.addEventListener('click', function () {
+                            window.location.href = "{% url 'category-create' %}"; // Redirect to add item form
+                        });
+                        suggestionsBox.appendChild(noResultsItem);
                     }
                 })
                 .catch(error => console.error('Error fetching suggestions:', error));

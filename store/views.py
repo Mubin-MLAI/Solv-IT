@@ -618,20 +618,31 @@ def is_ajax(request):
 @csrf_exempt
 @require_POST
 @login_required
+
 def get_items_ajax_view(request):
-    if is_ajax(request):
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':  # Fix is_ajax() issue
         try:
-            term = request.POST.get("term", "")
-            data = []
+            term = request.POST.get("term", "").strip()
+            print("POST Data:", request.POST)  # Debugging
+            print("Search Term:", term)
 
-            items = Item.objects.filter(name__icontains=term)
-            for item in items[:10]:
-                data.append(item.to_json())
+            if not term:
+                return JsonResponse({'error': 'No search term provided'}, status=400)
 
+            # items = Item.objects.filter(make_and_models__icontains=term)
+            items = catogaryitem.objects.filter(name__icontains=term)
+            
+            data = [{'id': item.id, 'name': item.name, 'price': item.unit_price, 'total_item': item.unit_price + item.quantity} for item in items[:10]]  # Fix .to_json()
+            
+            print("Filtered Data:", data)  # Debugging
             return JsonResponse(data, safe=False)
+
         except Exception as e:
+            print("Error:", str(e))  # Debugging
             return JsonResponse({'error': str(e)}, status=500)
+
     return JsonResponse({'error': 'Not an AJAX request'}, status=400)
+
 
 
 

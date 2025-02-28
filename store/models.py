@@ -214,10 +214,18 @@ class Item(models.Model):
         product['ram'] = 1
         product['total_product'] = 0
         return product
+    
+    def to_select3(self):
+        item = {
+            "label": self.make_and_models,
+            "value": self.id
+        }
+        return item
 
     class Meta:
         ordering = ['name']
         verbose_name_plural = 'Items'
+
 
 
 class Delivery(models.Model):
