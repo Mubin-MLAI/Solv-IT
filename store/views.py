@@ -17,7 +17,7 @@ from functools import reduce
 # Django core imports
 from django.shortcuts import render
 from django.urls import reverse, reverse_lazy
-from django.http import JsonResponse
+from django.http import HttpResponse, JsonResponse
 from django.views.decorators.http import require_POST
 from django.views.decorators.csrf import csrf_exempt
 from django.db.models import Q, Count, Sum
@@ -36,6 +36,7 @@ from django.views.generic.edit import FormMixin
 from django_tables2 import SingleTableView
 import django_tables2 as tables
 from django_tables2.export.views import ExportMixin
+from requests import Response
 
 # Local app imports
 from accounts.models import Profile, Vendor
@@ -50,6 +51,7 @@ import pandas as pd
 
 @login_required
 def dashboard(request):
+    user_profile = request.user.profile
     profiles = Profile.objects.all()
     # Category.objects.annotate(nitem=Count("item"))
     # items = Item.objects.all()
@@ -77,6 +79,7 @@ def dashboard(request):
         date["date_added__date"].strftime("%Y-%m-%d") for date in sale_dates
     ]
     sale_dates_values = [float(date["total_sales"]) for date in sale_dates]
+    
 
     context = {
         # "items": items,
@@ -91,47 +94,60 @@ def dashboard(request):
         # "category_counts": category_counts,
         "sale_dates_labels": sale_dates_labels,
         "sale_dates_values": sale_dates_values,
+        'user_role': user_profile.role,
     }
-    return render(request, "store/dashboard.html", context)
+    print(context)
+
+    if user_profile.role == 'OP':
+        return render(request, 'store/operative_dashboard.html')  # A different template for Operative users
+    else:
+        return render(request, 'store/dashboard.html')
+    # return render(request, "store/dashboard.html", context)
 
 
 class ProductListView(LoginRequiredMixin, ExportMixin, tables.SingleTableView):
     """
-    View class to display a list of products.
+    View class to update product information.
 
     Attributes:
     - model: The model associated with the view.
-    - table_class: The table class used for rendering.
     - template_name: The HTML template used for rendering the view.
-    - context_object_name: The variable name for the context object.
-    - paginate_by: Number of items per page for pagination.
+    - fields: The fields to be updated.
+    - success_url: The URL to redirect to upon successful form submission.
     """
 
     model = Item
     table_class = ItemTable
-    template_name = "store/productslist.html"
     context_object_name = "items"
     paginate_by = 10
     SingleTableView.table_pagination = False
 
-class ProductListView(LoginRequiredMixin, ExportMixin, tables.SingleTableView):
-    """
-    View class to display a list of products.
+    def get_template_names(self):
 
-    Attributes:
-    - model: The model associated with the view.
-    - table_class: The table class used for rendering.
-    - template_name: The HTML template used for rendering the view.
-    - context_object_name: The variable name for the context object.
-    - paginate_by: Number of items per page for pagination.
-    """
+        user_profile = self.request.user.profile
+        if user_profile.role == 'OP':
+            return ["store/operative_dashboard.html"]
+        else:
+            return ["store/productslist.html"]
 
-    model = Item
-    table_class = ItemTable
-    template_name = "store/productslist.html"
-    context_object_name = "items"
-    paginate_by = 10
-    SingleTableView.table_pagination = False
+# class ProductListView(LoginRequiredMixin, ExportMixin, tables.SingleTableView):
+#     """
+#     View class to display a list of products.
+
+#     Attributes:
+#     - model: The model associated with the view.
+#     - table_class: The table class used for rendering.
+#     - template_name: The HTML template used for rendering the view.
+#     - context_object_name: The variable name for the context object.
+#     - paginate_by: Number of items per page for pagination.
+#     """
+
+#     model = Item
+#     table_class = ItemTable
+#     template_name = "store/productslist.html"
+#     context_object_name = "items"
+#     paginate_by = 10
+#     SingleTableView.table_pagination = False
 
 
 class CatogaryItemListView(LoginRequiredMixin, ExportMixin, tables.SingleTableView):
@@ -190,6 +206,10 @@ class ItemSearchListView(ProductListView):
         result = super(ProductListView, self).get_queryset()
 
         query = self.request.GET.get("q")
+
+        if not query:
+            return result.none()
+        
         if query:
             query_list = query.split()
             result = result.filter(
@@ -379,6 +399,36 @@ def productcreateview(request):
 
 
 
+class ProductUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
+    """
+    View class to update product information.
+
+    Attributes:
+    - model: The model associated with the view.
+    - template_name: The HTML template used for rendering the view.
+    - fields: The fields to be updated.
+    - success_url: The URL to redirect to upon successful form submission.
+    """
+
+    model = Item
+    form_class = ItemForm
+    template_name = "store/productupdate.html"  # Default template name
+
+    def get_template_names(self):
+        user_profile = self.request.user.profile
+        # If user is 'OP', change template name to 'operative_productupdate.html'
+        if user_profile.role == 'OP':
+            return ["store/operative_productupdate.html"]
+        else:
+            return ["store/productupdate.html"]
+
+    from django.shortcuts import render
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.mixins import UserPassesTestMixin
+from django.views.generic import UpdateView
+from .models import Item, catogaryitem
+from .forms import ItemForm
+
 
 class ProductUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     """
@@ -392,15 +442,90 @@ class ProductUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     """
 
     model = Item
-    template_name = "store/productupdate.html"
     form_class = ItemForm
-    success_url = "/products"
+    template_name = "store/productupdate.html"  # Default template name
+
+    def get_template_names(self):
+        user_profile = self.request.user.profile
+
+        # If user is 'OP', change template name to 'operative_productupdate.html'
+        if user_profile.role == 'OP':
+            return ["store/operative_productupdate.html"]
+        else:
+            return ["store/productupdate.html"]
+
+    def get_context_data(self, **kwargs):
+        # Get the default context
+        context = super().get_context_data(**kwargs)
+
+        # Get suggestions if user role is 'OP'
+        user_profile = self.request.user.profile
+        if user_profile.role == 'OP':
+        # Get processor suggestions
+            processor_items = catogaryitem.objects.filter(category='processor')
+            processor_suggestions = []
+            for item in processor_items:
+                font_color_class = 'text-danger' if item.quantity < 5 else ''
+                suggestion = {
+                    'name': item.name + ' (' + str(item.quantity) + ')',
+                    'font_color_class': font_color_class
+                }
+                processor_suggestions.append(suggestion)
+
+            # Similarly for RAM, HDD, and SSD
+            ram_items = catogaryitem.objects.filter(category='ram')
+            ram_suggestions = []
+            for item in ram_items:
+                font_color_class = 'text-danger' if item.quantity < 5 else ''
+                suggestion = {
+                    'name': item.name + ' (' + str(item.quantity) + ')',
+                    'font_color_class': font_color_class
+                }
+                ram_suggestions.append(suggestion)
+
+            hdd_items = catogaryitem.objects.filter(category='hdd')
+            hdd_suggestions = []
+            for item in hdd_items:
+                font_color_class = 'text-danger' if item.quantity < 5 else ''
+                suggestion = {
+                    'name': item.name + ' (' + str(item.quantity) + ')',
+                    'font_color_class': font_color_class
+                }
+                hdd_suggestions.append(suggestion)
+
+            ssd_items = catogaryitem.objects.filter(category='ssd')
+            ssd_suggestions = []
+            for item in ssd_items:
+                font_color_class = 'text-danger' if item.quantity < 5 else ''
+                suggestion = {
+                    'name': item.name + ' (' + str(item.quantity) + ')',
+                    'font_color_class': font_color_class
+                }
+                ssd_suggestions.append(suggestion)
+
+            # Add all suggestions to the context
+            context['processor_suggestions'] = processor_suggestions
+            context['ram_suggestions'] = ram_suggestions
+            context['hdd_suggestions'] = hdd_suggestions
+            context['ssd_suggestions'] = ssd_suggestions
+
+        return context
+
+
+    def get_success_url(self):
+        """
+        Redirect to the products page upon successful form submission.
+        """
+        return reverse_lazy('products')  # Assuming 'products' is the name of your products URL pattern
 
     def test_func(self):
+        """
+        Check if the user is allowed to update the product.
+        """
         if self.request.user.is_superuser:
             return True
-        else:
-            return False
+        return False
+
 
 
 class ProductDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):

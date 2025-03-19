@@ -8,13 +8,16 @@
     .navbar {
         height: 70px;
         padding: 0.8rem 1rem;
-        background-color: #222; /* Dark background */
-        transition: background-color 0.3s ease-in-out, transform 0.3s ease-in-out; /* Smooth transition for color and animation */
+        background-color: #222;
+        /* Dark background */
+        transition: background-color 0.3s ease-in-out, transform 0.3s ease-in-out;
+        /* Smooth transition for color and animation */
     }
 
     /* Zoom effect on hover for navbar */
     .navbar:hover {
-        transform: scale(1.05); /* Slight zoom effect */
+        transform: scale(1.05);
+        /* Slight zoom effect */
     }
 
     .navbar-brand img {
@@ -26,7 +29,8 @@
 
     /* Zoom effect on the profile picture */
     .navbar-brand:hover img {
-        transform: scale(1.1); /* Slight zoom effect on profile image */
+        transform: scale(1.1);
+        /* Slight zoom effect on profile image */
     }
 
     /* Active Navbar Link */
@@ -51,7 +55,8 @@
         height: 78px;
 
         color: #222;
-        transform: scale(1.05); /* Zoom effect on hover */
+        transform: scale(1.05);
+        /* Zoom effect on hover */
     }
 
     /* Dropdown Styling */
@@ -81,18 +86,20 @@
     <div class="container-fluid">
         <!-- Navbar Brand (User Profile) -->
         <a class="navbar-brand d-flex align-items-center" href="{% url 'user-profile' %}">
-            <img class="rounded-circle img-fluid" id="navbar-img" width="45" src="{{ request.user.profile.profile_picture.url }}" alt="Profile Picture" />
+            <img class="rounded-circle img-fluid" id="navbar-img" width="45"
+                src="{{ request.user.profile.profile_picture.url }}" alt="Profile Picture" />
             <div class="ms-3">
                 <h5 class="fs-6 mb-0">
-                    {{ request.user.username }}{% if request.user.profile.role == 'AD' %} <i class="fa-solid fa-circle-check text-success"></i>{% endif %}
+                    {{ request.user.username }}{% if request.user.profile.role == 'AD' %} <i
+                        class="fa-solid fa-circle-check text-success"></i>{% endif %}
                 </h5>
                 <span class="badge bg-success text-light">
                     {% if request.user.profile.role == 'AD' %}
-                        Admin
+                    Admin
                     {% elif request.user.profile.role == 'EX' %}
-                        Executive
+                    Executive
                     {% else %}
-                        Operative
+                    Operative
                     {% endif %}
                 </span>
             </div>
@@ -108,29 +115,46 @@
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav ms-auto">
                 <li class="nav-item">
-                    <a class="nav-link {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}" href="{% url 'dashboard' %}">
+                    <a class="nav-link {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}"
+                        href="{% url 'dashboard' %}">
                         <i class="fa fa-tachometer-alt fa-fw me-2"></i> Dashboard
                     </a>
                 </li>
+                {% if request.user.profile.role != 'OP' %}
                 <li class="nav-item dropdown">
-                    <a class="nav-link {% if request.resolver_match.url_name == 'productslist' %}active{% endif %} dropdown-toggle" href="#" id="productsDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                    <a class="nav-link {% if request.resolver_match.url_name == 'productslist' %}active{% endif %} dropdown-toggle"
+                        href="#" id="productsDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                         <i class="fa fa-folder me-2"></i> Products
                     </a>
                     <ul class="dropdown-menu bg-dark border-0" aria-labelledby="productsDropdown">
-                        <li><a class="dropdown-item text-light {% if request.resolver_match.url_name == 'productslist' %}active{% endif %}" href="{% url 'productslist' %}">All Products</a></li>
+                        <li><a class="dropdown-item text-light {% if request.resolver_match.url_name == 'productslist' %}active{% endif %}"
+                                href="{% url 'productslist' %}">All Products</a></li>
                         <li><a class="dropdown-item text-light" href="{% url 'category-list' %}">Add Item</a></li>
                     </ul>
                 </li>
                 <li class="nav-item dropdown">
-                    <a class="nav-link {% if request.resolver_match.url_name == 'profile_list' or request.resolver_match.url_name == 'customer_list' or request.resolver_match.url_name == 'vendor-list' %} active{% endif %} dropdown-toggle" href="#" id="accountsDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                    <a class="nav-link {% if request.resolver_match.url_name == 'profile_list' or request.resolver_match.url_name == 'customer_list' or request.resolver_match.url_name == 'vendor-list' %} active{% endif %} dropdown-toggle"
+                        href="#" id="accountsDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                         <i class="fa fa-users me-2"></i> Accounts
                     </a>
                     <ul class="dropdown-menu bg-dark border-0" aria-labelledby="accountsDropdown">
-                        <li><a class="dropdown-item text-light {% if request.resolver_match.url_name == 'profile_list' %}active{% endif %}" href="{% url 'profile_list' %}">All Staff</a></li>
-                        <li><a class="dropdown-item text-light {% if request.resolver_match.url_name == 'customer_list' %}active{% endif %}" href="{% url 'customer_list' %}">Customers</a></li>
-                        <li><a class="dropdown-item text-light {% if request.resolver_match.url_name == 'vendor-list' %}active{% endif %}" href="{% url 'vendor-list' %}">Vendors</a></li>
+                        <li><a class="dropdown-item text-light {% if request.resolver_match.url_name == 'profile_list' %}active{% endif %}"
+                                href="{% url 'profile_list' %}">All Staff</a></li>
+                        <li><a class="dropdown-item text-light {% if request.resolver_match.url_name == 'customer_list' %}active{% endif %}"
+                                href="{% url 'customer_list' %}">Customers</a></li>
+                        <li><a class="dropdown-item text-light {% if request.resolver_match.url_name == 'vendor-list' %}active{% endif %}"
+                                href="{% url 'vendor-list' %}">Vendors</a></li>
                     </ul>
                 </li>
+                {% if request.user.profile.role != 'Admin' %}
+                <li class="nav-item dropdown">
+                    <a class="nav-link {% if request.resolver_match.url_name == 'profile_list' or request.resolver_match.url_name == 'customer_list' or request.resolver_match.url_name == 'vendor-list' %} active{% endif %}"
+                        href="http://127.0.0.1:8000/admin">
+                        <i class="fa fa-users me-2"></i> Administration
+                    </a>
+                </li>
+                {% endif %}
+                {% endif %}
                 <li class="nav-item">
                     <a class="nav-link text-danger" href="{% url 'user-logout' %}">
                         <i class="fa fa-sign-out me-2"></i> Logout
@@ -145,7 +169,7 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script>
     // Explicitly initializing Bootstrap dropdowns if needed
-    document.querySelectorAll('.dropdown-toggle').forEach(function(element) {
+    document.querySelectorAll('.dropdown-toggle').forEach(function (element) {
         new bootstrap.Dropdown(element);
     });
 </script>

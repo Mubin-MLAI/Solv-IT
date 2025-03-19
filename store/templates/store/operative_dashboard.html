@@ -34,16 +34,14 @@
         <div class="col-md-6">
             <h4 class="display-6 mb-0 text-success">Products List</h4>
         </div>
-        {% if request.user.profile.role != 'OP' %}
-        <div class="col-md-6 d-flex justify-content-end gap-2">
+        <!-- <div class="col-md-6 d-flex justify-content-end gap-2">
             <a class="btn btn-success btn-sm rounded-pill shadow-sm" href="{% url 'product-create' %}">
                 <i class="fa-solid fa-plus"></i> Add Item
             </a>
             <a class="btn btn-success btn-sm rounded-pill shadow-sm" href="{% querystring '_export'='xlsx' %}">
                 <i class="fa-solid fa-download"></i> Export to Excel
             </a>
-        </div>
-        {% endif %}
+        </div> -->
     </div>
 
     <!-- Search Form -->
@@ -54,9 +52,7 @@
         <button class="btn btn-outline-success rounded-pill shadow-sm" type="submit">
             <i class="fa-solid fa-search"></i>
         </button>
-        <button class="btn btn-outline-secondary rounded-pill shadow-sm" type="button" id="clearSearch1">
-            <i class="fa-solid fa-times"></i>
-        </button>
+        
     </form>
     <div id="suggestions1" class="list-group position-absolute"
         style="z-index: 9999; width: 100%; background-color: rgb(254, 254, 253);"></div>
@@ -110,13 +106,6 @@
             </tbody>
         </table>
     </div>
-    {% else %}
-    {% if request.user.profile.role != 'OP' %}
-    <div class="alert alert-warning text-center">
-        <p>No products found for "{{ request.GET.q }}". You can <a href="{% url 'product-create' %}"
-                class="btn btn-success btn-sm rounded-pill shadow-sm">Add a new product</a>.</p>
-    </div>
-    {% endif %}
     {% endif %}
 </div>
 
@@ -195,7 +184,6 @@
                             suggestionsBox.appendChild(item);
                         });
                     } else {
-                        
                         const noResultsItem = document.createElement('a');
                         noResultsItem.classList.add('list-group-item', 'list-group-item-action', 'text-danger');
                         noResultsItem.textContent = 'No suggestions found! Click here to add item';

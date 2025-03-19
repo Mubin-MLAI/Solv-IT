@@ -1,0 +1,647 @@
+{% extends "store/base.html" %}
+{% load static %}
+
+{% block title %}
+Update Product
+{% endblock title %}
+
+{% block content %}
+<br>
+<div class="container">
+    <div class="row">
+        <div class="col-sm">
+            <div class="text-center">IN</div>
+            <div class="col-lg-12 col-md-5">
+                <div class="card shadow-sm border-light">
+                    <div class="card-body">
+                        <form method="POST" enctype="multipart/form-data">
+                            {% csrf_token %}
+                            <div class="row mb-3">
+                                <!-- Product Name and Serial No (Two columns) -->
+                                <div class="col-md-6 col-lg-6">
+                                    <label for="{{ form.name.id_for_label }}" class="form-label">
+                                        Product Name
+                                    </label>
+                                    <input type="text" name="name" id="product_name" class="form-control"
+                                        placeholder="Enter Product Name" value="{{ form.name.value }}">
+                                    <div class="text-danger">{{ form.name.errors }}</div>
+                                </div>
+
+                                <div class="col-md-6 col-lg-6">
+                                    <label for="{{ form.make_and_models.id_for_label }}" class="form-label">
+                                        Make & Models
+                                    </label>
+                                    <input type="text" name="make_and_models" id="make_and_models" class="form-control"
+                                        placeholder="Enter Make & Models" value="{{ form.make_and_models.value }}"
+                                        readonly>
+                                    <div class="text-danger">{{ form.make_and_models.errors }}</div>
+
+                                </div>
+                            </div>
+
+                            <div class="row mb-3">
+                                <!-- Make & Models (Full width, below the first two columns) -->
+                                <div class="col-md-12 col-lg-12">
+                                    <label for="{{ form.serialno.id_for_label }}" class="form-label">
+                                        Serial No
+                                    </label>
+                                    <input type="text" name="serialno" id="serial_no" class="form-control"
+                                        placeholder="Enter Serial Number" value="{{ form.serialno.value }}" readonly>
+                                    <div class="text-danger">{{ form.serialno.errors }}</div>
+                                </div>
+                            </div>
+
+                            <div class="row mb-3">
+                                <!-- Reduced width for Processor, RAM, HDD, and SSD details -->
+                                <div class="col-md-6 col-lg-8">
+                                    <label for="processor" class="form-label">Processor</label>
+                                    <select id="processor" name="processor" class="form-control">
+                                        {% for suggestion in processor_suggestions %}
+                                            <option value="{{ suggestion.name }}" 
+                                                    {% if form.processor.value == suggestion.name %}selected{% endif %}class="{{ suggestion.font_color_class }}">
+                                                    {{ suggestion.name }}
+                                            </option>
+                                        {% empty %}
+                                            <option value="">No processors available</option>
+                                        {% endfor %}
+                                    </select>
+                                    <div class="text-danger">{{ form.processor.errors }}</div>
+                                </div>
+                                
+                                
+
+                                <div class="col-md-6 col-lg-4">
+                                    <label for="processor_qty" class="form-label">Qty</label>
+                                    <input type="number" id="processor_qty" name="processor_qty" class="form-control"
+                                        value="{{ form.processor_qty.value }}">
+                                </div>
+                            </div>
+
+                            <div class="row mb-3">
+                                <div class="col-md-6 col-lg-8">
+                                    <label for="ram" class="form-label">RAM Details</label>
+                                    <select id="ram" name="ram" class="form-control">
+                                        {% for suggestion in ram_suggestions %}
+                                            <option value="{{ suggestion.name }}" 
+                                                    {% if form.ram.value == suggestion.name %}selected{% endif %}class="{{ suggestion.font_color_class }}">
+                                                    {{ suggestion.name }}
+                                            </option>
+                                        {% empty %}
+                                        <option value="">No rams available</option>
+                                        {% endfor %}
+                                    </select>
+                                    <div class="text-danger">{{ form.ram.errors }}</div>
+                                </div>
+
+                                <div class="col-md-6 col-lg-4">
+                                    <label for="ram_qty" class="form-label">Qty</label>
+                                    <input type="number" id="ram_qty" name="ram_qty" class="form-control"
+                                        value="{{ form.ram_qty.value }}">
+                                </div>
+                            </div>
+
+                            <div class="row mb-3">
+                                <div class="col-md-6 col-lg-8">
+                                    <label for="hdd" class="form-label">HDD Details</label>
+                                    <select id="hdd" name="hdd" class="form-control">
+                                        {% for suggestion in hdd_suggestions %}
+                                            <option value="{{ suggestion.name }}" 
+                                                    {% if form.hdd.value == suggestion.name %}selected{% endif %}class="{{ suggestion.font_color_class }}">
+                                                    {{ suggestion.name }}
+                                            </option>
+                                        {% empty %}
+                                        <option value="">No hdd available</option>
+                                        {% endfor %}
+                                    </select>
+                                    <div class="text-danger">{{ form.hdd.errors }}</div>
+                                </div>
+
+                                <div class="col-md-6 col-lg-4">
+                                    <label for="hdd_qty" class="form-label">Qty</label>
+                                    <input type="number" id="hdd_qty" name="hdd_qty" class="form-control"
+                                        value="{{ form.hdd_qty.value }}">
+                                </div>
+                            </div>
+
+                            <div class="row mb-3">
+                                <div class="col-md-6 col-lg-8">
+                                    <label for="ssd" class="form-label">SSD Details</label>
+                                    <select id="ssd" name="ssd" class="form-control">
+                                        {% for suggestion in ssd_suggestions %}
+                                            <option value="{{ suggestion.name }}" 
+                                                    {% if form.ssd.value == suggestion.name %}selected{% endif %}class="{{ suggestion.font_color_class }}">
+                                                    {{ suggestion.name }}
+                                            </option>
+                                        {% empty %}
+                                        <option value="">No ssd available</option>
+                                        {% endfor %}
+                                    </select>
+                                    <div class="text-danger">{{ form.ssd.errors }}</div>
+                                </div>
+
+                                <div class="col-md-6 col-lg-4">
+                                    <label for="ssd_qty" class="form-label">Qty</label>
+                                    <input type="number" id="ssd_qty" name="ssd_qty" class="form-control"
+                                        value="{{ form.ssd_qty.value }}">
+                                </div>
+                            </div>
+                            
+                            <div class="row mb-3">
+                                <!-- SMPS Status -->
+                                <div class="col-md-6 col-lg-8">
+                                    <label for="smps_status" class="form-label">SMPS Status</label>
+                                    <select id="smps_status1" name="smps_status" class="form-control"
+                                        onchange="toggleReplacementDescription1()">
+                                        <option value="available" {% if form.smps_status.value == 'available' %}selected{% endif %}>Available</option>
+                                        <option value="not_available" {% if form.smps_status.value == 'not_available' %}selected{% endif %}>Not Available</option>
+                                        <option value="replacement" {% if form.smps_status.value == 'replacement' %}selected{% endif %}>Replacement</option>
+                                    </select>
+                                    <div class="text-danger">{{ form.smps_status.errors }}</div>
+                                </div>
+    
+                                <!-- Motherboard Status -->
+                                <div class="col-md-6 col-lg-8" id="motherboard_status_div">
+                                    <label for="motherboard_status" class="form-label">Motherboard Status</label>
+                                    <select id="motherboard_status1" name="motherboard_status" class="form-control"
+                                        onchange="toggleMotherboardReplacementDescription1()">
+                                        <option value="available" {% if form.motherboard_status.value == 'available' %}selected{% endif %}>Available</option>
+                                        <option value="not_available" {% if form.motherboard_status.value == 'not_available' %}selected{% endif %}>Not Available</option>
+                                        <option value="replacement" {% if form.motherboard_status.value == 'replacement' %}selected{% endif %}>Replacement</option>
+                                    </select>
+                                    <div class="text-danger">{{ form.motherboard_status.errors }}</div>
+                                </div>
+                            </div>
+
+
+                            <div class="row mb-3">
+                                <!-- SMPS Replacement Description -->
+                                <div class="col-md-6 col-lg-8" id="smps_replacement_description_div1"
+                                    style="display: none;">
+                                    <label for="smps_replacement_description" class="form-label">SMPS Replacement
+                                        Description</label>
+                                    <input type="text" id="smps_replacement_description"
+                                        name="smps_replacement_description" class="form-control"
+                                        value="{{ form.smps_replacement_description.value }}">
+                                </div>
+
+                                <!-- Motherboard Replacement Description -->
+                                <div class="col-md-6 col-lg-8" id="motherboard_replacement_description_div1"
+                                    style="display: none;">
+                                    <label for="motherboard_replacement_description" class="form-label">Motherboard
+                                        Replacement Description</label>
+                                    <input type="text" id="motherboard_replacement_description"
+                                        name="motherboard_replacement_description" class="form-control"
+                                        value="{{ form.motherboard_replacement_description.value }}">
+                                </div>
+                            </div>
+
+                            <div class="form-group text-center">
+                                <button class="btn btn-success btn-lg" type="submit">
+                                    <i class="fas fa-check"></i> Update Product
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm">
+            <div class="text-center">Current Details</div>
+            <div class="col-lg-12 col-md-5">
+                <div class="card shadow-sm border-light">
+                    <div class="card-body">
+                        <form method="POST" enctype="multipart/form-data">
+                            {% csrf_token %}
+                            <div class="row mb-3">
+                                <!-- Product Name and Serial No (Two columns) -->
+                                <div class="col-md-6 col-lg-6">
+                                    <label for="{{ form.name.id_for_label }}" class="form-label">
+                                        Product Name
+                                    </label>
+                                    <input type="text" name="name" id="product_name" class="form-control"
+                                        placeholder="Enter Product Name" value="{{ form.name.value }}">
+                                    <div class="text-danger">{{ form.name.errors }}</div>
+                                </div>
+
+                                <div class="col-md-6 col-lg-6">
+                                    <label for="{{ form.make_and_models.id_for_label }}" class="form-label">
+                                        Make & Models
+                                    </label>
+                                    <input type="text" name="make_and_models" id="make_and_models" class="form-control"
+                                        placeholder="Enter Make & Models" value="{{ form.make_and_models.value }}"
+                                        readonly>
+                                    <div class="text-danger">{{ form.make_and_models.errors }}</div>
+
+                                </div>
+                            </div>
+
+                            <div class="row mb-3">
+                                <!-- Make & Models (Full width, below the first two columns) -->
+                                <div class="col-md-12 col-lg-12">
+                                    <label for="{{ form.serialno.id_for_label }}" class="form-label">
+                                        Serial No
+                                    </label>
+                                    <input type="text" name="serialno" id="serial_no" class="form-control"
+                                        placeholder="Enter Serial Number" value="{{ form.serialno.value }}" readonly>
+                                    <div class="text-danger">{{ form.serialno.errors }}</div>
+                                </div>
+                            </div>
+
+                            <div class="row mb-3">
+                                <!-- Reduced width for Processor, RAM, HDD, and SSD details -->
+                                <div class="col-md-6 col-lg-8">
+                                    <label for="processor" class="form-label">
+                                        Processor Details
+                                    </label>
+                                    <input id="searchbox" name="processor" type="text"
+                                        class="form-control border- square-pill shadow-sm" placeholder="Find Processor"
+                                        autocomplete="off" value="{{ form.processor.value }}">
+                                    <div id="suggestions" class="list-group position-absolute"></div>
+                                </div>
+
+                                <div class="col-md-6 col-lg-4">
+                                    <label for="processor_qty" class="form-label">Qty</label>
+                                    <input type="number" id="processor_qty" name="processor_qty" class="form-control"
+                                        value="{{ form.processor_qty.value }}">
+                                </div>
+                            </div>
+
+                            <div class="row mb-3">
+                                <div class="col-md-6 col-lg-8">
+                                    <label for="ram" class="form-label">
+                                        RAM Details
+                                    </label>
+                                    <input id="searchbox1" name="ram" type="text"
+                                        class="form-control border- square-pill shadow-sm" placeholder="Find RAM"
+                                        autocomplete="off" value="{{ form.ram.value }}">
+                                    <div id="suggestions1" class="list-group position-absolute"></div>
+                                </div>
+
+                                <div class="col-md-6 col-lg-4">
+                                    <label for="ram_qty" class="form-label">Qty</label>
+                                    <input type="number" id="ram_qty" name="ram_qty" class="form-control"
+                                        value="{{ form.ram_qty.value }}">
+                                </div>
+                            </div>
+
+                            <div class="row mb-3">
+                                <div class="col-md-6 col-lg-8">
+                                    <label for="hdd" class="form-label">
+                                        HDD Details
+                                    </label>
+                                    <input id="searchbox2" name="hdd" type="text"
+                                        class="form-control border- square-pill shadow-sm" placeholder="Find HDD"
+                                        autocomplete="off" value="{{ form.hdd.value }}">
+                                    <div id="suggestions2" class="list-group position-absolute"></div>
+                                </div>
+
+                                <div class="col-md-6 col-lg-4">
+                                    <label for="hdd_qty" class="form-label">Qty</label>
+                                    <input type="number" id="hdd_qty" name="hdd_qty" class="form-control"
+                                        value="{{ form.hdd_qty.value }}">
+                                </div>
+                            </div>
+
+                            <div class="row mb-3">
+                                <div class="col-md-6 col-lg-8">
+                                    <label for="ssd" class="form-label">
+                                        SSD Details
+                                    </label>
+                                    <input id="searchbox3" name="ssd" type="text"
+                                        class="form-control border- square-pill shadow-sm" placeholder="Find SSD"
+                                        autocomplete="off" value="{{ form.ssd.value }}">
+                                    <div id="suggestions3" class="list-group position-absolute"></div>
+                                </div>
+
+                                <div class="col-md-6 col-lg-4">
+                                    <label for="ssd_qty" class="form-label">Qty</label>
+                                    <input type="number" id="ssd_qty" name="ssd_qty" class="form-control"
+                                        value="{{ form.ssd_qty.value }}">
+                                </div>
+                            </div>
+                            
+
+                            <div class="row mb-3">
+                                <!-- SMPS Status -->
+                                <div class="col-md-6 col-lg-8">
+                                    <label for="smps_status" class="form-label">SMPS Status</label>
+                                    <select id="smps_status" name="smps_status" class="form-control"
+                                        onchange="toggleReplacementDescription()">
+                                        <option value="available" {% if form.smps_status.value == 'available' %}selected{% endif %}>Available</option>
+                                        <option value="not_available" {% if form.smps_status.value == 'not_available' %}selected{% endif %}>Not Available</option>
+                                        <option value="replacement" {% if form.smps_status.value == 'replacement' %}selected{% endif %}>Replacement</option>
+                                    </select>
+                                    <div class="text-danger">{{ form.smps_status.errors }}</div>
+                                </div>
+    
+                                <!-- Motherboard Status -->
+                                <div class="col-md-6 col-lg-8" id="motherboard_status_div">
+                                    <label for="motherboard_status" class="form-label">Motherboard Status</label>
+                                    <select id="motherboard_status" name="motherboard_status" class="form-control"
+                                        onchange="toggleMotherboardReplacementDescription()">
+                                        <option value="available" {% if form.motherboard_status.value == 'available' %}selected{% endif %}>Available</option>
+                                        <option value="not_available" {% if form.motherboard_status.value == 'not_available' %}selected{% endif %}>Not Available</option>
+                                        <option value="replacement" {% if form.motherboard_status.value == 'replacement' %}selected{% endif %}>Replacement</option>
+                                    </select>
+                                    <div class="text-danger">{{ form.motherboard_status.errors }}</div>
+                                </div>
+                            </div>
+
+
+                            <div class="row mb-3">
+                                <!-- SMPS Replacement Description -->
+                                <div class="col-md-6 col-lg-8" id="smps_replacement_description_div"
+                                    style="display: none;">
+                                    <label for="smps_replacement_description" class="form-label">SMPS Replacement
+                                        Description</label>
+                                    <input type="text" id="smps_replacement_description"
+                                        name="smps_replacement_description" class="form-control"
+                                        value="{{ form.smps_replacement_description.value }}">
+                                </div>
+
+                                <!-- Motherboard Replacement Description -->
+                                <div class="col-md-6 col-lg-8" id="motherboard_replacement_description_div"
+                                    style="display: none;">
+                                    <label for="motherboard_replacement_description" class="form-label">Motherboard
+                                        Replacement Description</label>
+                                    <input type="text" id="motherboard_replacement_description"
+                                        name="motherboard_replacement_description" class="form-control"
+                                        value="{{ form.motherboard_replacement_description.value }}">
+                                </div>
+                            </div>
+
+                            <div class="form-group text-center">
+                                <button class="btn btn-success btn-lg" type="submit">
+                                    <i class="fas fa-check"></i> Update Product
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+        <div class="col-sm">
+            <div class="text-center">OUT</div>
+            <div class="col-lg-12 col-md-5">
+                <div class="card shadow-sm border-light">
+                    <div class="card-body">
+                        <form method="POST" enctype="multipart/form-data">
+                            {% csrf_token %}
+                            <div class="row mb-3">
+                                <!-- Product Name and Serial No (Two columns) -->
+                                <div class="col-md-6 col-lg-6">
+                                    <label for="{{ form.name.id_for_label }}" class="form-label">
+                                        Product Name
+                                    </label>
+                                    <input type="text" name="name" id="product_name" class="form-control"
+                                        placeholder="Enter Product Name" value="{{ form.name.value }}">
+                                    <div class="text-danger">{{ form.name.errors }}</div>
+                                </div>
+
+                                <div class="col-md-6 col-lg-6">
+                                    <label for="{{ form.make_and_models.id_for_label }}" class="form-label">
+                                        Make & Models
+                                    </label>
+                                    <input type="text" name="make_and_models" id="make_and_models" class="form-control"
+                                        placeholder="Enter Make & Models" value="{{ form.make_and_models.value }}"
+                                        readonly>
+                                    <div class="text-danger">{{ form.make_and_models.errors }}</div>
+
+                                </div>
+                            </div>
+
+                            <div class="row mb-3">
+                                <!-- Make & Models (Full width, below the first two columns) -->
+                                <div class="col-md-12 col-lg-12">
+                                    <label for="{{ form.serialno.id_for_label }}" class="form-label">
+                                        Serial No
+                                    </label>
+                                    <input type="text" name="serialno" id="serial_no" class="form-control"
+                                        placeholder="Enter Serial Number" value="{{ form.serialno.value }}" readonly>
+                                    <div class="text-danger">{{ form.serialno.errors }}</div>
+                                </div>
+                            </div>
+
+                            <div class="row mb-3">
+                                <!-- Reduced width for Processor, RAM, HDD, and SSD details -->
+                                <div class="col-md-6 col-lg-8">
+                                    <label for="processor" class="form-label">
+                                        Processor Details
+                                    </label>
+                                    <input id="searchbox" name="processor" type="text"
+                                        class="form-control border- square-pill shadow-sm" placeholder="Find Processor"
+                                        autocomplete="off" value="{{ form.processor.value }}">
+                                    <div id="suggestions" class="list-group position-absolute"></div>
+                                </div>
+
+                                <div class="col-md-6 col-lg-4">
+                                    <label for="processor_qty" class="form-label">Qty</label>
+                                    <input type="number" id="processor_qty" name="processor_qty" class="form-control"
+                                        value="{{ form.processor_qty.value }}">
+                                </div>
+                            </div>
+
+                            <div class="row mb-3">
+                                <div class="col-md-6 col-lg-8">
+                                    <label for="ram" class="form-label">
+                                        RAM Details
+                                    </label>
+                                    <input id="searchbox1" name="ram" type="text"
+                                        class="form-control border- square-pill shadow-sm" placeholder="Find RAM"
+                                        autocomplete="off" value="{{ form.ram.value }}">
+                                    <div id="suggestions1" class="list-group position-absolute"></div>
+                                </div>
+
+                                <div class="col-md-6 col-lg-4">
+                                    <label for="ram_qty" class="form-label">Qty</label>
+                                    <input type="number" id="ram_qty" name="ram_qty" class="form-control"
+                                        value="{{ form.ram_qty.value }}">
+                                </div>
+                            </div>
+
+                            <div class="row mb-3">
+                                <div class="col-md-6 col-lg-8">
+                                    <label for="hdd" class="form-label">
+                                        HDD Details
+                                    </label>
+                                    <input id="searchbox2" name="hdd" type="text"
+                                        class="form-control border- square-pill shadow-sm" placeholder="Find HDD"
+                                        autocomplete="off" value="{{ form.hdd.value }}">
+                                    <div id="suggestions2" class="list-group position-absolute"></div>
+                                </div>
+
+                                <div class="col-md-6 col-lg-4">
+                                    <label for="hdd_qty" class="form-label">Qty</label>
+                                    <input type="number" id="hdd_qty" name="hdd_qty" class="form-control"
+                                        value="{{ form.hdd_qty.value }}">
+                                </div>
+                            </div>
+
+                            <div class="row mb-3">
+                                <div class="col-md-6 col-lg-8">
+                                    <label for="ssd" class="form-label">
+                                        SSD Details
+                                    </label>
+                                    <input id="searchbox3" name="ssd" type="text"
+                                        class="form-control border- square-pill shadow-sm" placeholder="Find SSD"
+                                        autocomplete="off" value="{{ form.ssd.value }}">
+                                    <div id="suggestions3" class="list-group position-absolute"></div>
+                                </div>
+
+                                <div class="col-md-6 col-lg-4">
+                                    <label for="ssd_qty" class="form-label">Qty</label>
+                                    <input type="number" id="ssd_qty" name="ssd_qty" class="form-control"
+                                        value="{{ form.ssd_qty.value }}">
+                                </div>
+                            </div>
+
+                            <div class="row mb-3">
+                                <!-- SMPS Status -->
+                                <div class="col-md-6 col-lg-8">
+                                    <label for="smps_status" class="form-label">SMPS Status</label>
+                                    <select id="smps_status2" name="smps_status" class="form-control"
+                                        onchange="toggleReplacementDescription2()">
+                                        <option value="available" {% if form.smps_status.value == 'available' %}selected{% endif %}>Available</option>
+                                        <option value="not_available" {% if form.smps_status.value == 'not_available' %}selected{% endif %}>Not Available</option>
+                                        <option value="replacement" {% if form.smps_status.value == 'replacement' %}selected{% endif %}>Replacement</option>
+                                    </select>
+                                    <div class="text-danger">{{ form.smps_status.errors }}</div>
+                                </div>
+    
+                                <!-- Motherboard Status -->
+                                <div class="col-md-6 col-lg-8" id="motherboard_status_div">
+                                    <label for="motherboard_status" class="form-label">Motherboard Status</label>
+                                    <select id="motherboard_status2" name="motherboard_status" class="form-control"
+                                        onchange="toggleMotherboardReplacementDescription2()">
+                                        <option value="available" {% if form.motherboard_status.value == 'available' %}selected{% endif %}>Available</option>
+                                        <option value="not_available" {% if form.motherboard_status.value == 'not_available' %}selected{% endif %}>Not Available</option>
+                                        <option value="replacement" {% if form.motherboard_status.value == 'replacement' %}selected{% endif %}>Replacement</option>
+                                    </select>
+                                    <div class="text-danger">{{ form.motherboard_status.errors }}</div>
+                                </div>
+                            </div>
+
+
+
+                            <div class="row mb-3">
+                                <!-- SMPS Replacement Description -->
+                                <div class="col-md-6 col-lg-8" id="smps_replacement_description_div2"
+                                    style="display: none;">
+                                    <label for="smps_replacement_description" class="form-label">SMPS Replacement
+                                        Description</label>
+                                    <input type="text" id="smps_replacement_description"
+                                        name="smps_replacement_description" class="form-control"
+                                        value="{{ form.smps_replacement_description.value }}">
+                                </div>
+
+                                <!-- Motherboard Replacement Description -->
+                                <div class="col-md-6 col-lg-8" id="motherboard_replacement_description_div2"
+                                    style="display: none;">
+                                    <label for="motherboard_replacement_description" class="form-label">Motherboard
+                                        Replacement Description</label>
+                                    <input type="text" id="motherboard_replacement_description"
+                                        name="motherboard_replacement_description" class="form-control"
+                                        value="{{ form.motherboard_replacement_description.value }}">
+                                </div>
+                            </div>
+
+                            <div class="form-group text-center">
+                                <button class="btn btn-success btn-lg" type="submit">
+                                    <i class="fas fa-check"></i> Update Product
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Toggle the replacement description fields
+    function toggleReplacementDescription() {
+        var smpsStatus = document.getElementById("smps_status").value;
+        var replacementDescriptionDiv = document.getElementById("smps_replacement_description_div");
+        replacementDescriptionDiv.style.display = smpsStatus === "replacement" ? "block" : "none";
+    }
+
+    function toggleMotherboardReplacementDescription() {
+        var motherboardStatus = document.getElementById("motherboard_status").value;
+        var toggleMotherboardReplacementDescriptionDiv = document.getElementById("motherboard_replacement_description_div");
+        toggleMotherboardReplacementDescriptionDiv.style.display = motherboardStatus === "replacement" ? "block" : "none";
+    }
+
+    function toggleReplacementDescription1() {
+        var smpsStatus = document.getElementById("smps_status1").value;
+        var replacementDescriptionDiv = document.getElementById("smps_replacement_description_div1");
+        replacementDescriptionDiv.style.display = smpsStatus === "replacement" ? "block" : "none";
+    }
+
+    function toggleMotherboardReplacementDescription1() {
+        var motherboardStatus = document.getElementById("motherboard_status2").value;
+        var toggleMotherboardReplacementDescriptionDiv = document.getElementById("motherboard_replacement_description_div2");
+        toggleMotherboardReplacementDescriptionDiv.style.display = motherboardStatus === "replacement" ? "block" : "none";
+    }
+
+    function toggleReplacementDescription2() {
+        var smpsStatus = document.getElementById("smps_status").value;
+        var replacementDescriptionDiv = document.getElementById("smps_replacement_description_div");
+        replacementDescriptionDiv.style.display = smpsStatus === "replacement" ? "block" : "none";
+    }
+
+    function toggleMotherboardReplacementDescription2() {
+        var motherboardStatus = document.getElementById("motherboard_status").value;
+        var toggleMotherboardReplacementDescriptionDiv = document.getElementById("motherboard_replacement_description_div");
+        toggleMotherboardReplacementDescriptionDiv.style.display = motherboardStatus === "replacement" ? "block" : "none";
+    }
+
+    function searchSuggestions(inputId, suggestionsId) {
+        const searchBox = document.getElementById(inputId);
+        const suggestionsBox = document.getElementById(suggestionsId);
+
+        searchBox.addEventListener('input', function () {
+            const query = searchBox.value;
+            if (query.length >= 2) { // trigger after at least 2 characters
+                fetch(`/search-suggestions/?q=${query}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        suggestionsBox.innerHTML = ''; // Clear previous suggestions
+                        if (data.suggestions.length > 0) {
+                            data.suggestions.forEach(suggestion => {
+                                const item = document.createElement('a');
+                                item.href = "javascript:void(0);"; // Prevent immediate navigation
+                                item.classList.add('list-group-item', 'list-group-item-action');
+                                item.textContent = suggestion;
+                                item.addEventListener('click', function () {
+                                    searchBox.value = suggestion; // Fill input with clicked suggestion
+                                    suggestionsBox.innerHTML = ''; // Hide suggestions
+                                });
+                                suggestionsBox.appendChild(item);
+                            });
+                        } else {
+                            const noResultsItem = document.createElement('a');
+                            noResultsItem.classList.add('list-group-item', 'list-group-item-action', 'text-danger');
+                            noResultsItem.textContent = 'No suggestions found! Click here to add item';
+                            noResultsItem.style.cursor = 'pointer'; // Make it look clickable
+                            noResultsItem.addEventListener('click', function () {
+                                window.location.href = "{% url 'category-create' %}"; // Redirect to add item form
+                            });
+                            suggestionsBox.appendChild(noResultsItem);
+                        }
+                    })
+                    .catch(error => console.error('Error fetching suggestions:', error));
+            } else {
+                suggestionsBox.innerHTML = ''; // Clear suggestions if input is less than 2 characters
+            }
+        });
+    }
+    // Initialize search suggestions for each input field (Processor, RAM, HDD, SSD)
+    searchSuggestions('searchbox', 'suggestions');
+    searchSuggestions('searchbox1', 'suggestions1');
+    searchSuggestions('searchbox2', 'suggestions2');
+    searchSuggestions('searchbox3', 'suggestions3');
+</script>
+
+{% endblock content %}
