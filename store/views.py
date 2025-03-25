@@ -13,6 +13,8 @@ and querying functionalities.
 # Standard library imports
 import operator
 from functools import reduce
+from django.contrib import messages
+from django.contrib.messages import success
 
 # Django core imports
 from django.shortcuts import render
@@ -422,14 +424,6 @@ class ProductUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
         else:
             return ["store/productupdate.html"]
 
-    from django.shortcuts import render
-from django.contrib.auth.mixins import LoginRequiredMixin
-from django.contrib.auth.mixins import UserPassesTestMixin
-from django.views.generic import UpdateView
-from .models import Item, catogaryitem
-from .forms import ItemForm
-
-
 class ProductUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     """
     View class to update product information.
@@ -442,8 +436,11 @@ class ProductUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     """
 
     model = Item
+    template_name = "store/productupdate.html"
     form_class = ItemForm
-    template_name = "store/productupdate.html"  # Default template name
+    
+
+    
 
     def get_template_names(self):
         user_profile = self.request.user.profile
@@ -454,6 +451,13 @@ class ProductUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
         else:
             return ["store/productupdate.html"]
 
+    def test_func(self):
+        if self.request.user.is_superuser:
+            return True
+        else:
+            return False
+        
+    
     def get_context_data(self, **kwargs):
         # Get the default context
         context = super().get_context_data(**kwargs)
@@ -503,6 +507,7 @@ class ProductUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
                 }
                 ssd_suggestions.append(suggestion)
 
+
             # Add all suggestions to the context
             context['processor_suggestions'] = processor_suggestions
             context['ram_suggestions'] = ram_suggestions
@@ -510,22 +515,70 @@ class ProductUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
             context['ssd_suggestions'] = ssd_suggestions
 
         return context
-
+    
 
     def get_success_url(self):
         """
         Redirect to the products page upon successful form submission.
-        """
-        return reverse_lazy('products')  # Assuming 'products' is the name of your products URL pattern
 
-    def test_func(self):
         """
-        Check if the user is allowed to update the product.
-        """
-        if self.request.user.is_superuser:
-            return True
-        return False
+        if 'button1' in self.request.POST:
+            print('button1')
+            user_profile = self.request.user.profile
+            if user_profile.role == 'OP':
+                ram =  self.request.POST['ram']
+                serialno =  self.request.POST['serialno'].strip()
+                ram_items = catogaryitem.objects.filter(serial_no=serialno)
+                product_items = Item.objects.filter(serialno=serialno)
+                product_items_list = [product_item.processor for product_item in product_items if product_item.processor is not None]
+                print('product_items_list', product_items_list)
+                ram_1 = [ram_item.quantity for ram_item in ram_items if ram_item.quantity is not None]
+                ram_qty =  self.request.POST['ram_qty']
+                print('ram_qty',ram_qty, ram_1)
 
+
+                serial_items = Item.objects.filter(serialno=serialno)
+                serial_suggestions = []
+                for i in serial_items:
+                    rams =  i.ram
+                    print('rams', rams)
+
+
+
+                for ram_q in ram_1:
+                    ram_left = int(ram_q) - int(ram_qty)
+                    print('ram_left', ram_left)
+
+                for i in ram_items:
+                    i.quantity  = ram_left
+                    i.save()
+                
+                     
+
+                messages.success(self.request, "Product update successful!")  # Add a success message
+                return reverse_lazy('dashboard')
+            else:
+                messages.success(self.request, "Product update successful!")  # Add a success message
+                return reverse_lazy('/products')
+        elif 'button2' in self.request.POST:
+            print('button2')
+            user_profile = self.request.user.profile
+            if user_profile.role == 'OP':
+                messages.success(self.request, "Product update successful!")  # Add a success message
+                return reverse_lazy('dashboard')
+            else:
+                messages.success(self.request, "Product update successful!")  # Add a success message
+                return reverse_lazy('/products')
+        else:
+            print('button3')
+            user_profile = self.request.user.profile
+            if user_profile.role == 'OP':
+                messages.success(self.request, "Product update successful!")  # Add a success message
+                return reverse_lazy('dashboard')
+            else:
+                messages.success(self.request, "Product update successful!")  # Add a success message
+                return reverse_lazy('/products')
+    
 
 
 class ProductDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
@@ -810,4 +863,36 @@ def search_suggestions_product(request):
         else:
             suggestions = list(set([f"{item.make_and_models}" for item in item2])) # or other fields like item.serial_no, etc.
     return JsonResponse({'suggestions': suggestions})
+
+
+
+# from django.shortcuts import render, redirect
+# from django.http import JsonResponse
+# from .models import Processortemp1, RAMtemp1, HDDtemp1, SSDtemp1
+
+# def add_item(request):
+#     if request.method == 'POST':
+#         item_type = request.POST.get('type')
+#         size = request.POST.get('size')
+#         quantity = request.POST.get('quantity')
+
+#         print('item_type size quantity', item_type, size, quantity)
+
+#         # Handle the logic based on item type
+#         if item_type == 'processor':
+#             item = Processortemp1(name=size, quantity=quantity)
+#             item.save()
+#         elif item_type == 'ram':
+#             item = RAMtemp1(size=size, quantity=quantity)
+#             item.save()
+#         elif item_type == 'hdd':
+#             item = HDDtemp1(size=size, quantity=quantity)
+#             item.save()
+#         elif item_type == 'ssd':
+#             item = SSDtemp1(size=size, quantity=quantity)
+#             item.save()
+
+#         return JsonResponse({'message': 'Item added successfully'})
+
+#     return JsonResponse({'message': 'Invalid request'}, status=400)
 

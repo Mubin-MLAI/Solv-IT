@@ -52,11 +52,26 @@
         <button class="btn btn-outline-success rounded-pill shadow-sm" type="submit">
             <i class="fa-solid fa-search"></i>
         </button>
-        
+
     </form>
     <div id="suggestions1" class="list-group position-absolute"
         style="z-index: 9999; width: 100%; background-color: rgb(254, 254, 253);"></div>
 </div>
+
+<div class="card-body">
+
+    {% if messages %}
+    <ul class="messages">
+        {% for message in messages %}
+        <div class="alert alert-success" role="alert">
+            <li class="message {{ message.tags }}" style="text-align: center; font-size: large;">{{ message }}</li>
+        </div>
+        {% endfor %}
+    </ul>
+    {% endif %}
+
+</div>
+
 
 <!-- Product Table Section -->
 <div class="px-4">
@@ -199,7 +214,7 @@
             suggestionsBox.innerHTML = ''; // Clear suggestions if input is less than 2 characters
         }
     });
-    
+
 
 
     // Hide suggestions when clicking outside the input
