@@ -1,113 +1,171 @@
 from django import forms
-from .models import Item, Delivery, Sdd,Hdd,Processor,Ram,catogaryitem
+from .models import Item, Delivery, Ssd,Hdd,Processor,Ram,catogaryitem
+
+
+
+
+# class ItemForm(forms.ModelForm):
+#     """
+#     A form for creating or updating an Item in the inventory.
+#     """
+#     class Meta:
+#         model = Item
+#         fields = [
+#             'name', 'serialno', 'make_and_models', 'processors', 'rams', 'hdds', 
+#             'ssds', 'smps_status', 'motherboard_status', 'smps_replacement_description','motherboard_replacement_description' 
+#         ]
+#         widgets = {
+#             'name': forms.TextInput(attrs={'class': 'form-control'}),
+#             'serialno': forms.TextInput(attrs={'class': 'form-control'}),
+#             'make_and_models': forms.TextInput(attrs={'class': 'form-control'}),
+            
+#             # Change the processor, ram, hdd, and ssd fields to text input
+#             'processors': forms.SelectMultiple(attrs={'class': 'form-control'}),
+#             # 'processor_qty': forms.NumberInput(attrs={'class': 'form-control', 'min': 1}),
+#             'rams': forms.SelectMultiple(attrs={'class': 'form-control'}),
+#             # 'ram_qty': forms.NumberInput(attrs={'class': 'form-control', 'min': 1}),
+#             'hdds': forms.SelectMultiple(attrs={'class': 'form-control'}),
+#             # 'hdd_qty': forms.NumberInput(attrs={'class': 'form-control', 'min': 1}),
+#             'ssds': forms.SelectMultiple(attrs={'class': 'form-control'}),
+#             # 'ssd_qty': forms.NumberInput(attrs={'class': 'form-control', 'min': 1}),
+            
+#             # For SMPS, motherboard, and their statuses, keeping select dropdowns as is
+#             'smps_status': forms.Select(attrs={'class': 'form-control'}),
+#             'smps_replacement_description' : forms.TextInput(attrs={'class': 'form-control'}),
+#             'motherboard_status': forms.Select(attrs={'class': 'form-control'}),
+#             'motherboard_replacement_description' : forms.TextInput(attrs={'class': 'form-control'}),
+#         }
+
+            
+            
+#             # Quantity fields (NumberInput with min validation)
+            
+            
+            
+            
+#             # Status fields as select dropdowns
+        # labels = {
+        #     'name': 'Item Name',
+        #     'serialno': 'Serial Number',
+        #     'make_and_models': 'Make and Model',
+        #     'processors': 'Processor',
+        #     # 'processor_qty': 'Processor Quantity',
+        #     'rams': 'RAM',
+        #     # 'ram_qty': 'RAM Quantity',
+        #     'hdds': 'HDD',
+        #     # 'hdd_qty': 'HDD Quantity',
+        #     'ssds': 'SSD',
+        #     # 'ssd_qty': 'SSD Quantity',
+        #     'smps_status': 'SMPS Status',
+        #     'smps_replacement_description': 'SMPS Description',
+        #     'motherboard_status': 'Motherboard Status',
+        #     'motherboard_replacement_description': 'Motherboard Description',
+        # }
 
 
 class ItemForm(forms.ModelForm):
-    """
-    A form for creating or updating an Item in the inventory.
-    """
+    processors = forms.ModelMultipleChoiceField(
+        queryset=catogaryitem.objects.filter(category='processor'),
+        required=False,
+        widget=forms.SelectMultiple(attrs={'class': 'form-control'})
+    )
+    rams = forms.ModelMultipleChoiceField(
+        queryset=catogaryitem.objects.filter(category='ram'),
+        required=False,
+        widget=forms.SelectMultiple(attrs={'class': 'form-control'})
+    )
+    hdds = forms.ModelMultipleChoiceField(
+        queryset=catogaryitem.objects.filter(category='hdd'),
+        required=False,
+        widget=forms.SelectMultiple(attrs={'class': 'form-control'})
+    )
+    ssds = forms.ModelMultipleChoiceField(
+        queryset=catogaryitem.objects.filter(category='ssd'),
+        required=False,
+        widget=forms.SelectMultiple(attrs={'class': 'form-control'})
+    )
+
     class Meta:
         model = Item
         fields = [
-            'name', 'serialno', 'make_and_models', 'processor','processor_qty', 'ram', 'ram_qty', 'hdd', 
-            'hdd_qty', 'ssd', 'ssd_qty', 'smps_status', 'motherboard_status', 'smps_replacement_description','motherboard_replacement_description' 
+            'name', 'serialno', 'make_and_models',
+            'processors', 'rams', 'hdds', 'ssds',
+            'smps_status', 'motherboard_status', 
+            'smps_replacement_description', 'motherboard_replacement_description',
         ]
         widgets = {
             'name': forms.TextInput(attrs={'class': 'form-control'}),
             'serialno': forms.TextInput(attrs={'class': 'form-control'}),
             'make_and_models': forms.TextInput(attrs={'class': 'form-control'}),
-            
-            # Change the processor, ram, hdd, and ssd fields to text input
-            'processor': forms.TextInput(attrs={'class': 'form-control'}),
-            'processor_qty': forms.NumberInput(attrs={'class': 'form-control', 'min': 1}),
-            'ram': forms.TextInput(attrs={'class': 'form-control'}),
-            'ram_qty': forms.NumberInput(attrs={'class': 'form-control', 'min': 1}),
-            'hdd': forms.TextInput(attrs={'class': 'form-control'}),
-            'hdd_qty': forms.NumberInput(attrs={'class': 'form-control', 'min': 1}),
-            'ssd': forms.TextInput(attrs={'class': 'form-control'}),
-            'ssd_qty': forms.NumberInput(attrs={'class': 'form-control', 'min': 1}),
-            
-            # For SMPS, motherboard, and their statuses, keeping select dropdowns as is
             'smps_status': forms.Select(attrs={'class': 'form-control'}),
-            'smps_replacement_description' : forms.TextInput(attrs={'class': 'form-control'}),
+            'smps_replacement_description': forms.TextInput(attrs={'class': 'form-control'}),
             'motherboard_status': forms.Select(attrs={'class': 'form-control'}),
-            'motherboard_replacement_description' : forms.TextInput(attrs={'class': 'form-control'}),
+            'motherboard_replacement_description': forms.TextInput(attrs={'class': 'form-control'}),
         }
-
-            
-            
-            # Quantity fields (NumberInput with min validation)
-            
-            
-            
-            
-            # Status fields as select dropdowns
-        labels = {
-            'name': 'Item Name',
-            'serialno': 'Serial Number',
-            'make_and_models': 'Make and Model',
-            'processor': 'Processor',
-            'processor_qty': 'Processor Quantity',
-            'ram': 'RAM',
-            'ram_qty': 'RAM Quantity',
-            'hdd': 'HDD',
-            'hdd_qty': 'HDD Quantity',
-            'ssd': 'SSD',
-            'ssd_qty': 'SSD Quantity',
-            'smps_status': 'SMPS Status',
-            'smps_replacement_description': 'SMPS Description',
-            'motherboard_status': 'Motherboard Status',
-            'motherboard_replacement_description': 'Motherboard Description',
-        }
-
-# class RamForm(forms.ModelForm):
-#     """
-#     A form for creating or updating RAM details.
-#     """
-#     class Meta:
-#         model = Ram
-#         fields = ['name', 'serial_no', 'quantity', 'unit_price']  # Added new fields here
         
-#         # Widgets for custom form styling
 
-#         # widget={
-#         #     'name' : forms.TextInput(attrs={'class': 'form-control'}),
-#         #     'serial_no' : forms.TextInput(attrs={'class': 'form-control'}),
-#         #     'quantity' : forms.NumberInput(attrs={'class': 'form-control'}),
-#         #     'unit_price' : forms.NumberInput(attrs={'class': 'form-control'})
-#         # }
-#         widgets = {
-#             'name': forms.TextInput(attrs={
-#                 'class': 'form-control',
-#                 'placeholder': 'Enter Ram Details',
-#                 'aria-label': 'Ram Details'
-#             }),
-#             'serial_no': forms.TextInput(attrs={
-#                 'class': 'form-control',
-#                 'placeholder': 'Enter Serial Number',
-#                 'aria-label': 'Serial Number'
-#             }),
-#             'quantity': forms.NumberInput(attrs={
-#                 'class': 'form-control',
-#                 'placeholder': 'Enter Quantity',
-#                 'aria-label': 'Quantity'
-#             }),
-#             'unit_price': forms.NumberInput(attrs={
-#                 'class': 'form-control',
-#                 'placeholder': 'Enter Unit Price',
-#                 'aria-label': 'Unit Price'
-#             }),
-#         }
+    def save(self, commit=True):
+        item = super().save(commit=False)
+        if commit:
+            item.save()
+            # Set the unified components M2M field
+            item.catogary_item_clone.set(
+                list(self.cleaned_data['processors']) +
+                list(self.cleaned_data['rams']) +
+                list(self.cleaned_data['hdds']) +
+                list(self.cleaned_data['ssds'])
+            )
+        return item
 
-#         # Custom field labels
-#         labels = {
-#             'name': 'RAM',
-#             'serial_no': 'Serial Number',
-#             'quantity': 'Quantity',
-#             'unit_price': 'Unit Price',
-#         }
 
 class RamForm(forms.ModelForm):
+    """
+    A form for creating or updating RAM details.
+    """
+    class Meta:
+        model = Ram
+        fields = ['name', 'serial_no', 'quantity', 'unit_price']  # Added new fields here
+        
+        # Widgets for custom form styling
+
+        # widget={
+        #     'name' : forms.TextInput(attrs={'class': 'form-control'}),
+        #     'serial_no' : forms.TextInput(attrs={'class': 'form-control'}),
+        #     'quantity' : forms.NumberInput(attrs={'class': 'form-control'}),
+        #     'unit_price' : forms.NumberInput(attrs={'class': 'form-control'})
+        # }
+        widgets = {
+            'name': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Enter Ram Details',
+                'aria-label': 'Ram Details'
+            }),
+            'serial_no': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Enter Serial Number',
+                'aria-label': 'Serial Number'
+            }),
+            'quantity': forms.NumberInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Enter Quantity',
+                'aria-label': 'Quantity'
+            }),
+            'unit_price': forms.NumberInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Enter Unit Price',
+                'aria-label': 'Unit Price'
+            }),
+        }
+
+        # Custom field labels
+        labels = {
+            'name': 'RAM',
+            'serial_no': 'Serial Number',
+            'quantity': 'Quantity',
+            'unit_price': 'Unit Price',
+        }
+
+class catogaryForm(forms.ModelForm):
     """
     A form for creating or updating item details such as SSD, Processor, RAM, or HDD.
     """
@@ -241,7 +299,7 @@ class SddForm(forms.ModelForm):
     A form for creating or updating Sdd.
     """
     class Meta:
-        model = Sdd
+        model = Ssd
         fields = ['name', 'serial_no', 'quantity', 'unit_price'] 
         widgets = {
             'name': forms.TextInput(attrs={
@@ -339,6 +397,7 @@ class SddForm(forms.ModelForm):
 #         labels = {
 #             'name': 'NVME',
 #         }
+
 
 
 class DeliveryForm(forms.ModelForm):

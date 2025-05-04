@@ -20,38 +20,12 @@ from accounts.models import Vendor
 from django.core.validators import MinValueValidator
 from django import forms
 
-class catogaryitem(models.Model):
-    CATEGORY_CHOICES = [
-        ('ssd', 'SSD'),
-        ('processor', 'Processor'),
-        ('hdd', 'HDD'),
-        ('ram', 'RAM'),
-    ]
-    
-    category = models.CharField(
-        max_length=20,
-        choices=CATEGORY_CHOICES,  # Using Category.choices
-    )
-    name = models.CharField(max_length=100)
-    serial_no = models.CharField(max_length=100)
-    quantity = models.IntegerField()
-    unit_price = models.DecimalField(max_digits=10, decimal_places=2)
-
-    def __str__(self):
-        """
-        String representation of the Ram.
-        """
-        return f"category: {self.category}"
-
-    class Meta:
-        verbose_name_plural = 'category'
-
-
 
 class Ram(models.Model):
     """
     Represents a category for items.
     """
+    
     name = models.CharField(max_length=50)
     serial_no = models.CharField(max_length=50, blank= True)
     quantity =  models.PositiveIntegerField()
@@ -62,7 +36,7 @@ class Ram(models.Model):
         """
         String representation of the Ram.
         """
-        return f"Ram: {self.name}"
+        return f"Ram: {self.name} X ({self.quantity})"
 
     class Meta:
         verbose_name_plural = 'Rams'
@@ -82,7 +56,7 @@ class Processor(models.Model):
         """
         String representation of the Processor.
         """
-        return f"Processor: {self.name}"
+        return f"Processor: {self.name} X ({self.quantity})"
 
     class Meta:
         verbose_name_plural = 'Processors'
@@ -102,16 +76,15 @@ class Hdd(models.Model):
         """
         String representation of the Hdd.
         """
-        return f"Hdd: {self.name}"
+        return f"Hdd: {self.name} X ({self.quantity})"
 
     class Meta:
         verbose_name_plural = 'Hdd'
 
-class Sdd(models.Model):
+class Ssd(models.Model):
     """
     Represents a Sdd for items.
     """
-    
     name = models.CharField(max_length=50)
     serial_no = models.CharField(max_length=50, blank= True)
     quantity =  models.PositiveIntegerField()
@@ -122,31 +95,10 @@ class Sdd(models.Model):
         """
         String representation of the Sdd.
         """
-        return f"Sdd: {self.name}"
+        return f"Sdd: {self.name} X ({self.quantity})"
 
     class Meta:
         verbose_name_plural = 'Sdd'
-# class M_2(models.Model):
-#     name = models.CharField(max_length=50)
-#     serial_no = models.CharField(max_length=50, blank= True)
-#     quantity =  models.PositiveIntegerField()
-#     unit_price =  models.IntegerField()
-#     slug = AutoSlugField(unique=True, populate_from='name')
-
-#     def __str__(self):
-#         return f"{self.name} - {self.model}"
-
-# class Nvme(models.Model):
-#     name = models.CharField(max_length=255)
-#     model = models.CharField(max_length=255)
-#     capacity = models.PositiveIntegerField(
-#         help_text="Capacity in GB",
-#         validators=[MinValueValidator(1)]  # Ensures the capacity is at least 1 GB
-#     )
-#     product_code = models.CharField(max_length=255)
-
-#     def __str__(self):
-#         return f"{self.name} - {self.model}"
 
 class Smps(models.Model):
     name = models.CharField(max_length=50)
@@ -169,6 +121,31 @@ class Motherboard(models.Model):
         verbose_name_plural = 'Motherboards'
 
 
+class catogaryitem(models.Model):
+    CATEGORY_CHOICES = [
+        ('ssd', 'SSD'),
+        ('processor', 'Processor'),
+        ('hdd', 'HDD'),
+        ('ram', 'RAM'),
+    ]
+    
+    category = models.CharField(
+        max_length=20,
+        choices=CATEGORY_CHOICES,  # Using Category.choices
+    )
+    name = models.CharField(max_length=100)
+    serial_no = models.CharField(max_length=100)
+    quantity = models.IntegerField()
+    unit_price = models.DecimalField(max_digits=10, decimal_places=2)
+
+    def __str__(self):
+        """
+        String representation of the Ram.
+        """
+        return f"category: {self.category} ( {self.name} ) X {self.quantity}"
+
+    class Meta:
+        verbose_name_plural = 'category_item'
 
 class Item(models.Model):
     STATUS_CHOICES = [
@@ -181,20 +158,11 @@ class Item(models.Model):
     name = models.CharField(max_length=50)
     serialno = models.CharField(max_length=50, unique=False, null=True)
     make_and_models = models.CharField(max_length=100, null=True)
-    processor = models.CharField(max_length=50, unique=False, null=True)
-    processor_qty = models.PositiveIntegerField()
-    ram = models.CharField(max_length=50, unique=False, null=True)
-    ram_qty = models.PositiveIntegerField()
-    hdd = models.CharField(max_length=50, unique=False, null=True)
-    hdd_qty = models.PositiveIntegerField()
-    ssd = models.CharField(max_length=50, unique=False, null=True)
-    ssd_qty = models.PositiveIntegerField()
+    catogary_item_clone = models.ManyToManyField(catogaryitem, blank=True) 
     smps_status = models.CharField(max_length=50, choices=STATUS_CHOICES, default='available')
     smps_replacement_description = models.TextField(max_length=100,null=True, blank=True)
     motherboard_status = models.CharField(max_length=50, choices=STATUS_CHOICES, default='available')
     motherboard_replacement_description = models.TextField(max_length=100, null=True, blank=True)
-    # m_2 = models.ForeignKey('M_2', on_delete=models.CASCADE, null=True, blank=True)
-    # nvme = models.ForeignKey('Nvme', on_delete=models.CASCADE, null=True, blank=True)
 
 
     def __str__(self):
@@ -228,6 +196,9 @@ class Item(models.Model):
 
 
 
+
+
+
 class Delivery(models.Model):
     """
     Represents a delivery of an item to a customer.
@@ -251,3 +222,4 @@ class Delivery(models.Model):
             f"Delivery of {self.item} to {self.customer_name} "
             f"at {self.location} on {self.date}"
         )
+

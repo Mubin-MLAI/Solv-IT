@@ -89,10 +89,26 @@
                     <td>{{ item.name }}</td>
                     <td>{{ item.serialno }}</td>
                     <td>{{ item.make_and_models }}</td>
-                    <td>{{ item.processor }}</td>
-                    <td>{{ item.ram }}</td>
-                    <td>{{ item.hdd }}</td>
-                    <td>{{ item.ssd }}</td>
+                    <td>
+                        {% for p in item.processors %}
+                            <li>{{ p }}<br></li>
+                        {% endfor %}
+                    </td>
+                    <td>
+                        {% for p in item.rams %}
+                            <li>{{ p }}<br></li>
+                        {% endfor %}
+                    </td>
+                    <td>
+                        {% for p in item.hdds %}
+                            <li>{{ p }}<br></li>
+                        {% endfor %}
+                    </td>
+                    <td>
+                        {% for p in item.ssds %}
+                            <li>{{ p }}<br></li>
+                        {% endfor %}
+                    </td>
                     <td>{{ item.smps_status }}</td>
                     <td>{{ item.motherboard_status }}</td>
                     <td>

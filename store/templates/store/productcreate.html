@@ -6,10 +6,59 @@ Add Product
 {% endblock title %}
 
 {% block content %}
+
+<style>
+    .processor-field,
+    .ram-field,
+    .hdd-field,
+    .ssd-field {
+        border: 1px solid #ccc;
+        /* Light gray border */
+        padding: 5px;
+        border-radius: 5px;
+        /* Optional: for rounded corners */
+    }
+
+    .processor-field input,
+    .ram-field input,
+    .hdd-field input,
+    .ssd-field input {
+        border: none;
+        /* To avoid extra borders on input fields */
+    }
+
+    /* Increase width of individual form controls */
+    .processor-field select,
+    .ram-field select,
+    .hdd-field select,
+    .ssd-field select,
+    .processor-field input,
+    .ram-field input,
+    .hdd-field input,
+    .ssd-field input {
+        width: 100%;
+        /* Full width of the container */
+    }
+
+    /* Optionally, add padding for extra spacing */
+    .processor-field input,
+    .ram-field input,
+    .hdd-field input,
+    .ssd-field input {
+        padding: 10px;
+    }
+
+    /* Optional: Set a max-width for responsiveness */
+    .processor-field,
+    .ram-field,
+    .hdd-field,
+    .ssd-field {
+        max-width: 100%;
+    }
+</style>
 <br>
 <div class="container my-5">
     <div class="row justify-content-center">
-        <!-- <div class="col-lg-8 col-md-10"> -->
         <div class="card shadow-sm border-light">
             <div class="card-body">
                 {% if request.user.profile.role != 'OP' %}
@@ -21,18 +70,14 @@ Add Product
                             <label for="{{ form.name.id_for_label }}" class="form-label">
                                 Product Name
                             </label>
-                            <input type="text" name="name" id="product_name" class="form-control"
-                                placeholder="Enter Product Name">
+                            {{ form.name }}
                             <div class="text-danger">{{ form.name.errors }}</div>
                         </div>
 
                         <!-- Serial No -->
                         <div class="col-md-4">
-                            <label for="{{ form.serialno.id_for_label }}" class="form-label">
-                                Serial No
-                            </label>
-                            <input type="text" name="serialno" id="serial_no" class="form-control"
-                                placeholder="Enter Serial Number">
+                            <label for="id_serialno" class="form-label">Serial No</label>
+                            {{ form.serialno }}
                             <div class="text-danger">{{ form.serialno.errors }}</div>
                         </div>
 
@@ -41,116 +86,128 @@ Add Product
                             <label for="{{ form.make_and_models.id_for_label }}" class="form-label">
                                 Make & Models
                             </label>
-                            <input type="text" name="make_and_models" id="make_and_models" class="form-control"
-                                placeholder="Enter Make & Models">
+                            {{ form.make_and_models }}
                             <div class="text-danger">{{ form.make_and_models.errors }}</div>
                         </div>
                     </div>
 
+                    <!-- Processor Section -->
                     <div class="row mb-3">
                         <!-- Processor Details (75% width) -->
                         <div class="col-md-9">
-                            <label for="processor" class="form-label">
-                                Processor Details
-                            </label>
-                            <input id="searchbox" name="processor" type="text"
-                                class="form-control border- square-pill shadow-sm" placeholder="Find Processor"
-                                autocomplete="off">
-                            <div id="suggestions" class="list-group position-absolute"
-                                style="z-index: 9999; width: 70%; background-color: rgb(254, 254, 253);"></div>
+                            <label for="id_processors" class="form-label">Processor Details</label>
+                            <div id="processors-field">
+                                {{ form.processors }}
+                            </div>
+
+                            <!-- <button type="button" class="btn btn-sm btn-primary" id="add-processor-btn">
+                                Add Processor
+                            </button> -->
+                            <div class="text-danger">{{ form.processors.errors }}</div>
+                            <!-- <div id="add-processor-form" style="margin-top: 20px; display: none;">
+                                <form id="processor-create-form">
+                                    {% csrf_token %}
+                                    <input type="text" name="name" placeholder="Name" required
+                                        class="form-control mb-2" />
+                                    <input type="text" name="serial_no" placeholder="Serial No"
+                                        class="form-control mb-2" />
+                                    <input type="number" name="quantity" placeholder="Quantity" required
+                                        class="form-control mb-2" />
+                                    <input type="number" name="unit_price" placeholder="Unit Price" required
+                                        class="form-control mb-2" />
+                                    <button type="submit" class="btn btn-success btn-sm">Save Processor</button>
+                                </form>
+                            </div> -->
+                            <!-- <button type="button" id="show-processor-button" class="btn btn-primary">Show Processor</button> -->
                         </div>
 
                         <!-- Processor Quantity (25% width) -->
+                         
                         <div class="col-md-3">
-                            <label for="processor_qty" class="form-label">Processor Quantity</label>
-                            <input type="number" id="processor_qty" name="processor_qty" class="form-control" value="1">
+                            <br><br>
+                            <button type="button" class="btn btn-sm btn-primary" id="add-processor-btn">
+                                Add Processor
+                            </button>
+                            <br><br>
+                            <h6>You Need To First Add Processor</h6>
                         </div>
                     </div>
 
+                    <!-- RAM Section -->
                     <div class="row mb-3">
                         <!-- RAM Details (75% width) -->
                         <div class="col-md-9">
-                            <label for="ram" class="form-label">
-                                RAM Details
-                            </label>
-                            <input id="searchbox1" name="ram" type="text"
-                                class="form-control border- square-pill shadow-sm" placeholder="Find RAM"
-                                autocomplete="off">
-                            <div id="suggestions1" class="list-group position-absolute"
-                                style="z-index: 9999; width: 70%; background-color: rgb(254, 254, 253);"></div>
+                            <label for="id_rams" class="form-label">RAM Details</label>
+                            <div class="ram-field">
+                                {{ form.rams }}
+                            </div>
+                            <div class="text-danger">{{ form.rams.errors }}</div>
                         </div>
 
                         <!-- RAM Quantity (25% width) -->
                         <div class="col-md-3">
-                            <label for="ram_qty" class="form-label">RAM Quantity</label>
-                            <input type="number" id="ram_qty" name="ram_qty" class="form-control" value="1">
+                            <br><br>
+                            <button type="button" class="btn btn-sm btn-primary" id="add-processor-btn">
+                                Add RAM
+                            </button>
                         </div>
                     </div>
 
+                    <!-- HDD Section -->
                     <div class="row mb-3">
                         <!-- HDD Details (75% width) -->
                         <div class="col-md-9">
-                            <label for="hdd" class="form-label">
-                                HDD Details
-                            </label>
-                            <input id="searchbox2" name="hdd" type="text"
-                                class="form-control border- square-pill shadow-sm" placeholder="Find HDD"
-                                autocomplete="off">
-                            <div id="suggestions2" class="list-group position-absolute"
-                                style="z-index: 9999; width: 70%; background-color: rgb(254, 254, 253);"></div>
+                            <label for="id_hdds" class="form-label">HDD Details</label>
+                            <div class="hdd-field">
+                                {{ form.hdds }}
+                            </div>
+                            <div class="text-danger">{{ form.hdds.errors }}</div>
                         </div>
 
                         <!-- HDD Quantity (25% width) -->
                         <div class="col-md-3">
-                            <label for="hdd_qty" class="form-label">HDD Quantity</label>
-                            <input type="number" id="hdd_qty" name="hdd_qty" class="form-control" value="1">
+                            <br><br>
+                            <button type="button" class="btn btn-sm btn-primary" id="add-processor-btn">
+                                Add HDD
+                            </button>
                         </div>
                     </div>
 
+                    <!-- SSD Section -->
                     <div class="row mb-3">
                         <!-- SSD Details (75% width) -->
                         <div class="col-md-9">
-                            <label for="ssd" class="form-label">
-                                SSD Details
-                            </label>
-                            <input id="searchbox3" name="ssd" type="text"
-                                class="form-control border- square-pill shadow-sm" placeholder="Find SSD"
-                                autocomplete="off">
-                            <div id="suggestions3" class="list-group position-absolute"
-                                style="z-index: 9999; width: 70%; background-color: rgb(254, 254, 253);"></div>
+                            <label for="id_ssds" class="form-label">SSD Details</label>
+                            <div class="ssd-field">
+                                {{ form.ssds }}
+                            </div>
+                            <div class="text-danger">{{ form.ssds.errors }}</div>
                         </div>
 
                         <!-- SSD Quantity (25% width) -->
                         <div class="col-md-3">
-                            <label for="ssd_qty" class="form-label">SSD Quantity</label>
-                            <input type="number" id="ssd_qty" name="ssd_qty" class="form-control" value="1">
+                            <br><br>
+                            <button type="button" class="btn btn-sm btn-primary" id="add-processor-btn">
+                                Add SSD
+                            </button>
                         </div>
                     </div>
 
 
+                    <!-- SMPS Section -->
                     <div class="row mb-3">
                         <!-- SMPS Status -->
                         <div class="col-md-4">
                             <label for="smps_status" class="form-label">SMPS Status</label>
-                            <select id="smps_status" name="smps_status" class="form-control"
-                                onchange="toggleReplacementDescription()">
-                                <option value="available">Available</option>
-                                <option value="not_available">Not Available</option>
-                                <option value="replacement">Replacement</option>
-                            </select>
-                            <div class="text-danger">{{ form.smps.errors }}</div>
+                            {{ form.smps_status }}
+                            <div class="text-danger">{{ form.smps_status.errors }}</div>
                         </div>
 
                         <!-- Motherboard Status -->
                         <div class="col-md-4" id="motherboard_status_div">
                             <label for="motherboard_status" class="form-label">Motherboard Status</label>
-                            <select id="motherboard_status" name="motherboard_status" class="form-control"
-                                onchange="toggleMotherboardReplacementDescription()">
-                                <option value="available">Available</option>
-                                <option value="not_available">Not Available</option>
-                                <option value="replacement">Replacement</option>
-                            </select>
-                            <div class="text-danger">{{ form.motherboard.errors }}</div>
+                            {{ form.motherboard_status }}
+                            <div class="text-danger">{{ form.motherboard_status.errors }}</div>
                         </div>
                     </div>
 
@@ -179,15 +236,52 @@ Add Product
                     </div>
                 </form>
                 {% else %}
-                    <h1 style="color: red; text-align: center;"><b>Sorry You Don't have Permission to Add Product</b></h1>
-                {% endif %}               
+                <h1 style="color: red; text-align: center;"><b>Sorry You Don't have Permission to Add Product</b></h1>
+                {% endif %}
             </div>
         </div>
     </div>
 </div>
-</div>
 
 <script>
+
+document.addEventListener('DOMContentLoaded', function () {
+        const serialInput = document.getElementById("id_serialno");  // Django auto-generates this ID
+        const processorSelect = document.getElementById("id_processors");
+        const ramSelect = document.getElementById("id_rams");
+        const hddSelect = document.getElementById("id_hdds");
+        const ssdSelect = document.getElementById("id_ssds");
+
+        serialInput.addEventListener("change", function () {
+            const serial = serialInput.value;
+
+            if (serial.length >= 3) {
+                fetch(`/get-category-items/?serial=${serial}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        updateSelectOptions(processorSelect, data.processors);
+                        updateSelectOptions(ramSelect, data.rams);
+                        updateSelectOptions(hddSelect, data.hdds);
+                        updateSelectOptions(ssdSelect, data.ssds);
+                    });
+            }
+        });
+
+        function updateSelectOptions(selectElement, items) {
+            selectElement.innerHTML = "";  // Clear existing options
+            items.forEach(item => {
+                const option = document.createElement("option");
+                option.value = item.id;
+                option.textContent = `${item.name} - ${item.serial_no}`;
+                selectElement.appendChild(option);
+            });
+        }
+    });
+
+    document.getElementById("add-processor-btn").addEventListener("click", function() {
+            window.location.href = "{% url 'category-create' %}";
+        });
+
     // Toggle the replacement description fields
     function toggleReplacementDescription() {
         var smpsStatus = document.getElementById("smps_status").value;
@@ -199,8 +293,6 @@ Add Product
         var toggleMotherboardReplacementDescriptionDiv = document.getElementById("motherboard_replacement_description_div");
         toggleMotherboardReplacementDescriptionDiv.style.display = motherboardStatus === "replacement" ? "block" : "none";
     }
-
-
 
     function searchSuggestions(inputId, suggestionsId) {
         const searchBox = document.getElementById(inputId);
@@ -242,6 +334,92 @@ Add Product
             }
         });
     }
+
+    //     document.addEventListener('DOMContentLoaded', function() {
+    //     var showButton = document.getElementById('show-processor-button');
+    //     var processorFieldContainer = document.getElementById('processors-field');
+    //     var serialnoFieldId = "{{ form.serialno.id_for_label }}";
+    //     var serialNoInput = document.getElementById(serialnoFieldId);
+
+    //     showButton.addEventListener('click', function() {
+    //         var serialNo = serialNoInput.value.trim();
+
+    //         if (serialNo) {
+    //             // Make the AJAX request to fetch processors based on serialno
+    //             fetch(`/add-processor1/?serialno=${serialNo}`)
+    //                 .then(response => response.json())
+    //                 .then(data => {
+    //                     // Get the form processors field
+    //                     var processorsField = document.getElementById('{{ form.processors.id_for_label }}');
+
+    //                     // Check if we got processors in the response
+    //                     if (data.success && data.processors.length > 0) {
+    //                         // Clear any previous options or content
+    //                         processorsField.innerHTML = ''; 
+
+    //                         // Optionally, add a default option
+    //                         var defaultOption = document.createElement('option');
+    //                         defaultOption.value = '';
+    //                         defaultOption.textContent = 'Select a processor';
+    //                         processorsField.appendChild(defaultOption);
+
+    //                         // Add processors to the dropdown or select field
+    //                         data.processors.forEach(processor => {
+    //                             var option = document.createElement('option');
+    //                             option.value = processor.id; // Assuming processor.id is what should be selected
+    //                             option.textContent = `Processor Name: ${processor.name} (Quantity: ${processor.quantity})`;
+    //                             processorsField.appendChild(option);
+    //                         });
+
+    //                         processorFieldContainer.style.display = 'block'; // Show the processor field
+    //                     } else {
+    //                         // If no processors are found, show a default "No processors" option
+    //                         processorsField.innerHTML = '<option>No processors found for this serial number.</option>';
+    //                         processorFieldContainer.style.display = 'block'; // Show the processor field
+    //                     }
+    //                 })
+    //                 .catch(error => {
+    //                     console.error('Error fetching processors:', error);
+    //                 });
+    //         } else {
+    //             alert('Please enter a serial number.');
+    //         }
+    //     });
+    // });
+
+    document.getElementById("add-processor-btn").addEventListener("click", function () {
+        document.getElementById("add-processor-form").style.display = "block";
+    });
+
+    document.getElementById("processor-create-form").addEventListener("submit", function (e) {
+        e.preventDefault();
+        const form = e.target;
+        const formData = new FormData(form);
+
+        fetch("{% url 'create_processor' %}", {
+            method: "POST",
+            headers: {
+                "X-CSRFToken": formData.get("csrfmiddlewaretoken")
+            },
+            body: formData
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    const selectField = document.querySelector("#processors-field select");
+                    const option = document.createElement("option");
+                    option.value = data.processor.id;
+                    option.text = data.processor.name;
+                    option.selected = true;
+                    selectField.appendChild(option);
+                    document.getElementById("processors-field").style.display = "block";
+                    form.reset();
+                    document.getElementById("add-processor-form").style.display = "none";
+                } else {
+                    alert("Failed to add processor");
+                }
+            });
+    });
 
     // Initialize search suggestions for each input field (Processor, RAM, HDD, SSD)
     searchSuggestions('searchbox', 'suggestions');

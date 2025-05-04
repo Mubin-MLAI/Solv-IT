@@ -10,7 +10,7 @@ This module defines the following admin classes:
 """
 
 from django.contrib import admin
-from .models import Sdd, Item, Delivery, Hdd,Ram,Processor, catogaryitem
+from .models import Ssd, Item, Delivery, Hdd,Ram,Processor, catogaryitem
 
 
 class RamAdmin(admin.ModelAdmin):
@@ -69,11 +69,31 @@ class ItemAdmin(admin.ModelAdmin):
     Admin configuration for the Item model.
     """
     list_display = (
-        "serialno","make_and_models","processor","ram","hdd","ssd","smps_status","motherboard_status"
+        "serialno","make_and_models","get_categoryitem","smps_status","motherboard_status"
     )
     # search_fields = ('name', 'category__name', 'vendor__name')
     # list_filter = ('category', 'vendor')
     ordering = ('name',)
+
+    # Custom method to display categories as a comma-separated list
+    def get_categoryitem(self, obj):
+        return ", ".join([Processor.name for Processor in obj.catogary_item_clone.all()])
+    get_categoryitem.short_description = 'catogary_item_clone'
+
+    # Custom method to display vendors as a comma-separated list
+    def get_ram(self, obj):
+        return ", ".join([Ram.name for Ram in obj.rams.all()])
+    get_ram.short_description = 'ram'
+
+    # Custom method to display categories as a comma-separated list
+    def get_hdd(self, obj):
+        return ", ".join([Hdd.name for Hdd in obj.hdds.all()])
+    get_hdd.short_description = 'hdd'
+
+    # Custom method to display vendors as a comma-separated list
+    def get_ssd(self, obj):
+        return ", ".join([Ssd.name for Ssd in obj.ssds.all()])
+    get_ssd.short_description = 'ssd'
 
 
 class DeliveryAdmin(admin.ModelAdmin):
@@ -93,7 +113,7 @@ admin.site.register(catogaryitem, catogaryitemAdmin)
 admin.site.register(Ram, RamAdmin)
 admin.site.register(Item, ItemAdmin)
 admin.site.register(Delivery, DeliveryAdmin)
-admin.site.register(Sdd, SddAdmin)
+admin.site.register(Ssd, SddAdmin)
 admin.site.register(Hdd, HddAdmin)
 # admin.site.register(M_2, M_2Admin)
 # admin.site.register(Nvme, NvmeAdmin)

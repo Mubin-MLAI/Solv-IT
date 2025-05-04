@@ -8,7 +8,7 @@ from . import views
 from .views import (
     ProductListView,
     ProductDetailView,
-    productcreateview,
+    ProductCreateView,
     ProductUpdateView,
     ProductDeleteView,
     ItemSearchListView,
@@ -29,7 +29,11 @@ from .views import (
     HddCategoryUpdateView,
     CatogaryItemSearchListView,
     search_suggestions,
-    search_suggestions_product
+    search_suggestions_product,
+    add_processor1,
+    create_processor,
+    get_category_items,
+    operativedashboard
 )
 
 # URL patterns
@@ -50,7 +54,7 @@ urlpatterns = [
     ),
     path(
         'new-product/',
-        productcreateview,
+        ProductCreateView.as_view(),
         name='product-create'
     ),
     path(
@@ -159,6 +163,15 @@ urlpatterns = [
     ),
     path('search-suggestions/', search_suggestions, name='search-suggestions'),
     path('search-suggestions-product/', search_suggestions_product, name='search-search-suggestions-product'),
+    path('add-processor/', views.add_processor, name='add_processor'),
+    path('add-ram/', views.add_ram, name='add_ram'),
+    path('add-hdd/', views.add_hdd, name='add_hdd'),
+    path('add-ssd/', views.add_ssd, name='add_ssd'),
+    path('add-processor1/', add_processor1, name='add-processor1'),
+    path('create-processor/', create_processor, name='create_processor'),
+    # path('add-processor/', views.add_processor, name='add_processor')
+    path('get-category-items/', get_category_items, name='get-category-items'),
+    path('operative-dashboard/', operativedashboard, name='operative-dashboard'),
 ]
 
 # Static media files configuration for development
