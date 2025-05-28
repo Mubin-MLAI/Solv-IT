@@ -13,6 +13,7 @@ and querying functionalities.
 # Standard library imports
 import operator
 from functools import reduce
+import re
 from django.contrib import messages
 from django.contrib.messages import success
 
@@ -47,6 +48,7 @@ from .models import  Item, Delivery, Ram, Ssd, Hdd, Processor , catogaryitem  #,
 from .forms import ItemForm,  DeliveryForm, RamForm, SddForm, HddForm, ProcessorForm , catogaryForm   #, NvmeForm, M_2Form
 from .tables import ItemTable, CategoryItemTable
 import pandas as pd
+from django.db import transaction
 
 
 
@@ -136,6 +138,8 @@ class ProductListView(LoginRequiredMixin, ExportMixin, tables.SingleTableView):
         context = super().get_context_data(**kwargs)
         items = context['items']  # assuming your ListView or similar sets this
 
+
+        print('working ')
         # Get all category items in one go to reduce DB hits
         all_category_items = catogaryitem.objects.filter(
             serial_no__in=[item.serialno for item in items]
@@ -292,28 +296,104 @@ class ProductDetailView(LoginRequiredMixin, FormMixin, DetailView):
         return reverse("product-detail", kwargs={"slug": self.object.slug})
 
 
+
+
 class ProductCreateView(LoginRequiredMixin, CreateView):
     """
     View class to create a new product.
-
-    Attributes:
-    - model: The model associated with the view.
-    - template_name: The HTML template used for rendering the view.
-    - form_class: The form class used for data input.
-    - success_url: The URL to redirect to upon successful form submission.
     """
-
     model = Item
     template_name = "store/productcreate.html"
     form_class = ItemForm
-    success_url = "/products"
 
-    def test_func(self):
-        # item = Item.objects.get(id=pk)
-        if self.request.POST.get("quantity") < 1:
-            return False
-        else:
-            return True
+    def form_valid(self, form):
+        response = super().form_valid(form)
+        serialno = form.instance.serialno.strip()
+        components = ['processors', 'rams', 'hdds', 'ssds']
+        quantities = {
+            'processors': self.request.POST.get('processor_qty', '').strip(),
+            'rams': self.request.POST.get('ram_qty', '').strip(),
+            'hdds': self.request.POST.get('hdd_qty', '').strip(),
+            'ssds': self.request.POST.get('ssd_qty', '').strip(),
+        }
+
+        component_map = {
+            'processors': 'processor',
+            'rams': 'ram',
+            'hdds': 'hdd',
+            'ssds': 'ssd'
+        }
+
+        try:
+            with transaction.atomic():
+                for component in components:
+                    item_id = self.request.POST.get(component, '').strip()
+                    category_value = component_map[component]
+
+                    if not item_id:
+                        continue
+
+                    qty_raw = quantities[component]
+                    qty = int(qty_raw) if qty_raw.isdigit() else 0
+                    if qty <= 0:
+                        continue
+
+                    # Get item object from DB
+                    try:
+                        item_obj = catogaryitem.objects.get(id=item_id)
+                    except catogaryitem.DoesNotExist:
+                        messages.error(self.request, f"Invalid item selected for {component}.")
+                        continue
+
+                    clean_name = item_obj.name.strip()
+                    try:
+                        available_item = catogaryitem.objects.get(
+                            name=clean_name,
+                            category=category_value,
+                            serial_no='Solv-IT'
+                        )
+
+                        
+                    except catogaryitem.DoesNotExist:
+                        messages.error(self.request, f"No '{clean_name}' available in stock for {component}.")
+                        continue
+
+                    if available_item.quantity < qty:
+                        messages.error(self.request, f"Not enough quantity of '{clean_name}' in {component}.")
+                        continue
+
+                    # Deduct from general stock
+                    available_item.quantity -= qty
+                    available_item.save()
+
+                    # Assign to the product (by serial no)
+                    assigned_item, created = catogaryitem.objects.get_or_create(
+                        name=clean_name,
+                        category=category_value,
+                        serial_no=serialno,
+                        defaults={
+                            'quantity': 0,
+                            'unit_price': available_item.unit_price
+                        }
+                    )
+
+                    assigned_item.quantity += qty
+                    assigned_item.save()
+
+                    # print(f"✅ Assigned {qty} of '{clean_name}' to {serialno}. {'Created new' if created else 'Updated existing'}.")
+
+        except Exception as e:
+            messages.error(self.request, f"Error assigning items: {str(e)}")
+            return response
+
+        messages.success(self.request, "Product and components saved successfully.")
+        return response
+
+    def get_success_url(self):
+        return reverse_lazy('productslist')
+
+
+
 
 
 
@@ -331,8 +411,6 @@ class ProductUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     model = Item
     form_class = ItemForm
     template_name = "store/productupdate.html"  # Default template name
-        
-
 
     def get_template_names(self):
         user_profile = self.request.user.profile
@@ -352,13 +430,32 @@ class ProductUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-
         item = self.get_object()  # if it's a DetailView or similar
+        
 
         # Get all category items for this item’s serial number
-        all_category_items = catogaryitem.objects.filter(serial_no__iexact=item.serialno)
+        all_category_items = catogaryitem.objects.filter(serial_no__iexact='Solv-IT', quantity__gt=0)
+        operative_page_item = catogaryitem.objects.filter(serial_no__iexact=item.serialno)
+        # # Define the categories you care about
+        # categories = ['processor', 'ram', 'hdd', 'ssd']
 
-        all_category_in_table = catogaryitem.objects.filter(serial_no__iexact = 'Solv-IT').distinct()
+        # # Create a dictionary to hold categorized items
+        # categorized_items = {category: [] for category in categories}
+
+        # # Group items into the dictionary
+        # for item in all_category_items:
+        #     if item.category in categorized_items:
+        #         categorized_items[item.category].append(item)
+
+        # processors = categorized_items['processor']
+        # rams = categorized_items['ram']
+        # hdds = categorized_items['hdd']
+        # ssds = categorized_items['ssd']
+        
+        
+
+
+        all_category_in_table = catogaryitem.objects.filter(serial_no__iexact = 'Solv-IT', quantity__gt=0).distinct()
 
         # Filter and format
         processors1 = []
@@ -367,13 +464,13 @@ class ProductUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
         ssds1 = []
         for data in all_category_in_table:
             if data.category == 'processor':
-                processors1.append(f"{data.name} X({data.quantity})")
+                processors1.append(f"{data.name} X({data.quantity}) - ({data.serial_no})")
             if data.category == 'ram':
-                rams1.append(f"{data.name} X({data.quantity})")
+                rams1.append(f"{data.name} X({data.quantity}) - ({data.serial_no})")
             if data.category == 'hdd':
-                hdds1.append(f"{data.name} X({data.quantity})")
+                hdds1.append(f"{data.name} X({data.quantity}) - ({data.serial_no})")
             if data.category == 'ssd':
-                ssds1.append(f"{data.name} X({data.quantity})")
+                ssds1.append(f"{data.name} X({data.quantity}) - ({data.serial_no})")
 
         context['processor_options1'] = processors1
         context['ram_options1'] = rams1
@@ -388,18 +485,40 @@ class ProductUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
         ssds = []
         for data in all_category_items:
             if data.category == 'processor':
-                processors.append(f"{data.name} X({data.quantity})")
+                processors.append(f"{data.name} X({data.quantity}) --({data.serial_no})")
             if data.category == 'ram':
-                rams.append(f"{data.name} X({data.quantity})")
+                rams.append(f"{data.name} X({data.quantity}) --({data.serial_no})")
             if data.category == 'hdd':
-                hdds.append(f"{data.name} X({data.quantity})")
+                hdds.append(f"{data.name} X({data.quantity}) --({data.serial_no})")
             if data.category == 'ssd':
-                ssds.append(f"{data.name} X({data.quantity})")
+                ssds.append(f"{data.name} X({data.quantity}) --({data.serial_no})")
 
         context['processor_options'] = processors
         context['ram_options'] = rams
         context['hdd_options'] = hdds
         context['ssd_options'] = ssds
+        context['item'] = item
+
+
+        # Filter and format
+        processor2 = []
+        ram2 = []
+        hdd2 = []
+        ssd2 = []
+        for data in operative_page_item:
+            if data.category == 'processor':
+                processor2.append(f"{data.name} X({data.quantity})")
+            if data.category == 'ram':
+                ram2.append(f"{data.name} X({data.quantity})")
+            if data.category == 'hdd':
+                hdd2.append(f"{data.name} X({data.quantity})")
+            if data.category == 'ssd':
+                ssd2.append(f"{data.name} X({data.quantity})")
+
+        context['processor_option2'] = processor2
+        context['ram_option2'] = ram2
+        context['hdd_option2'] = hdd2
+        context['ssd_option2'] = ssd2
         context['item'] = item
 
         return context
@@ -453,9 +572,15 @@ class ProductUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
                         messages.error(self.request, f"No '{clean_name}' available in {component}.")
                         return reverse_lazy('productslist')
 
-                    # Deduct from stock
+                    # Deduct from source
                     available_item.quantity -= qty
-                    available_item.save()
+                    if available_item.quantity <= 0:
+                        available_item.delete()
+                        # print("❌ Deleted {} from {} (Qty reached zero).".format(clean_name, serialno))
+                    else:
+                        available_item.save()
+                        # print("➖ Deducted {} from {} ({}). Remaining: {}".format(qty, serialno, clean_name, available_item.quantity))
+
 
                     # Assign to serialno: update if exists, else create new
                     assigned_item, created = catogaryitem.objects.get_or_create(
@@ -472,9 +597,9 @@ class ProductUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
                     assigned_item.quantity += qty
                     assigned_item.save()
 
-                    print(f"✅ Assigned {qty} of '{clean_name}' to {serialno}. {'Created new' if created else 'Updated existing'} entry.")
+                    # print("✅ Assigned {} of '{}' to {}. {} entry.".format(qty, clean_name, serialno, 'Created new' if created else 'Updated existing'))
 
-                messages.success(self.request, "Items assigned successfully.")
+                messages.success(self.request, "✅ Assigned {} of '{}' to {}. {} entry.".format(qty, clean_name, serialno, 'Created new' if created else 'Updated existing'))
                 return reverse_lazy('dashboard')
             else:
                 messages.success(self.request, "Product update successful!")  # Add a success message
@@ -494,7 +619,7 @@ class ProductUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
             user_profile = self.request.user.profile
             if user_profile.role == 'OP':
                 serialno = self.request.POST['serialno'].strip()
-                components = ['ram', 'processor', 'hdd', 'ssd']
+                components = ['processor','ram', 'hdd', 'ssd']
                 quantities = {
                     'processor': self.request.POST.get('processor_qty', '').strip(),
                     'ram': self.request.POST.get('ram_qty', '').strip(),
@@ -503,7 +628,9 @@ class ProductUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
                 }
 
                 for component in components:
+                    print('component', self.request.POST.get(component, '').strip())
                     item_raw = self.request.POST.get(component, '').strip()
+                    print('item_raw', item_raw)
                     if not item_raw:
                         continue
 
@@ -516,71 +643,152 @@ class ProductUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
                     clean_name = item_raw.split(' X(')[0].strip()
                     print(f"\nProcessing {component.upper()}: {clean_name} | Qty: {qty}")
 
-                    # Get available item from stock
+                    # Get the item from the source device (e.g., LAP786786)
                     try:
-                        available_item = catogaryitem.objects.get(
+                        assigned_item = catogaryitem.objects.get(
                             name=clean_name,
                             category=component,
                             serial_no=serialno
                         )
                     except catogaryitem.DoesNotExist:
-                        messages.error(self.request, f"No available '{clean_name}' ({component}) in stock.")
-                        return reverse_lazy('dashboard')
-
-                    if available_item.quantity < qty:
-                        messages.error(self.request, f"No '{clean_name}' available in {component}.")
+                        messages.error(self.request, "No '{}' assigned to {}.".format(clean_name, serialno))
                         return reverse_lazy('productslist')
 
-                    # Deduct from stock
-                    available_item.quantity -= qty
-                    available_item.save()
+                    if assigned_item.quantity < qty:
+                        messages.error(self.request, "Not enough '{}' in {}.".format(clean_name, serialno))
+                        return reverse_lazy('productslist')
 
-                    # Assign to serialno: update if exists, else create new
-                    assigned_item, created = catogaryitem.objects.get_or_create(
+                    # Deduct from source
+                    assigned_item.quantity -= qty
+                    if assigned_item.quantity <= 0:
+                        assigned_item.delete()
+                        # print("❌ Deleted {} from {} (Qty reached zero).".format(clean_name, serialno))
+                    else:
+                        assigned_item.save()
+                        # print("➖ Deducted {} from {} ({}). Remaining: {}".format(qty, serialno, clean_name, assigned_item.quantity))
+
+                    # Add to 'Solv-IT'
+                    stock_item, created = catogaryitem.objects.get_or_create(
                         name=clean_name,
                         category=component,
                         serial_no='Solv-IT',
                         defaults={
                             'quantity': 0,
-                            'unit_price': available_item.unit_price,
-                            # add other fields if needed
+                            'unit_price': assigned_item.unit_price,
                         }
                     )
+                    stock_item.quantity += qty
+                    stock_item.save()
 
-                    assigned_item.quantity += qty
-                    assigned_item.save()
+                    # print("✅ Moved {} of '{}' to Solv-IT. {} entry.".format(qty, clean_name, 'Created new' if created else 'Updated existing'))
 
-                    print(f"✅ Assigned {qty} of '{clean_name}' to {serialno}. {'Created new' if created else 'Updated existing'} entry.")
 
-                messages.success(self.request, "Product Move to Solv-IT DB!")
+                messages.success(self.request, "✅ Moved {} of '{}' to Solv-IT. {} entry.".format(qty, clean_name, 'Created new' if created else 'Updated existing'))
                 return reverse_lazy('dashboard')
             else:
                 messages.success(self.request, "Product update successful!")  # Add a success message
                 return reverse_lazy('productslist')
         else:
-            print('button3')
-            user_profile = self.request.user.profile
-            if user_profile.role == 'OP':
-                messages.success(self.request, "Product update successful!")  # Add a success message
-                return reverse_lazy('dashboard')
-            else:
-                serialno = self.request.POST['serialno'].strip()
+            serialno = self.request.POST['serialno'].strip()
+            print('serialno', serialno)
+            print('dataaa', self.request.POST)
 
-                components = ['processor', 'ram', 'hdd', 'ssd']
-                for component in components:
-                    component_id = self.request.POST[f'{component}s'].strip()  # e.g., 'processors', 'rams', etc.
-                    source_items = catogaryitem.objects.filter(serial_no=serialno, category=component)
-                    target_items = catogaryitem.objects.filter(id=component_id, category=component)
-                    print(f'{component} serialno:', serialno)
-                    for source, target in zip(source_items, target_items):
-                        print('post data', source.name, target.name)
-                        target.serial_no = source.serial_no
-                        target.save()
-                        source.serial_no = 'Solv-IT'
-                        source.save()
+            components = ['processor', 'ram', 'hdd', 'ssd']
+            print('processor data',self.request.POST.get('processor', '').strip())
 
-                messages.success(self.request, "Product update successful!")  # Add a success message
-                return reverse_lazy('productslist')
+            # Get quantities from POST data
+            quantities = {
+                'processor': self.request.POST.get('processor_qty', '').strip(),
+                'ram': self.request.POST.get('ram_qty', '').strip(),
+                'hdd': self.request.POST.get('hdd_qty', '').strip(),
+                'ssd': self.request.POST.get('ssd_qty', '').strip(),
+            }
+
+            # STEP 1: Return all existing components (processor, ram, hdd, ssd) to 'Solv-IT'
+            
+
+            # STEP 2: Assign selected components to this serial number
+            for component in components:
+                item_raw = self.request.POST.get(component, '').strip()
+                qty_raw = self.request.POST.get(f"{component}_qty", '').strip()
+                qty = int(qty_raw) if qty_raw.isdigit() else 0
+
+                if not item_raw or qty <= 0:
+                    continue
+
+                clean_name = item_raw.split(' X(')[0].strip()
+                print(f"🔄 Updating {component.upper()} for {serialno}: {clean_name} x {qty}")
+
+                # ✅ Return only the current component to Solv-IT
+                existing_items = catogaryitem.objects.filter(serial_no=serialno, category=component)
+                for item in existing_items:
+                    print(f"♻️ Returning {item.category.upper()}: {item.name} X {item.quantity}")
+
+                    central_item, created = catogaryitem.objects.get_or_create(
+                        name=item.name,
+                        category=component,
+                        serial_no='Solv-IT',
+                        defaults={
+                            'quantity': 0,
+                            'unit_price': item.unit_price,
+                        }
+                    )
+                    central_item.quantity += item.quantity
+                    central_item.save()
+                    item.delete()
+
+                item_raw = self.request.POST.get(component, '').strip()
+                print(f"Raw selected item: {item_raw}")
+
+                clean_name = item_raw.split(' X(')[0].strip()
+                print(f"✅ Processing {component.upper()}: {clean_name} | Qty: {qty}")
+
+                # Fetch from 'Solv-IT' stock
+                try:
+                    available_item = catogaryitem.objects.get(
+                        name=clean_name,
+                        category=component,
+                        serial_no='Solv-IT'
+                    )
+                except catogaryitem.DoesNotExist:
+                    print(f"❌ No available '{clean_name}' ({component}) in stock.")
+                    messages.error(self.request, f"No available '{clean_name}' ({component}) in stock.")
+                    return redirect('dashboard')
+
+                if available_item.quantity < qty:
+                    messages.error(self.request, f"Not enough '{clean_name}' available in {component}.")
+                    return redirect('productslist')
+
+                # Deduct from stock
+                available_item.quantity -= qty
+                if available_item.quantity <= 0:
+                    available_item.delete()
+                else:
+                    available_item.save()
+
+                # Assign to target serial number
+                assigned_item, created = catogaryitem.objects.get_or_create(
+                    name=clean_name,
+                    category=component,
+                    serial_no=serialno,
+                    defaults={
+                        'quantity': 0,
+                        'unit_price': available_item.unit_price,
+                    }
+                )
+                assigned_item.quantity += qty
+                assigned_item.save()
+
+                messages.success(
+                    self.request,
+                    f"✅ Assigned {qty} of '{clean_name}' to {serialno}. {'Created new' if created else 'Updated existing'}."
+                )
+
+
+            return reverse_lazy('productslist')
+
+
+
     
 
 
@@ -945,12 +1153,26 @@ def create_processor(request):
 
 def get_category_items(request):
     serial = request.GET.get("serial", "")
-    data = {
-        "processors": list(catogaryitem.objects.filter(category='processor', serial_no__icontains=serial).values("id", "name", "quantity", "serial_no")),
-        "rams": list(catogaryitem.objects.filter(category='ram', serial_no__icontains=serial).values("id", "name", "quantity", "serial_no")),
-        "hdds": list(catogaryitem.objects.filter(category='hdd', serial_no__icontains=serial).values("id", "name", "quantity", "serial_no")),
-        "ssds": list(catogaryitem.objects.filter(category='ssd', serial_no__icontains=serial).values("id", "name", "quantity", "serial_no")),
-    }
+    name = request.GET.get("name", "")
+    if serial:
+        data = {
+            "processors": list(catogaryitem.objects.filter(category='processor', serial_no__icontains=serial).values("id", "name", "quantity", "serial_no")),
+            "rams": list(catogaryitem.objects.filter(category='ram', serial_no__icontains=serial).values("id", "name", "quantity", "serial_no")),
+            "hdds": list(catogaryitem.objects.filter(category='hdd', serial_no__icontains=serial).values("id", "name", "quantity", "serial_no")),
+            "ssds": list(catogaryitem.objects.filter(category='ssd', serial_no__icontains=serial).values("id", "name", "quantity", "serial_no")),
+        }
+    elif name:
+        data = {
+            "processors": list(catogaryitem.objects.filter(category='processor', name__icontains=name,  serial_no__icontains='Solv-IT', quantity__gte=1).values("id", "name", "quantity", "serial_no")),
+            "rams": list(catogaryitem.objects.filter(category='ram', name__icontains=name,  serial_no__icontains='Solv-IT', quantity__gte=1).values("id", "name", "quantity", "serial_no")),
+            "hdds": list(catogaryitem.objects.filter(category='hdd', name__icontains=name,  serial_no__icontains='Solv-IT', quantity__gte=1).values("id", "name", "quantity", "serial_no")),
+            "ssds": list(catogaryitem.objects.filter(category='ssd', name__icontains=name,  serial_no__icontains='Solv-IT', quantity__gte=1).values("id", "name", "quantity", "serial_no")),
+        }
+    else:
+        pass
+
+    print('data', data)
+    
     return JsonResponse(data)
 
 

@@ -238,7 +238,7 @@ Update Product
                                         Processor Details
                                     </label>
                                     <select id="processor" name="processor" class="form-control">
-                                        {% for option in processor_options %}
+                                        {% for option in processor_option2 %}
                                             <option value="{{ option }}">{{ option }}</option>
                                         {% empty %}
                                             <option value="">No processor available</option>
@@ -259,7 +259,7 @@ Update Product
                                         RAM Details
                                     </label>
                                     <select id="ram" name="ram" class="form-control">
-                                        {% for option in ram_options %}
+                                        {% for option in ram_option2 %}
                                             <option value="{{ option }}">{{ option }}</option>
                                         {% empty %}
                                             <option value="">No ram available</option>
@@ -280,7 +280,7 @@ Update Product
                                         HDD Details
                                     </label>
                                     <select id="hdd" name="hdd" class="form-control">
-                                        {% for option in hdd_options %}
+                                        {% for option in hdd_option2 %}
                                             <option value="{{ option }}">{{ option }}</option>
                                         {% empty %}
                                             <option value="">No hdd available</option>
@@ -301,7 +301,7 @@ Update Product
                                         SSD Details
                                     </label>
                                     <select id="ssd" name="ssd" class="form-control">
-                                        {% for option in ssd_options %}
+                                        {% for option in ssd_option2 %}
                                             <option value="{{ option }}">{{ option }}</option>
                                         {% empty %}
                                             <option value="">No ssd available</option>
@@ -416,17 +416,16 @@ Update Product
                             <div class="row mb-3">
                                 <!-- Reduced width for Processor, RAM, HDD, and SSD details -->
                                 <div class="col-md-6 col-lg-9">
-                                    <label for="processor" class="form-label">
-                                        Processor Details
-                                    </label>
-                                    <select id="Processor" name="Processor" class="form-control">
+                                    <label for="processor" class="form-label">Processor</label>
+                                    <select id="processor" name="processor" class="form-control">
                                         <option value="">-- Select Processor --</option>
-                                        {% for option in processor_options %}
+                                        {% for option in processor_option2 %}
                                             <option value="{{ option }}">{{ option }}</option>
                                         {% empty %}
-                                            <option value="">No processor available</option>
+                                        <option value="">No processors available</option>
                                         {% endfor %}
                                     </select>
+                                    <div class="text-danger">{{ form.processor.errors }}</div>
                                 </div>
 
                                 <div class="col-md-6 col-lg-3">
@@ -443,7 +442,7 @@ Update Product
                                     </label>
                                     <select id="ram" name="ram" class="form-control">
                                         <option value="">-- Select Ram --</option>
-                                        {% for option in ram_options %}
+                                        {% for option in ram_option2 %}
                                             <option value="{{ option }}">{{ option }}</option>
                                         {% empty %}
                                             <option value="">No ram available</option>
@@ -465,7 +464,7 @@ Update Product
                                     </label>
                                     <select id="hdd" name="hdd" class="form-control">
                                         <option value="">-- Select Hdd --</option>
-                                        {% for option in hdd_options %}
+                                        {% for option in hdd_option2 %}
                                             <option value="{{ option }}">{{ option }}</option>
                                         {% empty %}
                                             <option value="">No hdd available</option>
@@ -487,7 +486,7 @@ Update Product
                                     </label>
                                     <select id="ssd" name="ssd" class="form-control">
                                         <option value="">-- Select Sdd --</option>
-                                        {% for option in ssd_options %}
+                                        {% for option in ssd_option2 %}
                                             <option value="{{ option }}">{{ option }}</option>
                                         {% empty %}
                                             <option value="">No ssd available</option>

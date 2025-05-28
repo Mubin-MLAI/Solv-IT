@@ -2,141 +2,520 @@
 {% load static %}
 
 {% block title %}
-Update Product
+Add Product
 {% endblock title %}
 
 {% block content %}
+
+<style>
+    .processor-field,
+    .ram-field,
+    .hdd-field,
+    .ssd-field {
+        border: 1px solid #ccc;
+        /* Light gray border */
+        padding: 5px;
+        border-radius: 5px;
+        /* Optional: for rounded corners */
+    }
+
+    .processor-field input,
+    .ram-field input,
+    .hdd-field input,
+    .ssd-field input {
+        border: none;
+        /* To avoid extra borders on input fields */
+    }
+
+    /* Increase width of individual form controls */
+    .processor-field select,
+    .ram-field select,
+    .hdd-field select,
+    .ssd-field select,
+    .processor-field input,
+    .ram-field input,
+    .hdd-field input,
+    .ssd-field input {
+        width: 100%;
+        /* Full width of the container */
+    }
+
+    /* Optionally, add padding for extra spacing */
+    .processor-field input,
+    .ram-field input,
+    .hdd-field input,
+    .ssd-field input {
+        padding: 10px;
+    }
+
+    /* Optional: Set a max-width for responsiveness */
+    .processor-field,
+    .ram-field,
+    .hdd-field,
+    .ssd-field {
+        max-width: 100%;
+    }
+</style>
 <br>
 <div class="container my-5">
     <div class="row justify-content-center">
-        <div class="col-lg-8 col-md-10">
-            <div class="card shadow-sm border-light">
-                <div class="card-body">
-                    <form method="POST" enctype="multipart/form-data">
-                        {% csrf_token %}
-                        <div class="row mb-3">
-                            <!-- Product Name -->
-                            <div class="col-md-4">
-                                <label for="{{ form.name.id_for_label }}" class="form-label">Product Name</label>
-                                {{ form.name }} 
-                                <div class="text-danger">{{ form.name.errors }}</div>
-                            </div>
-
-                            <!-- Serial No -->
-                            <div class="col-md-4">
-                                <label for="{{ form.serialno.id_for_label }}" class="form-label">Serial No</label>
-                                {{ form.serialno }}
-                                <div class="text-danger">{{ form.serialno.errors }}</div>
-                            </div>
-
-                            <!-- Make & Models -->
-                            <div class="col-md-4">
-                                <label for="{{ form.make_and_models.id_for_label }}" class="form-label">Make & Models</label>
-                                {{ form.make_and_models }}
-                                <div class="text-danger">{{ form.make_and_models.errors }}</div>
-                            </div>
+        <div class="card shadow-sm border-light">
+            <div class="card-body">
+                {% if request.user.profile.role != 'OP' %}
+                <form method="POST" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <div class="row mb-3">
+                        <!-- Product Name -->
+                        <div class="col-md-4">
+                            <label for="{{ form.name.id_for_label }}" class="form-label">
+                                Product Name
+                            </label>
+                            {{ form.name }}
+                            <div class="text-danger">{{ form.name.errors }}</div>
                         </div>
 
-                        <!-- Processors -->
-                        <div class="row mb-3">
-                            <div class="col-md-12">
-                                <label for="{{ form.rams.id_for_label }}" class="form-label">Processor</label>
-                                    {{form.processors}}
-                                <div class="text-danger">{{ form.processors.errors }}</div>
-                            </div>
+                        <!-- Serial No -->
+                        <div class="col-md-4">
+                            <label for="id_serialno" class="form-label">Serial No</label>
+                            {{ form.serialno }}
+                            <div class="text-danger">{{ form.serialno.errors }}</div>
                         </div>
 
-                        <!-- RAMs -->
-                        <div class="row mb-3">
-                            <div class="col-md-12">
-                                <label for="{{ form.rams.id_for_label }}" class="form-label">RAMs</label>
-                                {{ form.rams }}
-                                <div class="text-danger">{{ form.rams.errors }}</div>
-                            </div>
+                        <!-- Make & Models -->
+                        <div class="col-md-4">
+                            <label for="{{ form.make_and_models.id_for_label }}" class="form-label">
+                                Make & Models
+                            </label>
+                            {{ form.make_and_models }}
+                            <div class="text-danger">{{ form.make_and_models.errors }}</div>
                         </div>
+                    </div>
 
-                        <!-- HDDs -->
-                        <div class="row mb-3">
-                            <div class="col-md-12">
-                                <label for="{{ form.hdds.id_for_label }}" class="form-label">HDDs</label>
-                                {{ form.hdds }}
-                                <div class="text-danger">{{ form.hdds.errors }}</div>
-                            </div>
+                    <div class="row mb-3">
+                        <!-- Processor Details -->
+                        <div class="col-md-9">
+                            <label for="processor" class="form-label">Processor</label>
+                            <!-- <select id="Processor_Filter" name="Processor_Filter" class="form-control">
+                                <option value="">-- Select Generation --</option>
+                                <option value="1st Generation">1st Generation</option>
+                                <option value="2nd Generation">2nd Generation</option>
+                                <option value="3rd Generation">3rd Generation</option>
+                                <option value="4th Generation">4th Generation</option>
+                                <option value="5th Generation">5th Generation</option>
+                                <option value="6th Generation">6th Generation</option>
+                                <option value="7th Generation">7th Generation</option>
+                                <option value="8th Generation">8th Generation</option>
+                                <option value="9th Generation">9th Generation</option>
+                                <option value="10th Generation">10th Generation</option>
+                                <option value="11th Generation">11th Generation</option>
+                                <option value="12th Generation">12th Generation</option>
+                                <option value="13th Generation">13th Generation</option>
+                            </select> -->
+                            <select id="processor" name="processor" class="form-control">
+                                <option value="">-- Select Processor --</option>
+                                {% for processor in processor_options %}
+                                    <option value="{{ processor }}" {% if processor == form.processor.value %}selected{% endif %}>
+                                        {{ processor }}
+                                    </option>
+                                {% endfor %}
+                            </select>                            
+                            <div class="text-danger">{{ form.processor.errors }}</div>
                         </div>
+                    
+                        <!-- Processor Quantity -->
+                        <div class="col-md-3">
+                            <label for="processor_qty" class="form-label">Qty</label>
+                            <input type="text" id="processor_qty" name="processor_qty" class="form-control"
+                                   value="{{ form.processor_qty.value}}">
+                            <div class="text-danger">{{ form.processor_qty.errors }}</div>
+                        </div>
+                    </div>
+                    
 
-                        <!-- SSDs -->
-                        <div class="row mb-3">
-                            <div class="col-md-12">
-                                <label for="{{ form.ssds.id_for_label }}" class="form-label">SSDs</label>
+                    <!-- 🧠 RAM Section -->
+                    <div class="row mb-3">
+                        <div class="col-md-9">
+                            <label for="ram" class="form-label">RAM</label>
+                            <!-- <select id="RAM_Filter" name="RAM_Filter" class="form-control">
+                                <option value="">-- Select RAM Size --</option>
+                                <option value="4GB">4GB</option>
+                                <option value="8GB">8GB</option>
+                                <option value="16GB">16GB</option>
+                                <option value="32GB">32GB</option>
+                                <option value="64GB">64GB</option>
+                            </select> -->
+                            <select id="ram" name="ram" class="form-control">
+                                <option value="">-- Select RAM --</option>
+                                {% for ram in ram_options %}
+                                    <option value="{{ ram }}" {% if ram == form.ram.value %}selected{% endif %}>{{ ram }}</option>
+                                {% endfor %}
+                            </select>
+                            <div class="text-danger">{{ form.ram.errors }}</div>
+                        </div>
+                        <div class="col-md-3">
+                            <label for="ram_qty" class="form-label">Qty</label>
+                            <input type="text" id="ram_qty" name="ram_qty" class="form-control"
+                                value="{{ form.ram_qty.value}}">
+                            <div class="text-danger">{{ form.ram_qty.errors }}</div>
+                        </div>
+                    </div>
+
+                    <!-- 💾 HDD Section -->
+                    <div class="row mb-3">
+                        <div class="col-md-9">
+                            <label for="hdd" class="form-label">HDD</label>
+                            <!-- <select id="HDD_Filter" name="HDD_Filter" class="form-control">
+                                <option value="">-- Select HDD Capacity --</option>
+                                <option value="250GB">250GB</option>
+                                <option value="320GB">320GB</option>
+                                <option value="500GB">500GB</option>
+                                <option value="1TB">1TB</option>
+                                <option value="2TB">2TB</option>
+                                <option value="4TB">4TB</option>
+                                <option value="6TB">6TB</option>
+                            </select> -->
+                            <select id="hdd" name="hdd" class="form-control">
+                                <option value="">-- Select HDD --</option>
+                                {% for hdd in hdd_options %}
+                                    <option value="{{ hdd }}" {% if hdd == form.hdd.value %}selected{% endif %}>{{ hdd }}</option>
+                                {% endfor %}
+                            </select>
+                            <div class="text-danger">{{ form.hdd.errors }}</div>
+                        </div>
+                        <div class="col-md-3">
+                            <label for="hdd_qty" class="form-label">Qty</label>
+                            <input type="text" id="hdd_qty" name="hdd_qty" class="form-control"
+                                value="{{ form.hdd_qty.value}}">
+                            <div class="text-danger">{{ form.hdd_qty.errors }}</div>
+                        </div>
+                    </div>
+
+                    <!-- ⚡ SSD Section -->
+                    <div class="row mb-3">
+                        <div class="col-md-9">
+                            <label for="ssd" class="form-label">SSD</label>
+                            <!-- <select id="SSD_Filter" name="SSD_Filter" class="form-control">
+                                <option value="">-- Select SSD Capacity --</option>
+                                <option value="128GB">128GB</option>
+                                <option value="256GB">256GB</option>
+                                <option value="500GB">500GB</option>
+                                <option value="1TB">1TB</option>
+                                <option value="2TB">2TB</option>
+                                <option value="4TB">4TB</option>
+                            </select> -->
+                            <!-- <div class="ssd-field" name="ssd">
                                 {{ form.ssds }}
-                                <div class="text-danger">{{ form.ssds.errors }}</div>
-                            </div>
+                            </div> -->
+                            <select id="ssd" name="ssd" class="form-control">
+                                <option value="">-- Select SSD --</option>
+                                {% for ssd in ssd_options %}
+                                    <option value="{{ ssd }}" {% if ssd == form.ssd.value %}selected{% endif %}>{{ ssd }}</option>
+                                {% endfor %}
+                            </select>
+                            <div class="text-danger">{{ form.ssd.errors }}</div>
+                        </div>
+                        <div class="col-md-3">
+                            <label for="ssd_qty" class="form-label">Qty</label>
+                            <input type="text" id="ssd_qty" name="ssd_qty" class="form-control"
+                                value="{{ form.ssd_qty.value}}">
+                            <div class="text-danger">{{ form.ssd_qty.errors }}</div>
+                        </div>
+                    </div>
+
+
+                    <!-- SMPS Section -->
+                    <div class="row mb-3">
+                        <!-- SMPS Status -->
+                        <div class="col-md-4">
+                            <label for="smps_status" class="form-label">SMPS Status</label>
+                            {{ form.smps_status }}
+                            <div class="text-danger">{{ form.smps_status.errors }}</div>
                         </div>
 
-                        <div class="row mb-3">
-                            <!-- SMPS Status -->
-                            <div class="col-md-6">
-                                <label for="{{ form.smps_status.id_for_label }}" class="form-label">SMPS Status</label>
-                                {{ form.smps_status }}
-                                <div class="text-danger">{{ form.smps_status.errors }}</div>
-                            </div>
+                        <!-- Motherboard Status -->
+                        <div class="col-md-4" id="motherboard_status_div">
+                            <label for="motherboard_status" class="form-label">Motherboard Status</label>
+                            {{ form.motherboard_status }}
+                            <div class="text-danger">{{ form.motherboard_status.errors }}</div>
+                        </div>
+                    </div>
 
-                            <!-- Motherboard Status -->
-                            <div class="col-md-6">
-                                <label for="{{ form.motherboard_status.id_for_label }}" class="form-label">Motherboard Status</label>
-                                {{ form.motherboard_status }}
-                                <div class="text-danger">{{ form.motherboard_status.errors }}</div>
-                            </div>
+                    <div class="row mb-3">
+                        <!-- SMPS Replacement Description -->
+                        <div class="col-md-4" id="smps_replacement_description_div" style="display: none;">
+                            <label for="smps_replacement_description" class="form-label">SMPS Replacement
+                                Description</label>
+                            <input type="text" id="smps_replacement_description" name="smps_replacement_description"
+                                class="form-control">
                         </div>
 
-                        <div class="row mb-3">
-                            <!-- SMPS Replacement Description -->
-                            <div class="col-md-6" id="smps_replacement_description_div" style="display: none;">
-                                <label for="{{ form.smps_replacement_description.id_for_label }}" class="form-label">SMPS Replacement Description</label>
-                                {{ form.smps_replacement_description }}
-                            </div>
-
-                            <!-- Motherboard Replacement Description -->
-                            <div class="col-md-6" id="motherboard_replacement_description_div" style="display: none;">
-                                <label for="{{ form.motherboard_replacement_description.id_for_label }}" class="form-label">Motherboard Replacement Description</label>
-                                {{ form.motherboard_replacement_description }}
-                            </div>
+                        <!-- Motherboard Replacement Description -->
+                        <div class="col-md-4" id="motherboard_replacement_description_div" style="display: none;">
+                            <label for="motherboard_replacement_description" class="form-label">Motherboard
+                                Replacement Description</label>
+                            <input type="text" id="motherboard_replacement_description"
+                                name="motherboard_replacement_description" class="form-control">
                         </div>
+                    </div>
 
-                        <div class="form-group text-center">
-                            <button class="btn btn-success btn-lg" type="submit">
-                                <i class="fas fa-check"></i> Update Product
-                            </button>
-                        </div>
-                    </form>
-                </div>
+                    <div class="form-group text-center">
+                        <button class="btn btn-success btn-lg" type="submit">
+                            <i class="fas fa-check"></i> Submit
+                        </button>
+                    </div>
+                </form>
+                {% else %}
+                <h1 style="color: red; text-align: center;"><b>Sorry You Don't have Permission to Add Product</b></h1>
+                {% endif %}
             </div>
         </div>
     </div>
 </div>
 
 <script>
-    // Toggle replacement description visibility on change
+
+document.addEventListener('DOMContentLoaded', function () {
+        const serialInput = document.getElementById("id_serialno");  // Django auto-generates this ID
+        const processorSelect = document.getElementById("processor");
+        const ramSelect = document.getElementById("ram");
+        const hddSelect = document.getElementById("hdd");
+        const ssdSelect = document.getElementById("ssd");
+        
+        const processorfilter = document.getElementById("Processor_Filter");
+        const ssdfilter = document.getElementById("SSD_Filter");
+        const ramfilter = document.getElementById("RAM_Filter");
+        const hddfilter = document.getElementById("HDD_Filter");
+
+        serialInput.addEventListener("change", function () {
+            const serial = serialInput.value;
+
+            if (serial.length >= 3) {
+                fetch(`/get-category-items/?serial=${serial}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        updateSelectOptions(processorSelect, data.processors);
+                        updateSelectOptions(ramSelect, data.rams);
+                        updateSelectOptions(hddSelect, data.hdds);
+                        updateSelectOptions(ssdSelect, data.ssds);
+                    });
+            }
+        });
+
+        processorfilter.addEventListener("change", function () {
+            const processorfltr = processorfilter.value;
+
+            if (processorfltr.length >= 3) {
+                fetch(`/get-category-items/?name=${processorfltr}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        updateSelectOptions(processorSelect, data.processors);
+                    });
+            }
+        });
+
+        
+
+        ramfilter.addEventListener("change", function () {
+            const ramfltr = ramfilter.value;
+
+            if (ramfilter.length >= 3) {
+                fetch(`/get-category-items/?name=${ramfltr}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        updateSelectOptions(ramSelect, data.rams);
+                    });
+            }
+        });
+
+        ssdfilter.addEventListener("change", function () {
+            const ssdfltr = ssdfilter.value;
+
+            if (ssdfilter.length >= 3) {
+                fetch(`/get-category-items/?name=${ssdfltr}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        updateSelectOptions(ssdSelect, data.ssds);
+                    });
+            }
+        });
+
+        hddfilter.addEventListener("change", function () {
+            const hddfltr = hddfilter.value;
+
+            if (hddfilter.length >= 3) {
+                fetch(`/get-category-items/?name=${hddfltr}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        updateSelectOptions(hddSelect, data.hdds);
+                    });
+            }
+        });
+
+
+        function updateSelectOptions(selectElement, items) {
+            selectElement.innerHTML = '<option value="">-- Select --</option>';
+        if (!items || items.length === 0) {
+            selectElement.innerHTML += '<option value="">No items available</option>';
+        } else {
+            items.forEach(item => {
+                const option = document.createElement("option");
+                option.value = item.id;
+                option.textContent = `${item.name} - ${item.serial_no} (Qty: ${item.quantity})`;
+                selectElement.appendChild(option);
+            });
+        }
+    }
+
+    });
+
+    document.getElementById("add-processor-btn").addEventListener("click", function() {
+            window.location.href = "{% url 'category-create' %}";
+        });
+
+    // Toggle the replacement description fields
     function toggleReplacementDescription() {
-        const smpsStatus = document.getElementById("id_smps_status").value;
-        document.getElementById("smps_replacement_description_div").style.display =
-            smpsStatus === "replacement" ? "block" : "none";
+        var smpsStatus = document.getElementById("smps_status").value;
+        var replacementDescriptionDiv = document.getElementById("smps_replacement_description_div");
+        replacementDescriptionDiv.style.display = smpsStatus === "replacement" ? "block" : "none";
     }
-
     function toggleMotherboardReplacementDescription() {
-        const mbStatus = document.getElementById("id_motherboard_status").value;
-        document.getElementById("motherboard_replacement_description_div").style.display =
-            mbStatus === "replacement" ? "block" : "none";
+        var motherboardStatus = document.getElementById("motherboard_status").value;
+        var toggleMotherboardReplacementDescriptionDiv = document.getElementById("motherboard_replacement_description_div");
+        toggleMotherboardReplacementDescriptionDiv.style.display = motherboardStatus === "replacement" ? "block" : "none";
     }
 
-    // Run on page load
-    window.onload = function () {
-        toggleReplacementDescription();
-        toggleMotherboardReplacementDescription();
+    function searchSuggestions(inputId, suggestionsId) {
+        const searchBox = document.getElementById(inputId);
+        const suggestionsBox = document.getElementById(suggestionsId);
 
-        document.getElementById("id_smps_status").addEventListener("change", toggleReplacementDescription);
-        document.getElementById("id_motherboard_status").addEventListener("change", toggleMotherboardReplacementDescription);
-    };
+        searchBox.addEventListener('input', function () {
+            const query = searchBox.value;
+            if (query.length >= 2) { // trigger after at least 2 characters
+                fetch(`/search-suggestions/?q=${query}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        suggestionsBox.innerHTML = ''; // Clear previous suggestions
+                        if (data.suggestions.length > 0) {
+                            data.suggestions.forEach(suggestion => {
+                                const item = document.createElement('a');
+                                item.href = "javascript:void(0);"; // Prevent immediate navigation
+                                item.classList.add('list-group-item', 'list-group-item-action');
+                                item.textContent = suggestion;
+                                item.addEventListener('click', function () {
+                                    searchBox.value = suggestion; // Fill input with clicked suggestion
+                                    suggestionsBox.innerHTML = ''; // Hide suggestions
+                                });
+                                suggestionsBox.appendChild(item);
+                            });
+                        } else {
+                            const noResultsItem = document.createElement('a');
+                            noResultsItem.classList.add('list-group-item', 'list-group-item-action', 'text-danger');
+                            noResultsItem.textContent = 'No suggestions found! Click here to add item';
+                            noResultsItem.style.cursor = 'pointer'; // Make it look clickable
+                            noResultsItem.addEventListener('click', function () {
+                                window.location.href = "{% url 'category-create' %}"; // Redirect to add item form
+                            });
+                            suggestionsBox.appendChild(noResultsItem);
+                        }
+                    })
+                    .catch(error => console.error('Error fetching suggestions:', error));
+            } else {
+                suggestionsBox.innerHTML = ''; // Clear suggestions if input is less than 2 characters
+            }
+        });
+    }
+
+    //     document.addEventListener('DOMContentLoaded', function() {
+    //     var showButton = document.getElementById('show-processor-button');
+    //     var processorFieldContainer = document.getElementById('processors-field');
+    //     var serialnoFieldId = "{{ form.serialno.id_for_label }}";
+    //     var serialNoInput = document.getElementById(serialnoFieldId);
+
+    //     showButton.addEventListener('click', function() {
+    //         var serialNo = serialNoInput.value.trim();
+
+    //         if (serialNo) {
+    //             // Make the AJAX request to fetch processors based on serialno
+    //             fetch(`/add-processor1/?serialno=${serialNo}`)
+    //                 .then(response => response.json())
+    //                 .then(data => {
+    //                     // Get the form processors field
+    //                     var processorsField = document.getElementById('{{ form.processors.id_for_label }}');
+
+    //                     // Check if we got processors in the response
+    //                     if (data.success && data.processors.length > 0) {
+    //                         // Clear any previous options or content
+    //                         processorsField.innerHTML = ''; 
+
+    //                         // Optionally, add a default option
+    //                         var defaultOption = document.createElement('option');
+    //                         defaultOption.value = '';
+    //                         defaultOption.textContent = 'Select a processor';
+    //                         processorsField.appendChild(defaultOption);
+
+    //                         // Add processors to the dropdown or select field
+    //                         data.processors.forEach(processor => {
+    //                             var option = document.createElement('option');
+    //                             option.value = processor.id; // Assuming processor.id is what should be selected
+    //                             option.textContent = `Processor Name: ${processor.name} (Quantity: ${processor.quantity})`;
+    //                             processorsField.appendChild(option);
+    //                         });
+
+    //                         processorFieldContainer.style.display = 'block'; // Show the processor field
+    //                     } else {
+    //                         // If no processors are found, show a default "No processors" option
+    //                         processorsField.innerHTML = '<option>No processors found for this serial number.</option>';
+    //                         processorFieldContainer.style.display = 'block'; // Show the processor field
+    //                     }
+    //                 })
+    //                 .catch(error => {
+    //                     console.error('Error fetching processors:', error);
+    //                 });
+    //         } else {
+    //             alert('Please enter a serial number.');
+    //         }
+    //     });
+    // });
+
+    document.getElementById("add-processor-btn").addEventListener("click", function () {
+        document.getElementById("add-processor-form").style.display = "block";
+    });
+
+    document.getElementById("processor-create-form").addEventListener("submit", function (e) {
+        e.preventDefault();
+        const form = e.target;
+        const formData = new FormData(form);
+
+        fetch("{% url 'create_processor' %}", {
+            method: "POST",
+            headers: {
+                "X-CSRFToken": formData.get("csrfmiddlewaretoken")
+            },
+            body: formData
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    const selectField = document.querySelector("#processors-field select");
+                    const option = document.createElement("option");
+                    option.value = data.processor.id;
+                    option.text = data.processor.name;
+                    option.selected = true;
+                    selectField.appendChild(option);
+                    document.getElementById("processors-field").style.display = "block";
+                    form.reset();
+                    document.getElementById("add-processor-form").style.display = "none";
+                } else {
+                    alert("Failed to add processor");
+                }
+            });
+    });
+
+    // Initialize search suggestions for each input field (Processor, RAM, HDD, SSD)
+    searchSuggestions('searchbox', 'suggestions');
+    searchSuggestions('searchbox1', 'suggestions1');
+    searchSuggestions('searchbox2', 'suggestions2');
+    searchSuggestions('searchbox3', 'suggestions3');
 </script>
 
 {% endblock content %}

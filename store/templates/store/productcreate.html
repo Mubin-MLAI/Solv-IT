@@ -96,32 +96,41 @@ Add Product
                         <!-- Processor Details (75% width) -->
                         <div class="col-md-9">
                             <label for="id_processors" class="form-label">Processor Details</label>
-                            <div id="processors-field">
+                            <select id="Processor_Filter" name="Processor_Filter" class="form-control">
+                                <option value="">-- Select Generation --</option>
+                                <option value="1st Generation">1st Generation</option>
+                                <option value="2nd Generation">2nd Generation</option>
+                                <option value="3rd Generation">3rd Generation</option>
+                                <option value="4th Generation">4th Generation</option>
+                                <option value="5th Generation">5th Generation</option>
+                                <option value="6th Generation">6th Generation</option>
+                                <option value="7th Generation">7th Generation</option>
+                                <option value="8th Generation">8th Generation</option>
+                                <option value="9th Generation">9th Generation</option>
+                                <option value="10th Generation">10th Generation</option>
+                                <option value="11th Generation">11th Generation</option>
+                                <option value="12th Generation">12th Generation</option>
+                                <option value="13th Generation">13th Generation</option>
+                            </select>                            
+                            <div id="processors-field" name="processors">
                                 {{ form.processors }}
                             </div>
 
                             <!-- <button type="button" class="btn btn-sm btn-primary" id="add-processor-btn">
                                 Add Processor
                             </button> -->
-                            <div class="text-danger">{{ form.processors.errors }}</div>
-                            <!-- <div id="add-processor-form" style="margin-top: 20px; display: none;">
-                                <form id="processor-create-form">
-                                    {% csrf_token %}
-                                    <input type="text" name="name" placeholder="Name" required
-                                        class="form-control mb-2" />
-                                    <input type="text" name="serial_no" placeholder="Serial No"
-                                        class="form-control mb-2" />
-                                    <input type="number" name="quantity" placeholder="Quantity" required
-                                        class="form-control mb-2" />
-                                    <input type="number" name="unit_price" placeholder="Unit Price" required
-                                        class="form-control mb-2" />
-                                    <button type="submit" class="btn btn-success btn-sm">Save Processor</button>
-                                </form>
-                            </div> -->
-                            <!-- <button type="button" id="show-processor-button" class="btn btn-primary">Show Processor</button> -->
+                            <div class="text-danger">{{ form.processors.errors }}</div>   
                         </div>
 
+                        <div class="col-md-6 col-lg-3">
+                            <label for="processor_qty" class="form-label">Qty</label>
+                            <input type="text" id="processor_qty" name="processor_qty" class="form-control"
+                                value="{{ form.processor_qty.value }}">
+                        </div> 
+
+
                         <!-- Processor Quantity (25% width) -->
+
                          
                         <div class="col-md-3">
                             <br><br>
@@ -138,10 +147,26 @@ Add Product
                         <!-- RAM Details (75% width) -->
                         <div class="col-md-9">
                             <label for="id_rams" class="form-label">RAM Details</label>
-                            <div class="ram-field">
+                            <select id="RAM_Filter" name="RAM_Filter" class="form-control">
+                                <option value="">-- Select RAM Size --</option>
+                                <!-- <option value="2GB">2GB</option> -->
+                                <option value="4GB">4GB</option>
+                                <option value="8GB">8GB</option>
+                                <option value="16GB">16GB</option>
+                                <option value="32GB">32GB</option>
+                                <option value="64GB">64GB</option>
+                            </select>
+                            
+                            <div class="ram-field" name="rams">
                                 {{ form.rams }}
                             </div>
                             <div class="text-danger">{{ form.rams.errors }}</div>
+                        </div>
+
+                        <div class="col-md-6 col-lg-3">
+                            <label for="ram_qty" class="form-label">Qty</label>
+                            <input type="text" id="ram_qty" name="ram_qty" class="form-control"
+                                value="{{ form.ram_qty.value }}">
                         </div>
 
                         <!-- RAM Quantity (25% width) -->
@@ -158,10 +183,26 @@ Add Product
                         <!-- HDD Details (75% width) -->
                         <div class="col-md-9">
                             <label for="id_hdds" class="form-label">HDD Details</label>
-                            <div class="hdd-field">
+                            <select id="HDD_Filter" name="HDD_Filter" class="form-control">
+                                <option value="">-- Select HDD Capacity --</option>
+                                <option value="250GB">250GB</option>
+                                <option value="320GB">320GB</option>
+                                <option value="500GB">500GB</option>
+                                <option value="1TB">1TB</option>
+                                <option value="2TB">2TB</option>
+                                <option value="4TB">4TB</option>
+                                <option value="6TB">6TB</option>
+                            </select>
+                            <div class="hdd-field" name="hdds">
                                 {{ form.hdds }}
                             </div>
                             <div class="text-danger">{{ form.hdds.errors }}</div>
+                        </div>
+
+                        <div class="col-md-6 col-lg-3">
+                            <label for="hdd_qty" class="form-label">Qty</label>
+                            <input type="text" id="hdd_qty" name="hdd_qty" class="form-control"
+                                value="{{ form.hdd_qty.value }}">
                         </div>
 
                         <!-- HDD Quantity (25% width) -->
@@ -178,10 +219,27 @@ Add Product
                         <!-- SSD Details (75% width) -->
                         <div class="col-md-9">
                             <label for="id_ssds" class="form-label">SSD Details</label>
-                            <div class="ssd-field">
+                            <select id="SSD_Filter" name="SSD_Filter" class="form-control">
+                                <option value="">-- Select SSD Capacity --</option>
+                                <option value="128GB">128GB</option>
+                                <option value="256GB">256GB</option>
+                                <option value="500GB">500GB</option>
+                                <option value="1TB">1TB</option>
+                                <option value="2TB">2TB</option>
+                                <option value="4TB">4TB</option>
+                            </select>
+                            
+                            <div class="ssd-field" name="ssds">
                                 {{ form.ssds }}
                             </div>
                             <div class="text-danger">{{ form.ssds.errors }}</div>
+                        </div>
+
+
+                        <div class="col-md-6 col-lg-3">
+                            <label for="ssd_qty" class="form-label">Qty</label>
+                            <input type="text" id="ssd_qty" name="ssd_qty" class="form-control"
+                                value="{{ form.ssd_qty.value }}">
                         </div>
 
                         <!-- SSD Quantity (25% width) -->
@@ -251,6 +309,10 @@ document.addEventListener('DOMContentLoaded', function () {
         const ramSelect = document.getElementById("id_rams");
         const hddSelect = document.getElementById("id_hdds");
         const ssdSelect = document.getElementById("id_ssds");
+        const processorfilter = document.getElementById("Processor_Filter");
+        const ssdfilter = document.getElementById("SSD_Filter");
+        const ramfilter = document.getElementById("RAM_Filter");
+        const hddfilter = document.getElementById("HDD_Filter");
 
         serialInput.addEventListener("change", function () {
             const serial = serialInput.value;
@@ -267,15 +329,67 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         });
 
+        processorfilter.addEventListener("change", function () {
+            const processorfltr = processorfilter.value;
+
+            if (processorfltr.length >= 3) {
+                fetch(`/get-category-items/?name=${processorfltr}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        updateSelectOptions(processorSelect, data.processors);
+                    });
+            }
+        });
+
+        
+
+        ramfilter.addEventListener("change", function () {
+            const ramfltr = ramfilter.value;
+
+            if (ramfilter.length >= 3) {
+                fetch(`/get-category-items/?name=${ramfltr}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        updateSelectOptions(ramSelect, data.rams);
+                    });
+            }
+        });
+
+        ssdfilter.addEventListener("change", function () {
+            const ssdfltr = ssdfilter.value;
+
+            if (ssdfilter.length >= 3) {
+                fetch(`/get-category-items/?name=${ssdfltr}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        updateSelectOptions(ssdSelect, data.ssds);
+                    });
+            }
+        });
+
+        hddfilter.addEventListener("change", function () {
+            const hddfltr = hddfilter.value;
+
+            if (hddfilter.length >= 3) {
+                fetch(`/get-category-items/?name=${hddfltr}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        updateSelectOptions(hddSelect, data.hdds);
+                    });
+            }
+        });
+
+
         function updateSelectOptions(selectElement, items) {
             selectElement.innerHTML = "";  // Clear existing options
             items.forEach(item => {
                 const option = document.createElement("option");
                 option.value = item.id;
-                option.textContent = `${item.name} - ${item.serial_no}`;
+                option.textContent = `${item.name} - ${item.serial_no} (Qty: ${item.quantity})`;
                 selectElement.appendChild(option);
             });
         }
+
     });
 
     document.getElementById("add-processor-btn").addEventListener("click", function() {

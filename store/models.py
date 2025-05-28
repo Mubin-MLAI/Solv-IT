@@ -123,10 +123,10 @@ class Motherboard(models.Model):
 
 class catogaryitem(models.Model):
     CATEGORY_CHOICES = [
-        ('ssd', 'SSD'),
-        ('processor', 'Processor'),
-        ('hdd', 'HDD'),
-        ('ram', 'RAM'),
+        ('ssd', 'SSDs'),
+        ('processor', 'Processors'),
+        ('hdd', 'HDDs'),
+        ('ram', 'RAMs'),
     ]
     
     category = models.CharField(
