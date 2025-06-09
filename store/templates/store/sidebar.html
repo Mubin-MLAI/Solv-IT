@@ -15,10 +15,9 @@
     }
 
     /* Zoom effect on hover for navbar */
-    .navbar:hover {
+    /* .navbar:hover {
         transform: scale(1.05);
-        /* Slight zoom effect */
-    }
+    } */
 
     .navbar-brand img {
         width: 45px;
@@ -56,7 +55,6 @@
 
         color: #222;
         transform: scale(1.05);
-        /* Zoom effect on hover */
     }
 
     /* Dropdown Styling */
@@ -124,14 +122,31 @@
                 <li class="nav-item dropdown">
                     <a class="nav-link {% if request.resolver_match.url_name == 'productslist' %}active{% endif %} dropdown-toggle"
                         href="#" id="productsDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                        <i class="fa fa-folder me-2"></i> Products
+                        <i class="fas fa-store me-2"></i> Stocks
                     </a>
                     <ul class="dropdown-menu bg-dark border-0" aria-labelledby="productsDropdown">
                         <li><a class="dropdown-item text-light {% if request.resolver_match.url_name == 'productslist' %}active{% endif %}"
                                 href="{% url 'productslist' %}">All Products</a></li>
-                        <li><a class="dropdown-item text-light" href="{% url 'category-list' %}">Add Item</a></li>
+                        <li><a class="dropdown-item text-light" href="{% url 'category-list' %}">All Item</a></li>
                     </ul>
                 </li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link {% if request.resolver_match.url_name == 'productslist' %}active{% endif %} dropdown-toggle"
+                        href="#" id="productsDropdown1" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="fas fa-hand-holding-usd me-2"></i> Buy & Sell
+                    </a>
+                    <ul class="dropdown-menu bg-dark border-0" aria-labelledby="productsDropdown1">
+                        <li><a class="dropdown-item text-light {% if request.resolver_match.url_name == 'saleslist' %}active{% endif %}"
+                            href="{% url 'saleslist' %}">Sales Orders</a></li>
+                        <li><a class="dropdown-item text-light" href="{% url 'purchaseslist' %}">Purchase Orders</a></li>
+                    </ul>
+                </li>
+                    <!-- <li class="nav-item mb-2">
+                        <a class="nav-link text-light {% if request.resolver_match.url_name == 'purchaseslist' %}active{% endif %}" href="{% url 'purchaseslist' %}">
+                            <i class="fa fa-shopping-cart me-2"></i> Purchase Orders
+                        </a>
+                    </li> -->
+
                 <li class="nav-item dropdown">
                     <a class="nav-link {% if request.resolver_match.url_name == 'profile_list' or request.resolver_match.url_name == 'customer_list' or request.resolver_match.url_name == 'vendor-list' %} active{% endif %} dropdown-toggle"
                         href="#" id="accountsDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
@@ -150,7 +165,7 @@
                 <li class="nav-item dropdown">
                     <a class="nav-link {% if request.resolver_match.url_name == 'profile_list' or request.resolver_match.url_name == 'customer_list' or request.resolver_match.url_name == 'vendor-list' %} active{% endif %}"
                         href="http://127.0.0.1:8000/admin">
-                        <i class="fa fa-users me-2"></i> Administration
+                        <i class="fas fa-user-shield me-2"></i> Administration
                     </a>
                 </li>
                 {% endif %}

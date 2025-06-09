@@ -67,7 +67,7 @@ Add Product
                     <div class="row mb-3">
                         <!-- Product Name -->
                         <div class="col-md-4">
-                            <label for="{{ form.name.id_for_label }}" class="form-label">
+                            <label for="{{ form.name.id_for_label }}" class="form-label" placeholder="Enter Product Name">
                                 Product Name
                             </label>
                             {{ form.name }}
@@ -76,16 +76,17 @@ Add Product
 
                         <!-- Serial No -->
                         <div class="col-md-4">
-                            <label for="id_serialno" class="form-label">Serial No</label>
+                            <label for="id_serialno" class="form-label" placeholder="Enter Serial No">Serial No</label>
                             {{ form.serialno }}
                             <div class="text-danger">{{ form.serialno.errors }}</div>
                         </div>
 
                         <!-- Make & Models -->
                         <div class="col-md-4">
-                            <label for="{{ form.make_and_models.id_for_label }}" class="form-label">
+                            <label for="{{ form.make_and_models.id_for_label }}" class="form-label" >
                                 Make & Models
                             </label>
+                            <div aria-placeholder="Enter Make & Models"></div>
                             {{ form.make_and_models }}
                             <div class="text-danger">{{ form.make_and_models.errors }}</div>
                         </div>
@@ -95,86 +96,36 @@ Add Product
                     <div class="row mb-3">
                         <!-- Processor Details (75% width) -->
                         <div class="col-md-9">
-                            <label for="id_processors" class="form-label">Processor Details</label>
-                            <select id="Processor_Filter" name="Processor_Filter" class="form-control">
-                                <option value="">-- Select Generation --</option>
-                                <option value="1st Generation">1st Generation</option>
-                                <option value="2nd Generation">2nd Generation</option>
-                                <option value="3rd Generation">3rd Generation</option>
-                                <option value="4th Generation">4th Generation</option>
-                                <option value="5th Generation">5th Generation</option>
-                                <option value="6th Generation">6th Generation</option>
-                                <option value="7th Generation">7th Generation</option>
-                                <option value="8th Generation">8th Generation</option>
-                                <option value="9th Generation">9th Generation</option>
-                                <option value="10th Generation">10th Generation</option>
-                                <option value="11th Generation">11th Generation</option>
-                                <option value="12th Generation">12th Generation</option>
-                                <option value="13th Generation">13th Generation</option>
-                            </select>                            
-                            <div id="processors-field" name="processors">
-                                {{ form.processors }}
-                            </div>
-
-                            <!-- <button type="button" class="btn btn-sm btn-primary" id="add-processor-btn">
-                                Add Processor
-                            </button> -->
+                            <label for="processor" class="form-label">Processor Details</label>
+                            <input type="text" name="processor" id="processor" class="form-control" placeholder="Enter Processor Name. if more > 1 e.g. i5 8th Generation, i7 9th Generation"
+                                style="text-transform: uppercase;">
                             <div class="text-danger">{{ form.processors.errors }}</div>   
                         </div>
 
                         <div class="col-md-6 col-lg-3">
                             <label for="processor_qty" class="form-label">Qty</label>
                             <input type="text" id="processor_qty" name="processor_qty" class="form-control"
-                                value="{{ form.processor_qty.value }}">
+                                value="{{ form.processor_qty.value }}" placeholder="e.g. 2,1">
                         </div> 
 
-
-                        <!-- Processor Quantity (25% width) -->
-
-                         
-                        <div class="col-md-3">
-                            <br><br>
-                            <button type="button" class="btn btn-sm btn-primary" id="add-processor-btn">
-                                Add Processor
-                            </button>
-                            <br><br>
-                            <h6>You Need To First Add Processor</h6>
-                        </div>
                     </div>
 
                     <!-- RAM Section -->
                     <div class="row mb-3">
                         <!-- RAM Details (75% width) -->
                         <div class="col-md-9">
-                            <label for="id_rams" class="form-label">RAM Details</label>
-                            <select id="RAM_Filter" name="RAM_Filter" class="form-control">
-                                <option value="">-- Select RAM Size --</option>
-                                <!-- <option value="2GB">2GB</option> -->
-                                <option value="4GB">4GB</option>
-                                <option value="8GB">8GB</option>
-                                <option value="16GB">16GB</option>
-                                <option value="32GB">32GB</option>
-                                <option value="64GB">64GB</option>
-                            </select>
+                            <label for="ram" class="form-label">RAM Details</label>
                             
-                            <div class="ram-field" name="rams">
-                                {{ form.rams }}
-                            </div>
+                            <input type="text" name="ram" id="ram" class="form-control" placeholder="Enter RAM details.  if more > 1 e.g. 4GB Company-name, 8GB Company-name"
+                            style="text-transform: uppercase;">
+                            
                             <div class="text-danger">{{ form.rams.errors }}</div>
                         </div>
 
                         <div class="col-md-6 col-lg-3">
                             <label for="ram_qty" class="form-label">Qty</label>
                             <input type="text" id="ram_qty" name="ram_qty" class="form-control"
-                                value="{{ form.ram_qty.value }}">
-                        </div>
-
-                        <!-- RAM Quantity (25% width) -->
-                        <div class="col-md-3">
-                            <br><br>
-                            <button type="button" class="btn btn-sm btn-primary" id="add-processor-btn">
-                                Add RAM
-                            </button>
+                                value="{{ form.ram_qty.value }}" placeholder="e.g. 1,2">
                         </div>
                     </div>
 
@@ -182,35 +133,16 @@ Add Product
                     <div class="row mb-3">
                         <!-- HDD Details (75% width) -->
                         <div class="col-md-9">
-                            <label for="id_hdds" class="form-label">HDD Details</label>
-                            <select id="HDD_Filter" name="HDD_Filter" class="form-control">
-                                <option value="">-- Select HDD Capacity --</option>
-                                <option value="250GB">250GB</option>
-                                <option value="320GB">320GB</option>
-                                <option value="500GB">500GB</option>
-                                <option value="1TB">1TB</option>
-                                <option value="2TB">2TB</option>
-                                <option value="4TB">4TB</option>
-                                <option value="6TB">6TB</option>
-                            </select>
-                            <div class="hdd-field" name="hdds">
-                                {{ form.hdds }}
-                            </div>
+                            <label for="hdd" class="form-label">HDD Details</label>
+                            <input type="text" name="hdd" id="hdd" class="form-control" placeholder="Enter HDD details.  if more > 1 e.g. 500GB Company-name, 1TB Company-name"
+                            style="text-transform: uppercase;">
                             <div class="text-danger">{{ form.hdds.errors }}</div>
                         </div>
 
                         <div class="col-md-6 col-lg-3">
                             <label for="hdd_qty" class="form-label">Qty</label>
                             <input type="text" id="hdd_qty" name="hdd_qty" class="form-control"
-                                value="{{ form.hdd_qty.value }}">
-                        </div>
-
-                        <!-- HDD Quantity (25% width) -->
-                        <div class="col-md-3">
-                            <br><br>
-                            <button type="button" class="btn btn-sm btn-primary" id="add-processor-btn">
-                                Add HDD
-                            </button>
+                                value="{{ form.hdd_qty.value }}" placeholder="e.g. 1,2">
                         </div>
                     </div>
 
@@ -218,20 +150,9 @@ Add Product
                     <div class="row mb-3">
                         <!-- SSD Details (75% width) -->
                         <div class="col-md-9">
-                            <label for="id_ssds" class="form-label">SSD Details</label>
-                            <select id="SSD_Filter" name="SSD_Filter" class="form-control">
-                                <option value="">-- Select SSD Capacity --</option>
-                                <option value="128GB">128GB</option>
-                                <option value="256GB">256GB</option>
-                                <option value="500GB">500GB</option>
-                                <option value="1TB">1TB</option>
-                                <option value="2TB">2TB</option>
-                                <option value="4TB">4TB</option>
-                            </select>
-                            
-                            <div class="ssd-field" name="ssds">
-                                {{ form.ssds }}
-                            </div>
+                            <label for="ssd" class="form-label">SSD Details</label>
+                            <input type="text" name="ssd" id="ssd" class="form-control" placeholder="Enter SSD details.  if more > 1 e.g. 256GB Company-name, 512GB Company-name"
+                            style="text-transform: uppercase;">
                             <div class="text-danger">{{ form.ssds.errors }}</div>
                         </div>
 
@@ -239,18 +160,9 @@ Add Product
                         <div class="col-md-6 col-lg-3">
                             <label for="ssd_qty" class="form-label">Qty</label>
                             <input type="text" id="ssd_qty" name="ssd_qty" class="form-control"
-                                value="{{ form.ssd_qty.value }}">
-                        </div>
-
-                        <!-- SSD Quantity (25% width) -->
-                        <div class="col-md-3">
-                            <br><br>
-                            <button type="button" class="btn btn-sm btn-primary" id="add-processor-btn">
-                                Add SSD
-                            </button>
+                                value="{{ form.ssd_qty.value }}" placeholder="e.g. 1,2">
                         </div>
                     </div>
-
 
                     <!-- SMPS Section -->
                     <div class="row mb-3">

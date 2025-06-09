@@ -24,11 +24,12 @@
         </a>
     </div>
 
-    <!-- Sale items and details -->
     <form id="form_sale" action="{% url 'sale-create' %}" class="saleForm" method="post">
-        <div class="row">
-            <!-- Left column -->
-            <div class="col-lg-8 mb-4">
+        {% csrf_token %}
+    
+        <!-- Sale Items Table (Full Width at Top) -->
+        <div class="row mb-4">
+            <div class="col-12">
                 <div class="card border-light shadow-sm">
                     <div class="card-header bg-success text-white">
                         <h5 class="mb-0">Sale Items</h5>
@@ -36,15 +37,15 @@
                     <div class="card-body">
                         <!-- Search item -->
                         <div class="mb-4">
-                            <label for="searchbox_items" class="form-label">Search Item:</label>
-                            <select class="form-select select2" name="searchbox_items" id="searchbox_items" aria-label="Search items"></select>
+                            <label for="searchbox_items" class="form-label" >Search Item:</label>
+                            <select class="form-select select2" name="searchbox_items" id="searchbox_items" aria-label="Search items" ></select>
                         </div>
-
-                        <!-- Delete all items from sale -->
+    
+                        <!-- Delete all items -->
                         <button type="button" class="btn btn-danger btn-sm mb-4 deleteAll">
                             <i class="fas fa-trash-alt me-2"></i> Delete All Items
                         </button>
-
+    
                         <!-- Items Table -->
                         <div class="table-responsive my-3">
                             <table class="table table-bordered table-striped" id="table_items">
@@ -52,29 +53,33 @@
                                     <tr>
                                         <th>#</th>
                                         <th>Name</th>
+                                        <th>Serial No</th>
+                                        <th>Description</th>
                                         <th>Price</th>
                                         <th>Quantity</th>
                                         <th>Total</th>
                                         <th class="text-center">Actions</th>
                                     </tr>
                                 </thead>
-                                <tbody>
-                                </tbody>
+                                <tbody></tbody>
+                                <p class="text-muted mt-2">
+                                    <small><span class="badge bg-warning text-dark">Note:</span> Highlighted rows indicate low stock.</small>
+                                </p>
                             </table>
                         </div>
                     </div>
                 </div>
             </div>
-            <!-- End Left Column -->
-
-            <!-- Right Column -->
-            <div class="col-lg-4 mb-4">
+        </div>
+    
+        <!-- Sale Details Section -->
+        <div class="row">
+            <div class="col-lg-6 mb-4">
                 <div class="card border-light shadow-sm">
                     <div class="card-header bg-success text-white">
                         <h5 class="mb-0">Sale Details</h5>
                     </div>
                     <div class="card-body">
-                        {% csrf_token %}
                         <div class="mb-3">
                             <label for="customer" class="form-label">Customer</label>
                             <select name="customer" class="form-select" id="customer" aria-label="Customer" required>
@@ -98,19 +103,24 @@
                         </div>
                         <div class="mb-3">
                             <label for="grand_total" class="form-label">Grand Total</label>
-                            <input name="grand_total" type="number" class="form-control" id="grand_total" aria-label="Grand Total" required>
+                            <input name="grand_total" type="number" class="form-control" id="grand_total" aria-label="Grand Total" required readonly>
                         </div>
                         <div class="mb-3">
                             <label for="amount_paid" class="form-label">Amount Payed</label>
-                            <input name="amount_paid" type="number" class="form-control" id="amount_paid" aria-label="Amount Paid" required>
+                            <input name="amount_paid" type="number" class="form-control" id="amount_paid" aria-label="Amount Paid" required readonly>
                         </div>
                         <button type="submit" class="btn btn-success w-100">Create Sale</button>
                     </div>
                 </div>
             </div>
-            <!-- End Right Column -->
+    
+            <!-- Add optional second column for future use or notes -->
+            <div class="col-lg-6 mb-4">
+                <!-- You can add another card or content here if needed -->
+            </div>
         </div>
     </form>
+    
 </div>
 {% endblock content %}
 
@@ -177,70 +187,62 @@
 
             $('input[name="sub_total"]').val(this.products.sub_total);
             $('input[name="tax_amount"]').val(this.products.tax_amount);
+
+            // Grand total = subtotal + tax
+            this.products.grand_total = roundTo(this.products.sub_total + this.products.tax_amount, 2);
             $('input[name="grand_total"]').val(this.products.grand_total);
+
+            // Auto-fill Amount Payed = Grand Total
+            $('input[name="amount_paid"]').val(this.products.grand_total);
+
         },
         // Adds an item to the sale object
         add_item: function (item) {
+            const exists = this.products.items.some(existing => existing.id === item.id);
+            if (exists) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Item already added',
+                    text: `${item.name} (Serial: ${item.serial_no}) is already in the sale.`
+                });
+                return;
+            }
+
             this.products.items.push(item);
             this.list_item();
         },
         // Shows the selected item in the table
         list_item: function () {
-            // Calculate the sale
             this.calculate_sale();
 
-            tblItems = $("#table_items").DataTable({
-                destroy: true,
-                data: this.products.items,
-                columns: [
-                    {"data": "number"},
-                    {"data": "name"},
-                    {"data": "price"},
-                    {"data": "quantity"},
-                    {"data": "total_item"},
-                    {"data": "id"},
-                ],
-                columnDefs: [
-                    {
-                        // Quantity
-                        class: 'text-center',
-                        targets: [3],
-                        render: function (data, type, row) {
-                            return '<input name="quantity" type="text" class="form-control form-control-xs text-center input-sm" autocomplete="off" value="' + row.quantity + '">';
-                        },
-                    },
-                    {
-                        // Item price and total
-                        class: 'text-right',
-                        targets: [2, 4],
-                        render: function (data, type, row) {
-                            return parseFloat(data).toFixed(2) + ' $';
-                        },
-                        
-                    },
-                    {
-                        // Delete button
-                        class: 'text-center',
-                        targets: [-1],
-                        orderable: false,
-                        render: function (data, type, row) {
-                            return '<a rel="delete" type="button" class="btn btn-sm btn-danger" data-bs-toggle="tooltip" title="Delete item"> <i class="fas fa-trash-alt fa-xs"></i> </a>';
-                        },
-                    },
-                ],
-                rowCallback(row, data, displayNun, displayIndex, dataIndex) {
-                    $(row).find("input[name='quantity']").TouchSpin({
-                        min: 1,
-                        max: 100, // Máximo de acuerdo al stock de cada itemo
-                        step: 1,
-                        decimals: 0,
-                        boostat: 1,
-                        maxboostedstep: 3,
-                        postfix: ''
-                    });
-                },
+            const tbody = $('#table_items tbody');
+            tbody.empty();
+
+            this.products.items.forEach((item, index) => {
+                const total = (item.price * item.quantity).toFixed(2);
+                const row = `
+                    <tr>
+                        <td>${index + 1}</td>
+                        <td>${item.name}</td>
+                        <td>${item.serial_no}</td>
+                        <td>
+                            <ul class="mb-0 ps-3">
+                                ${item.description.split(',').map(line => `<li>${line.trim()}</li>`).join('')}
+                            </ul>
+                        </td>
+                        <td><input type="text"  class="form-control  form-control-sm text-center input-price" data-index="${index}" min="0" step="0.01" style="width: 100px;"></td>
+                        <td><input type="text" class="form-control form-control-sm text-center input-quantity" value="${item.quantity}" data-index="${index}" min="1" ></td>
+                        <td class="text-end">${total} RS</td>
+                        <td class="text-center">
+                            <button type="button" class="btn btn-sm btn-danger btn-delete" data-index="${index}">
+                                <i class="fas fa-trash-alt"></i>
+                            </button>
+                        </td>
+                    </tr>
+                `;
+                tbody.append(row);
             });
-        },
+        }
     };
 
     $(document).ready(function () {
@@ -285,15 +287,17 @@
         });
 
         // Select2 items searchbox
+        // Select2 for item search
         $('#searchbox_items').select2({
-            delay: 250,
-            placeholder: 'Search an item',
-            minimumInputLength: 1,
+            theme: "bootstrap4",
+            placeholder:"Enter Product Serial Number",
             allowClear: true,
-            templateResult: template_item_searchbox,
+            minimumInputLength: 1,
             ajax: {
-                url: "{% url 'get_items' %}",
+                url: "{% url 'get_items' %}",  // Make sure this URL is correct
                 type: 'POST',
+                dataType: 'json',
+                delay: 250,
                 data: function (params) {
                     return {
                         term: params.term,
@@ -301,92 +305,70 @@
                     };
                 },
                 processResults: function (data) {
+                    if (data.error) {
+                        return { results: [] };
+                    }
+
                     return {
-                        results: data
+                        results: $.map(data, function (item) {
+                            return {
+                                id: item.id,
+                                name: item.name,
+                                serial_no: item.serial_no,
+                                description: item.description,
+                                quantity: item.quantity,
+                                price: item.total_item
+                            };
+                        })
                     };
                 }
+            },
+            templateResult: template_item_searchbox,
+            templateSelection: function (repo) {
+                return repo.name || repo.text;
+            },
+            escapeMarkup: function (markup) {
+                return markup;
             }
         }).on('select2:select', function (e) {
-            // When an item is selected from the searchbox
             var data = e.params.data;
-            // Add number, subtotal, and quantity of the item to the dictionary
-            data.number = number;
-            number++; // Increase the item number in the table
-            // Add the item to the sale object
+            data.price = parseFloat(data.price);
+            data.quantity = 1;
             sale.add_item(data);
-            // Clear the searchbox after the item is selected
-            $(this).val('').trigger('change.select2');
+            $(this).val(null).trigger('change'); // clear the search box
         });
+
 
         // Tables Events
-        $('#table_items tbody').on('click', 'a[rel="delete"]', function () {
-            // When an item is deleted
-            var tr = tblItems.cell($(this).closest('td, li')).index();
-            item_name = (tblItems.row(tr.row).data().name);
+        // Handle price or quantity change
+        // Handle price or quantity change without redrawing the table
+        $('#table_items tbody').on('input', '.input-price, .input-quantity', function () {
+            const index = $(this).data('index');
+            const price = parseFloat($(`.input-price[data-index="${index}"]`).val()) || 0;
+            const quantity = parseInt($(`.input-quantity[data-index="${index}"]`).val()) || 1;
 
-            Swal.fire({
-                customClass: {
-                    confirmButton: 'ml-3 btn btn-danger',
-                    cancelButton: 'btn btn-success'
-                },
-                buttonsStyling: false,
-                title: "Are you sure you want to delete this item from the sale?",
-                text: item_name,
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonText: 'Delete',
-                cancelButtonText: 'Cancel',
-                reverseButtons: true,
-            }).then((result) => {
-                // If confirmed
-                if (result.isConfirmed) {
-                    // Delete the item
-                    sale.products.items.splice(tr.row, 1);
-                    // List the table again
-                    sale.list_item();
-                    Swal.fire('The item was eliminated!', '', 'success');
-                }
-            });
-        }).on('change keyup', 'input[name="quantity"]', function () {
-            // When an item changes its quantity
-            var quantity = parseInt($(this).val());
-            var tr = tblItems.cell($(this).closest('td, li')).index();
-            // Update the item quantity in the sale object
-            sale.products.items[tr.row].quantity = quantity;
-            // Calculate the sale with the new quantity
-            sale.calculate_sale();
-            // Find the row to update the item total
-            $('td:eq(4)', tblItems.row(tr.row).node()).html(sale.products.items[tr.row].total_item + ' $');
+            // Update the item data
+            sale.products.items[index].price = price;
+            sale.products.items[index].quantity = quantity;
+            sale.products.items[index].total_item = price * quantity;
+
+            // Update the total cell directly without full redraw
+            const $row = $(this).closest('tr');
+            const total = (price * quantity).toFixed(2);
+            $row.find('td').eq(6).text(`${total} $`);
+
+            // Recalculate totals for the whole sale
+            sale.calculate_sale();  // This only updates the summary fields
         });
 
-        // Delete all items
-        $('.deleteAll').on('click', function () {
-            // If there are no items, don't do anything
-            if (sale.products.items.length === 0) return false;
-            // Alert the user
-            Swal.fire({
-                customClass: {
-                    confirmButton: 'ml-3 btn btn-danger',
-                    cancelButton: 'btn btn-success'
-                },
-                buttonsStyling: false,
-                title: "Are you sure you want to delete all items from the sale?",
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonText: 'Delete all',
-                cancelButtonText: 'Cancel',
-                reverseButtons: true,
-            }).then((result) => {
-                // If confirmed
-                if (result.isConfirmed) {
-                    // Remove all items from the sale object
-                    sale.products.items = [];
-                    // Recalculate the sale
-                    sale.list_item();
-                    Swal.fire('All items were eliminated!', '', 'success');
-                }
-            });
+
+        // Handle delete
+        $('#table_items tbody').on('click', '.btn-delete', function () {
+            const index = $(this).data('index');
+            sale.products.items.splice(index, 1);
+            sale.list_item();
         });
+
 
         // Items datatable
         tblItems = $('#table_items').DataTable({
@@ -400,14 +382,19 @@
 
         // Item searchbox templateResult
         function template_item_searchbox(repo) {
+            if (repo.loading) return repo.text;
+
             return $(`
-                <div class="card mb-3">
-                    <div class="card-body">
-                        <small class="card-title">${repo.name}</small>
+                <div class="card mb-2">
+                    <div class="card-body py-2">
+                        <h6 class="card-title mb-1">${repo.name} (${repo.serial_no})</h6>
+                        <p class="card-text"><small>${repo.description}</small></p>
                     </div>
                 </div>
             `);
         }
+
+
 
         // Helper functions
         function getAjax(type, url, data, successCallback, errorCallback) {
@@ -440,10 +427,13 @@
                 customer: $('select[name="customer"]').val(),
                 sub_total: $('input[name="sub_total"]').val(),
                 grand_total: grandTotal,
+                tax_amount: $('input[name="tax_amount"]').val(),
+                tax_percentage: $('input[name="tax_percentage"]').val(),
                 amount_paid: amountPaid,
                 amount_change: amountChange,
                 items: sale.products.items
             };
+
 
             // Check if amount_change is present
             if (isNaN(amountChange)) {

@@ -54,14 +54,27 @@ Update Product
                             <div class="row mb-3">
                                 <!-- Reduced width for Processor, RAM, HDD, and SSD details -->
                                 <div class="col-md-6 col-lg-8">
-                                    <label for="processor" class="form-label">Processor</label>
-                                    <select id="processor" name="processor" class="form-control">
-                                        {% for option in processor_options1 %}
-                                            <option value="{{ option }}">{{ option }}</option>
-                                        {% empty %}
-                                        <option value="">No processors available</option>
+                                    <label for="processor_generation" class="form-label">Select Generation</label>
+                                    <select id="processor_generation" class="form-control" onchange="filterProcessorsByGeneration()">
+                                        <option value="">-Select Generation-</option>
+                                        {% for generation, options in processor_by_generation.items %}
+                                            {% if options %}
+                                                <option value="{{ generation }}">{{ generation }}</option>
+                                            {% endif %}
                                         {% endfor %}
                                     </select>
+                                    <label for="processor" class="form-label">Processor Details</label>
+                                    <select id="processor" name="processor" class="form-control">
+                                        <option value="">-Select Processor-</option>
+                                        {% for generation, options in processor_by_generation.items %}
+                                            {% if options %}
+                                            {% for option in options %}
+                                                <option data-generation="{{ generation }}" value="{{ option }}">{{ option }}</option>
+                                            {% endfor %}
+                                            {% endif %}
+                                        {% endfor %}
+                                    </select>
+                                    
                                     <div class="text-danger">{{ form.processor.errors }}</div>
                                 </div>
 
@@ -76,14 +89,24 @@ Update Product
 
                             <div class="row mb-3">
                                 <div class="col-md-6 col-lg-8">
-                                    <label for="ram" class="form-label">RAM Details</label>
-                                    <select id="ram" name="ram" class="form-control">
-                                        {% for option in ram_options1 %}
-                                            <option value="{{ option }}">{{ option }}</option>
-                                        {% empty %}
-                                        <option value="">No rams available</option>
+                                    <label for="ram_size" class="form-label">RAM Size</label>
+                                    <select id="ram_size" class="form-control" onchange="filterComponentBySizeram()">
+                                        <option value="">-Select RAM Size-</option>
+                                        {% for size, options in rambysize.items %}
+                                            <option value="{{ size }}">{{ size }}</option>
                                         {% endfor %}
                                     </select>
+                                
+                                    <label for="ram" class="form-label">RAM Details</label>
+                                    <select id="ram" name="ram" class="form-control">
+                                        <option value="">-Select RAM-</option>
+                                        {% for size, options in rambysize.items %}
+                                            {% for option in options %}
+                                                <option data-size="{{ size }}" value="{{ option }}">{{ option }}</option>
+                                            {% endfor %}
+                                        {% endfor %}
+                                    </select>                   
+                                
                                     <div class="text-danger">{{ form.ram.errors }}</div>
                                 </div>
 
@@ -96,14 +119,22 @@ Update Product
 
                             <div class="row mb-3">
                                 <div class="col-md-6 col-lg-8">
-                                    <label for="hdd" class="form-label">HDD Details</label>
-                                    <select id="hdd" name="hdd" class="form-control">
-                                        {% for option in hdd_options1 %}
-                                            <option value="{{ option }}">{{ option }}</option>
-                                        {% empty %}
-                                        <option value="">No hdd available</option>
+                                    <label for="hdd_size" class="form-label">HDD Size</label>
+                                    <select id="hdd_size" class="form-control" onchange="filterComponentBySizehdd()">
+                                        <option value="">-Select HDD Size-</option>
+                                        {% for size, options in hddbysize.items %}
+                                            <option value="{{ size }}">{{ size }}</option>
                                         {% endfor %}
                                     </select>
+                                    <label for="hdd" class="form-label">HDD Details</label>
+                                    <select id="hdd" name="hdd" class="form-control">
+                                        <option value="">-Select HDD-</option>
+                                        {% for size, options in hddbysize.items %}
+                                            {% for option in options %}
+                                                <option data-size="{{ size }}" value="{{ option }}">{{ option }}</option>
+                                            {% endfor %}
+                                        {% endfor %}
+                                    </select>    
                                     <div class="text-danger">{{ form.hdd.errors }}</div>
                                 </div>
 
@@ -116,12 +147,20 @@ Update Product
 
                             <div class="row mb-3">
                                 <div class="col-md-6 col-lg-8">
+                                    <label for="ssd_size" class="form-label">SSD Size</label>
+                                    <select id="ssd_size" class="form-control" onchange="filterComponentBySizessd()">
+                                        <option value="">-Select SSD Size-</option>
+                                        {% for size, options in ssdbysize.items %}
+                                            <option value="{{ size }}">{{ size }}</option>
+                                        {% endfor %}
+                                    </select>
                                     <label for="ssd" class="form-label">SSD Details</label>
                                     <select id="ssd" name="ssd" class="form-control">
-                                        {% for option in ssd_options1 %}
-                                            <option value="{{ option }}">{{ option }}</option>
-                                        {% empty %}
-                                        <option value="">No ssd available</option>
+                                        <option value="">-Select SSD-</option>
+                                        {% for size, options in ssdbysize.items %}
+                                            {% for option in options %}
+                                                <option data-size="{{ size }}" value="{{ option }}">{{ option }}</option>
+                                            {% endfor %}
                                         {% endfor %}
                                     </select>
                                     <div class="text-danger">{{ form.ssd.errors }}</div>
@@ -252,7 +291,8 @@ Update Product
                                         value="{{ form.processor_qty.value }}">
                                 </div> -->
                             </div>
-
+                            
+                            
                             <div class="row mb-3">
                                 <div class="col-md-6 col-lg-9">
                                     <label for="ram" class="form-label">
@@ -362,11 +402,11 @@ Update Product
                                 </div>
                             </div>
 
-                            <div class="form-group text-center">
+                            <!-- <div class="form-group text-center">
                                 <button class="btn btn-success btn-lg" name="button2" type="submit">
                                     <i class="fas fa-check"></i> Update Product
                                 </button>
-                            </div>
+                            </div> -->
                         </form>
                     </div>
                 </div>
@@ -562,6 +602,91 @@ Update Product
 </div>
 
 <script>
+
+    function filterProcessorsByGeneration() {
+        var selectedGen = document.getElementById("processor_generation").value;
+        var processorSelect = document.getElementById("processor");
+        var options = processorSelect.options;
+
+        for (var i = 0; i < options.length; i++) {
+            var opt = options[i];
+            var gen = opt.getAttribute("data-generation");
+            
+            if (!selectedGen || gen === selectedGen) {
+                opt.style.display = "";
+            } else {
+                opt.style.display = "none";
+            }
+        }
+
+        // Optionally reset selection
+        processorSelect.selectedIndex = 0;
+    }
+
+    function filterComponentBySizeram() {
+    var selectedSize = document.getElementById("ram_size").value;
+    var ramSelect = document.getElementById("ram");
+    var options = ramSelect.options;
+
+    for (var i = 0; i < options.length; i++) {
+        var opt = options[i];
+        var size = opt.getAttribute("data-size");
+
+        if (!selectedSize || size === selectedSize) {
+            opt.style.display = "";
+        } else {
+            opt.style.display = "none";
+        }
+    }
+
+    // Optionally reset selection
+    ramSelect.selectedIndex = 0;
+    }
+
+    function filterComponentBySizehdd() {
+    var selectedSize = document.getElementById("hdd_size").value;
+    var ramSelect = document.getElementById("hdd");
+    var options = ramSelect.options;
+
+    for (var i = 0; i < options.length; i++) {
+        var opt = options[i];
+        var size = opt.getAttribute("data-size");
+
+        if (!selectedSize || size === selectedSize) {
+            opt.style.display = "";
+        } else {
+            opt.style.display = "none";
+        }
+    }
+
+    // Optionally reset selection
+    ramSelect.selectedIndex = 0;
+    }
+
+    function filterComponentBySizessd() {
+    var selectedSize = document.getElementById("ssd_size").value;
+    var ramSelect = document.getElementById("ssd");
+    var options = ramSelect.options;
+
+    for (var i = 0; i < options.length; i++) {
+        var opt = options[i];
+        var size = opt.getAttribute("data-size");
+
+        if (!selectedSize || size === selectedSize) {
+            opt.style.display = "";
+        } else {
+            opt.style.display = "none";
+        }
+    }
+
+    // Optionally reset selection
+    ramSelect.selectedIndex = 0;
+    }
+
+
+    
+
+
     // Toggle the replacement description fields
     function toggleReplacementDescription() {
         var smpsStatus = document.getElementById("smps_status").value;

@@ -90,17 +90,23 @@ class ItemForm(forms.ModelForm):
         fields = [
             'name', 'serialno', 'make_and_models',
             'processors', 'rams', 'hdds', 'ssds',
-            'smps_status', 'motherboard_status', 
-            'smps_replacement_description', 'motherboard_replacement_description',
+            # 'smps_status', 'motherboard_status', 
+            # 'smps_replacement_description', 'motherboard_replacement_description',
         ]
         widgets = {
-            'name': forms.TextInput(attrs={'class': 'form-control'}),
-            'serialno': forms.TextInput(attrs={'class': 'form-control'}),
-            'make_and_models': forms.TextInput(attrs={'class': 'form-control'}),
-            'smps_status': forms.Select(attrs={'class': 'form-control'}),
-            'smps_replacement_description': forms.TextInput(attrs={'class': 'form-control'}),
-            'motherboard_status': forms.Select(attrs={'class': 'form-control'}),
-            'motherboard_replacement_description': forms.TextInput(attrs={'class': 'form-control'}),
+            'name': forms.TextInput(attrs={'class': 'form-control',
+                'placeholder': 'Enter Product Name',
+                'style': 'text-transform: uppercase;'}),
+            'serialno': forms.TextInput(attrs={'class': 'form-control',
+                'placeholder': 'Enter Serial No',
+                'style': 'text-transform: uppercase;'}),
+            'make_and_models': forms.TextInput(attrs={'class': 'form-control',
+                'placeholder': 'Enter make and models',
+                'style': 'text-transform: uppercase;'}),
+            # 'smps_status': forms.Select(attrs={'class': 'form-control'}),
+            # 'smps_replacement_description': forms.TextInput(attrs={'class': 'form-control'}),
+            # 'motherboard_status': forms.Select(attrs={'class': 'form-control', }),
+            # 'motherboard_replacement_description': forms.TextInput(attrs={'class': 'form-control'}),
         }
         
 

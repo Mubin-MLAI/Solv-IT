@@ -177,6 +177,7 @@ def SaleCreateView(request):
                     if field not in data:
                         raise ValueError(f"Missing required field: {field}")
 
+                print('tax_amount tax_percentage',float(data.get("tax_amount", 0.0)), float(data.get("tax_percentage", 0.0)))
                 # Create sale attributes
                 sale_attributes = {
                     "customer": Customer.objects.get(id=int(data['customer'])),
@@ -192,6 +193,7 @@ def SaleCreateView(request):
                 with transaction.atomic():
                     # Create the sale
                     new_sale = Sale.objects.create(**sale_attributes)
+                    print('Sale created: {new_sale}')
                     logger.info(f"Sale created: {new_sale}")
 
                     # Create sale details and update item quantities
@@ -206,8 +208,12 @@ def SaleCreateView(request):
                             ]
                         ):
                             raise ValueError("Item is missing required fields")
+                        
+                        print('int(item["id"])', int(item["id"]))
+                        
 
                         item_instance = Item.objects.get(id=int(item["id"]))
+                        print('item_instance.quantity,  int(item["quantity"])', item_instance.quantity , int(item["quantity"]))
                         if item_instance.quantity < int(item["quantity"]):
                             raise ValueError(f"Not enough stock for item: {item_instance.name}")
 

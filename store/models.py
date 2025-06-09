@@ -163,6 +163,7 @@ class Item(models.Model):
     smps_replacement_description = models.TextField(max_length=100,null=True, blank=True)
     motherboard_status = models.CharField(max_length=50, choices=STATUS_CHOICES, default='available')
     motherboard_replacement_description = models.TextField(max_length=100, null=True, blank=True)
+    quantity = models.IntegerField(default=0)
 
 
     def __str__(self):
