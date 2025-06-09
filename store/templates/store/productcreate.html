@@ -1,5 +1,6 @@
 {% extends "store/base.html" %}
 {% load static %}
+{% load querystring from django_tables2 %}
 
 {% block title %}
 Add Product
@@ -59,6 +60,29 @@ Add Product
 <br>
 <div class="container my-5">
     <div class="row justify-content-center">
+        <!-- Excel Import Form -->
+        <div class="card shadow-sm border-light w-100">
+            <div class="card-body">
+                <h5 class="card-title mb-3">Import Products from Excel</h5>
+                {% if error %}
+                    <div class="alert alert-danger">{{ error }}</div>
+                {% endif %}
+                {% if success %}
+                    <div class="alert alert-success">{{ success }}</div>
+                {% endif %}
+
+                <form method="POST" enctype="multipart/form-data" action="{% url 'upload_category_items' %}">
+                    {% csrf_token %}
+                    <div class="row mb-3">
+                        <div class="col-md-4">
+                            {{ form.file.label_tag }}
+                            {{ form.file }}
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-success btn-sm rounded-pill shadow-sm"><i class="fa-solid fa-download"></i> Upload Product </button>
+                </form>
+            </div>
+        </div>
         <div class="card shadow-sm border-light">
             <div class="card-body">
                 {% if request.user.profile.role != 'OP' %}

@@ -33,7 +33,8 @@ from .views import (
     add_processor1,
     create_processor,
     get_category_items,
-    operativedashboard
+    operativedashboard,
+    upload_category_items
 )
 
 # URL patterns
@@ -172,6 +173,8 @@ urlpatterns = [
     # path('add-processor/', views.add_processor, name='add_processor')
     path('get-category-items/', get_category_items, name='get-category-items'),
     path('operative-dashboard/', operativedashboard, name='operative-dashboard'),
+    path('upload-category-items/', upload_category_items, name='upload_category_items'),
+
 ]
 
 # Static media files configuration for development

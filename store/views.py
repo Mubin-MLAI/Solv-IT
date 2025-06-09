@@ -50,6 +50,7 @@ from .forms import ItemForm,  DeliveryForm, RamForm, SddForm, HddForm, Processor
 from .tables import ItemTable, CategoryItemTable
 import pandas as pd
 from django.db import transaction
+from .forms import ExcelUploadForm
 
 
 
@@ -1480,6 +1481,67 @@ def operativedashboard(request):
         return render(request, "store/operative_productupdate.html")
     else:
         return render(request, "store/productslist.html")
+
+
+def create_category_items(spec_string, serial_no, category, quantity):
+    names = [n.strip() for n in str(spec_string).split(',') if n.strip()]
+    quantitys = [n for n in str(quantity).split(',') if n]
+    for name, quantity in zip( names, quantitys) :
+        catogaryitem.objects.create(
+            name=name,
+            serial_no=serial_no,
+            category=category,
+            quantity=quantity,
+            unit_price=0.0
+        )
+
+
+def upload_category_items(request):
+    if request.method == 'POST':
+        form = ExcelUploadForm(request.POST, request.FILES)
+        if form.is_valid():
+            excel_file = request.FILES['file']
+            try:
+                df = pd.read_excel(excel_file)
+
+                for _, row in df.iterrows():
+                    serial_no = str(row.get('Serialno')).strip()
+                    name = row.get('Name', '').strip()
+                    
+
+                    # Create the Item entry
+                    item = Item.objects.create(
+                        name=name,
+                        serialno=serial_no,
+                        make_and_models=row.get('Make and models', ''),
+                        smps_status=row.get('Smps status', '').strip(),
+                        motherboard_status=row.get('Motherboard status', '').strip(),
+                        quantity=row.get('quantity', '')
+                    )
+
+                    # Inside your row loop
+                    create_category_items(row.get('Processor', ''), serial_no, 'processor', row.get('processor_qty', ''))
+                    create_category_items(row.get('Ram', ''), serial_no, 'ram', row.get('ram_qty', ''))
+                    create_category_items(row.get('Hdd', ''), serial_no, 'hdd', row.get('hdd_qty', ''))
+                    create_category_items(row.get('Ssd', ''), serial_no, 'ssd',row.get('ssd_qty', ''))
+
+
+                return render(request, 'store/productcreate.html', {
+                    'form': ExcelUploadForm(),
+                    'success': "Excel imported successfully!"
+                })
+
+            except Exception as e:
+                return render(request, 'store/productcreate.html', {
+                    'form': form,
+                    'error': f"Import failed: {e}"
+                })
+    else:
+        form = ExcelUploadForm()
+
+    return render(request, 'store/productcreate.html', {'form': form})
+
+
         
 
 

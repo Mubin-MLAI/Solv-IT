@@ -84,6 +84,7 @@ class ItemForm(forms.ModelForm):
         required=False,
         widget=forms.SelectMultiple(attrs={'class': 'form-control'})
     )
+    
 
     class Meta:
         model = Item
@@ -122,6 +123,12 @@ class ItemForm(forms.ModelForm):
                 list(self.cleaned_data['ssds'])
             )
         return item
+    
+from django import forms
+
+class ExcelUploadForm(forms.Form):
+    file = forms.FileField(label='Select Excel file')
+
 
 
 class RamForm(forms.ModelForm):
