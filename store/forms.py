@@ -90,7 +90,7 @@ class ItemForm(forms.ModelForm):
         model = Item
         fields = [
             'name', 'serialno', 'make_and_models',
-            'processors', 'rams', 'hdds', 'ssds',
+            'processors', 'rams', 'hdds', 'ssds', 'quantity'
             # 'smps_status', 'motherboard_status', 
             # 'smps_replacement_description', 'motherboard_replacement_description',
         ]
@@ -104,25 +104,34 @@ class ItemForm(forms.ModelForm):
             'make_and_models': forms.TextInput(attrs={'class': 'form-control',
                 'placeholder': 'Enter make and models',
                 'style': 'text-transform: uppercase;'}),
+            'quantity': forms.NumberInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Enter quantity',
+                'min': '0'
+            }),
             # 'smps_status': forms.Select(attrs={'class': 'form-control'}),
             # 'smps_replacement_description': forms.TextInput(attrs={'class': 'form-control'}),
             # 'motherboard_status': forms.Select(attrs={'class': 'form-control', }),
             # 'motherboard_replacement_description': forms.TextInput(attrs={'class': 'form-control'}),
         }
+
+    def clean_quantity(self):
+        qty = self.cleaned_data.get('quantity')
+        if qty is not None and qty < 0:
+            raise forms.ValidationError("Quantity cannot be negative.")
+        return qty
         
 
     def save(self, commit=True):
         item = super().save(commit=False)
         if commit:
             item.save()
-            # Set the unified components M2M field
-            item.catogary_item_clone.set(
-                list(self.cleaned_data['processors']) +
-                list(self.cleaned_data['rams']) +
-                list(self.cleaned_data['hdds']) +
-                list(self.cleaned_data['ssds'])
-            )
+            item.processors.set(self.cleaned_data['processors'])
+            item.rams.set(self.cleaned_data['rams'])
+            item.hdds.set(self.cleaned_data['hdds'])
+            item.ssds.set(self.cleaned_data['ssds'])
         return item
+
     
 from django import forms
 

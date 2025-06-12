@@ -138,7 +138,8 @@
                     <ul class="dropdown-menu bg-dark border-0" aria-labelledby="productsDropdown1">
                         <li><a class="dropdown-item text-light {% if request.resolver_match.url_name == 'saleslist' %}active{% endif %}"
                             href="{% url 'saleslist' %}">Sales Orders</a></li>
-                        <li><a class="dropdown-item text-light" href="{% url 'purchaseslist' %}">Purchase Orders</a></li>
+                        <!-- <li><a class="dropdown-item text-light" href="{% url 'purchaseslist' %}">Purchase Orders</a></li> -->
+                        <li><a class="dropdown-item text-light" href="{% url 'cashbanklist' %}">Cash, Bank</a></li>
                     </ul>
                 </li>
                     <!-- <li class="nav-item mb-2">
@@ -150,7 +151,7 @@
                 <li class="nav-item dropdown">
                     <a class="nav-link {% if request.resolver_match.url_name == 'profile_list' or request.resolver_match.url_name == 'customer_list' or request.resolver_match.url_name == 'vendor-list' %} active{% endif %} dropdown-toggle"
                         href="#" id="accountsDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                        <i class="fa fa-users me-2"></i> Accounts
+                        <i class="fa fa-users me-2"></i> User Account
                     </a>
                     <ul class="dropdown-menu bg-dark border-0" aria-labelledby="accountsDropdown">
                         <li><a class="dropdown-item text-light {% if request.resolver_match.url_name == 'profile_list' %}active{% endif %}"

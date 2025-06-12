@@ -23,6 +23,7 @@ from store.models import Item
 from accounts.models import Customer
 from .models import Sale, Purchase, SaleDetail
 from .forms import PurchaseForm
+from store.models import catogaryitem 
 
 
 logger = logging.getLogger(__name__)
@@ -151,8 +152,17 @@ class SaleDetailView(LoginRequiredMixin, DetailView):
     """
 
     model = Sale
-    template_name = "transactions/saledetail.html"
+    template_name = "transactions/invoice.html"
 
+
+from django.shortcuts import render
+from django.http import JsonResponse
+from django.db import transaction
+import json
+import logging
+from .models import Customer, Item, Sale, SaleDetail
+
+logger = logging.getLogger(__name__)
 
 def SaleCreateView(request):
     context = {
@@ -161,121 +171,230 @@ def SaleCreateView(request):
         "items": [d.to_select3() for d in Item.objects.all()]
     }
 
-    if request.method == 'POST':
-        if is_ajax(request=request):
-            try:
-                # Load the JSON data from the request body
-                data = json.loads(request.body)
-                logger.info(f"Received data: {data}")
+    if request.method == 'POST' and is_ajax(request=request):
+        # try:
+        data = json.loads(request.body)
+        logger.info(f"Received data: {data}")
 
-                # Validate required fields
-                required_fields = [
-                    'customer', 'sub_total', 'grand_total',
-                    'amount_paid', 'amount_change', 'items'
-                ]
-                for field in required_fields:
-                    if field not in data:
-                        raise ValueError(f"Missing required field: {field}")
+        # ✅ Validate required fields
+        required_fields = [
+            'customer', 'sub_total', 'grand_total',
+            'amount_paid', 'amount_change', 'items'
+        ]
+        for field in required_fields:
+            if field not in data:
+                raise ValueError(f"Missing required field: {field}")
 
-                print('tax_amount tax_percentage',float(data.get("tax_amount", 0.0)), float(data.get("tax_percentage", 0.0)))
-                # Create sale attributes
-                sale_attributes = {
-                    "customer": Customer.objects.get(id=int(data['customer'])),
-                    "sub_total": float(data["sub_total"]),
-                    "grand_total": float(data["grand_total"]),
-                    "tax_amount": float(data.get("tax_amount", 0.0)),
-                    "tax_percentage": float(data.get("tax_percentage", 0.0)),
-                    "amount_paid": float(data["amount_paid"]),
-                    "amount_change": float(data["amount_change"]),
+        # ✅ Build sale (main) attributes — no "item" here
+        sale_attributes = {
+            "customer": Customer.objects.get(id=int(data['customer'])),
+            "sub_total": float(data["sub_total"]),
+            "grand_total": float(data["grand_total"]),
+            "tax_amount": float(data.get("tax_amount", 0.0)),
+            "tax_percentage": float(data.get("tax_percentage", 0.0)),
+            "amount_paid": float(data["amount_paid"]),
+            "amount_change": float(data["amount_change"]),
+        }
+
+        with transaction.atomic():
+            # ✅ Create Sale (master)
+            new_sale = Sale.objects.create(**sale_attributes)
+            logger.info(f"Sale created: {new_sale}")
+
+            # ✅ Process each item
+            items = data["items"]
+            if not isinstance(items, list):
+                raise ValueError("Items should be a list")
+
+            for item in items:
+                if not all(k in item for k in ["id", "price", "quantity", "total_item"]):
+                    raise ValueError("Item is missing required fields")
+
+                item_instance = Item.objects.get(id=int(item["id"]))
+
+                if item_instance.quantity < int(item["quantity"]):
+                    raise ValueError(f"Not enough stock for item: {item_instance.name}")
+
+                # ✅ Auto-generate description
+                components = catogaryitem.objects.filter(serial_no=item_instance.serialno)
+                grouped = {
+                    'processor': [],
+                    'ram': [],
+                    'hdd': [],
+                    'ssd': []
                 }
 
-                # Use a transaction to ensure atomicity
-                with transaction.atomic():
-                    # Create the sale
-                    new_sale = Sale.objects.create(**sale_attributes)
-                    print('Sale created: {new_sale}')
-                    logger.info(f"Sale created: {new_sale}")
+                for comp in components:
+                    grouped[comp.category].append(f"{comp.name} X({comp.quantity})")
 
-                    # Create sale details and update item quantities
-                    items = data["items"]
-                    if not isinstance(items, list):
-                        raise ValueError("Items should be a list")
+                description = ""
+                for cat in ['processor', 'ram', 'hdd', 'ssd']:
+                    if grouped[cat]:
+                        category_display = cat.upper()
+                        values = ", ".join(grouped[cat])
+                        description += f"{category_display}: {values}<br>"
 
-                    for item in items:
-                        if not all(
-                            k in item for k in [
-                                "id", "price", "quantity", "total_item"
-                            ]
-                        ):
-                            raise ValueError("Item is missing required fields")
-                        
-                        print('int(item["id"])', int(item["id"]))
-                        
-
-                        item_instance = Item.objects.get(id=int(item["id"]))
-                        print('item_instance.quantity,  int(item["quantity"])', item_instance.quantity , int(item["quantity"]))
-                        if item_instance.quantity < int(item["quantity"]):
-                            raise ValueError(f"Not enough stock for item: {item_instance.name}")
-
-                        detail_attributes = {
-                            "sale": new_sale,
-                            "item": item_instance,
-                            "price": float(item["price"]),
-                            "quantity": int(item["quantity"]),
-                            "total_detail": float(item["total_item"])
-                        }
-                        SaleDetail.objects.create(**detail_attributes)
-                        logger.info(f"Sale detail created: {detail_attributes}")
-
-                        # Reduce item quantity
-                        item_instance.quantity -= int(item["quantity"])
-                        item_instance.save()
-
-                return JsonResponse(
-                    {
-                        'status': 'success',
-                        'message': 'Sale created successfully!',
-                        'redirect': '/transactions/sales/'
-                    }
+                # ✅ Create SaleDetail with generated description
+                SaleDetail.objects.create(
+                    sale=new_sale,
+                    item=item_instance,
+                    quantity=int(item["quantity"]),
+                    price=float(item["price"]),
+                    total_detail=float(item["total_item"]),
+                    description=description  # Auto-generated HTML
                 )
 
-            except json.JSONDecodeError:
-                return JsonResponse(
-                    {
-                        'status': 'error',
-                        'message': 'Invalid JSON format in request body!'
-                    }, status=400)
-            except Customer.DoesNotExist:
-                return JsonResponse({
-                    'status': 'error',
-                    'message': 'Customer does not exist!'
-                    }, status=400)
-            except Item.DoesNotExist:
-                return JsonResponse({
-                    'status': 'error',
-                    'message': 'Item does not exist!'
-                    }, status=400)
-            except ValueError as ve:
-                return JsonResponse({
-                    'status': 'error',
-                    'message': f'Value error: {str(ve)}'
-                    }, status=400)
-            except TypeError as te:
-                return JsonResponse({
-                    'status': 'error',
-                    'message': f'Type error: {str(te)}'
-                    }, status=400)
-            except Exception as e:
-                logger.error(f"Exception during sale creation: {e}")
-                return JsonResponse(
-                    {
-                        'status': 'error',
-                        'message': (
-                            f'There was an error during the creation: {str(e)}'
-                        )
-                    }, status=500)
+                # ✅ Update stock
+                item_instance.quantity -= int(item["quantity"])
+                item_instance.save()
+
+        return JsonResponse({
+            'status': 'success',
+            'message': 'Sale created successfully!',
+            'redirect': '/transactions/sales/'
+        })
+
+        # except json.JSONDecodeError:
+        #     return JsonResponse({'status': 'error', 'message': 'Invalid JSON format in request body!'}, status=400)
+        # except Customer.DoesNotExist:
+        #     return JsonResponse({'status': 'error', 'message': 'Customer does not exist!'}, status=400)
+        # except Item.DoesNotExist:
+        #     return JsonResponse({'status': 'error', 'message': 'Item does not exist!'}, status=400)
+        # except ValueError as ve:
+        #     return JsonResponse({'status': 'error', 'message': f'Value error: {str(ve)}'}, status=400)
+        # except TypeError as te:
+        #     return JsonResponse({'status': 'error', 'message': f'Type error: {str(te)}'}, status=400)
+        # except Exception as e:
+        #     logger.error(f"Exception during sale creation: {e}")
+        #     return JsonResponse({'status': 'error', 'message': f'There was an error during the creation: {str(e)}'}, status=500)
 
     return render(request, "transactions/sale_create.html", context=context)
+
+
+# def SaleCreateView(request):
+#     context = {
+#         "active_icon": "sales",
+#         "customers": [c.to_select2() for c in Customer.objects.all()],
+#         "items": [d.to_select3() for d in Item.objects.all()]
+#     }
+
+#     if request.method == 'POST':
+#         if is_ajax(request=request):
+#             try:
+#                 # Load the JSON data from the request body
+#                 data = json.loads(request.body)
+#                 print('logger', f"Received data: {data}")
+#                 logger.info(f"Received data: {data}")
+
+#                 # Validate required fields
+#                 required_fields = [
+#                     'customer','item','sub_total', 'grand_total',
+#                     'amount_paid', 'amount_change', 'items'
+#                 ]
+#                 for field in required_fields:
+#                     if field not in data:
+#                         raise ValueError(f"Missing required field: {field}")
+
+#                 print('tax_amount tax_percentage',float(data.get("tax_amount", 0.0)), float(data.get("tax_percentage", 0.0)))
+#                 # Create sale attributes
+#                 sale_attributes = {
+#                     "customer": Customer.objects.get(id=int(data['customer'])),
+#                     "item": Item.objects.get(id=int(data['items'][0]['id'])),
+#                     "sub_total": float(data["sub_total"]),
+#                     "grand_total": float(data["grand_total"]),
+#                     "tax_amount": float(data.get("tax_amount", 0.0)),
+#                     "tax_percentage": float(data.get("tax_percentage", 0.0)),
+#                     "amount_paid": float(data["amount_paid"]),
+#                     "amount_change": float(data["amount_change"]),
+#                 }
+
+#                 # Use a transaction to ensure atomicity
+#                 with transaction.atomic():
+#                     # Create the sale
+#                     new_sale = Sale.objects.create(**sale_attributes)
+#                     print('Sale created: {new_sale}')
+#                     logger.info(f"Sale created: {new_sale}")
+
+#                     # Create sale details and update item quantities
+#                     items = data["items"]
+#                     if not isinstance(items, list):
+#                         raise ValueError("Items should be a list")
+
+#                     for item in items:
+#                         if not all(
+#                             k in item for k in [
+#                                 "id", "price", "quantity", "total_item"
+#                             ]
+#                         ):
+#                             raise ValueError("Item is missing required fields")
+                        
+#                         print('int(item["id"])', int(item["id"]))
+                        
+
+#                         item_instance = Item.objects.get(id=int(item["id"]))
+#                         print('item_instance.quantity,  int(item["quantity"])', item_instance.quantity , int(item["quantity"]))
+#                         if item_instance.quantity < int(item["quantity"]):
+#                             raise ValueError(f"Not enough stock for item: {item_instance.name}")
+
+                        # detail_attributes = {
+                        #     "sale": new_sale,
+                        #     "item": item_instance,
+                        #     "price": float(item["price"]),
+                        #     "quantity": int(item["quantity"]),
+                        #     "total_detail": float(item["total_item"])
+                        # }
+#                         SaleDetail.objects.create(**detail_attributes)
+#                         logger.info(f"Sale detail created: {detail_attributes}")
+
+#                         # Reduce item quantity
+#                         item_instance.quantity -= int(item["quantity"])
+#                         item_instance.save()
+
+#                 return JsonResponse(
+#                     {
+#                         'status': 'success',
+#                         'message': 'Sale created successfully!',
+#                         'redirect': '/transactions/sales/'
+#                     }
+#                 )
+
+#             except json.JSONDecodeError:
+#                 return JsonResponse(
+#                     {
+#                         'status': 'error',
+#                         'message': 'Invalid JSON format in request body!'
+#                     }, status=400)
+#             except Customer.DoesNotExist:
+#                 return JsonResponse({
+#                     'status': 'error',
+#                     'message': 'Customer does not exist!'
+#                     }, status=400)
+#             except Item.DoesNotExist:
+#                 return JsonResponse({
+#                     'status': 'error',
+#                     'message': 'Item does not exist!'
+#                     }, status=400)
+#             except ValueError as ve:
+#                 return JsonResponse({
+#                     'status': 'error',
+#                     'message': f'Value error: {str(ve)}'
+#                     }, status=400)
+#             except TypeError as te:
+#                 return JsonResponse({
+#                     'status': 'error',
+#                     'message': f'Type error: {str(te)}'
+#                     }, status=400)
+#             except Exception as e:
+#                 logger.error(f"Exception during sale creation: {e}")
+#                 return JsonResponse(
+#                     {
+#                         'status': 'error',
+#                         'message': (
+#                             f'There was an error during the creation: {str(e)}'
+#                         )
+#                     }, status=500)
+
+#     return render(request, "transactions/sale_create.html", context=context)
 
 
 class SaleDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
@@ -370,3 +489,15 @@ class PurchaseDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
         Allow deletion only for superusers.
         """
         return self.request.user.is_superuser
+    
+class cashbankListView(LoginRequiredMixin, ListView):
+    """
+    View to list all purchases with pagination.
+    """
+
+    model = Purchase
+    template_name = "transactions/bank_acc.html"
+    context_object_name = "purchases"
+    paginate_by = 10
+    
+

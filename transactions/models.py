@@ -93,6 +93,9 @@ class SaleDetail(models.Model):
     quantity = models.PositiveIntegerField()
     total_detail = models.DecimalField(max_digits=10, decimal_places=2)
 
+    # ✅ Add this field
+    description = models.TextField(blank=True, null=True)
+
     class Meta:
         db_table = "sale_details"
         verbose_name = "Sale Detail"

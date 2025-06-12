@@ -34,11 +34,13 @@ from .views import (
     create_processor,
     get_category_items,
     operativedashboard,
-    upload_category_items
+    upload_category_items,
+    cashbankListView,
 )
 
 # URL patterns
 urlpatterns = [
+    path('cashbankListView/', cashbankListView.as_view(), name='cashbanklist'),
     # Dashboard
     path('', views.dashboard, name='dashboard'),
 

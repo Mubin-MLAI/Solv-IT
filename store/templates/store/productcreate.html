@@ -187,41 +187,40 @@ Add Product
                                 value="{{ form.ssd_qty.value }}" placeholder="e.g. 1,2">
                         </div>
                     </div>
+                    <div class="col-md-6 col-lg-3">
+                        <label for="quantity" class="form-label">Item Quantity</label>
+                        <input type="number" id="quantity" name="quantity" class="form-control"
+                            value="{{ form.quantity.value }}">
+                    </div>
 
                     <!-- SMPS Section -->
-                    <div class="row mb-3">
-                        <!-- SMPS Status -->
+                    <!-- <div class="row mb-3">
                         <div class="col-md-4">
                             <label for="smps_status" class="form-label">SMPS Status</label>
                             {{ form.smps_status }}
                             <div class="text-danger">{{ form.smps_status.errors }}</div>
                         </div>
-
-                        <!-- Motherboard Status -->
                         <div class="col-md-4" id="motherboard_status_div">
                             <label for="motherboard_status" class="form-label">Motherboard Status</label>
                             {{ form.motherboard_status }}
                             <div class="text-danger">{{ form.motherboard_status.errors }}</div>
                         </div>
-                    </div>
+                    </div> -->
 
-                    <div class="row mb-3">
-                        <!-- SMPS Replacement Description -->
+                    <!-- <div class="row mb-3">
                         <div class="col-md-4" id="smps_replacement_description_div" style="display: none;">
                             <label for="smps_replacement_description" class="form-label">SMPS Replacement
                                 Description</label>
                             <input type="text" id="smps_replacement_description" name="smps_replacement_description"
                                 class="form-control">
                         </div>
-
-                        <!-- Motherboard Replacement Description -->
                         <div class="col-md-4" id="motherboard_replacement_description_div" style="display: none;">
                             <label for="motherboard_replacement_description" class="form-label">Motherboard
                                 Replacement Description</label>
                             <input type="text" id="motherboard_replacement_description"
                                 name="motherboard_replacement_description" class="form-control">
                         </div>
-                    </div>
+                    </div> -->
 
                     <div class="form-group text-center">
                         <button class="btn btn-success btn-lg" type="submit">

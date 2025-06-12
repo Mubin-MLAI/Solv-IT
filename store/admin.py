@@ -69,16 +69,16 @@ class ItemAdmin(admin.ModelAdmin):
     Admin configuration for the Item model.
     """
     list_display = (
-        "serialno","make_and_models","get_categoryitem","smps_status","motherboard_status"
+        "serialno","make_and_models","smps_status","motherboard_status"
     )
     # search_fields = ('name', 'category__name', 'vendor__name')
     # list_filter = ('category', 'vendor')
     ordering = ('name',)
 
     # Custom method to display categories as a comma-separated list
-    def get_categoryitem(self, obj):
-        return ", ".join([Processor.name for Processor in obj.catogary_item_clone.all()])
-    get_categoryitem.short_description = 'catogary_item_clone'
+    # def get_categoryitem(self, obj):
+    #     return ", ".join([Processor.name for Processor in obj.catogary_item_clone.all()])
+    # get_categoryitem.short_description = 'catogary_item_clone'
 
     # Custom method to display vendors as a comma-separated list
     def get_ram(self, obj):

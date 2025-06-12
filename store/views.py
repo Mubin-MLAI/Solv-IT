@@ -216,6 +216,9 @@ class CatogaryItemSearchListView(CatogaryItemListView):
                 )
             )
         return result
+    
+
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
 class ItemSearchListView(ProductListView):
     """
@@ -224,11 +227,12 @@ class ItemSearchListView(ProductListView):
     Attributes:
     - paginate_by: Number of items per page for pagination.
     """
-
+    table_class = ItemTable
     paginate_by = 10
+    SingleTableView.table_pagination = False
 
     def get_queryset(self):
-        result = super(ProductListView, self).get_queryset()
+        result = super().get_queryset()
 
         query = self.request.GET.get("q")
 
@@ -1214,67 +1218,6 @@ def is_ajax(request):
 @csrf_exempt
 @require_POST
 @login_required
-
-# def get_items_ajax_view(request):
-#     if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-#         try:
-#             # Extract and clean search term
-#             term = request.POST.get("term", "").strip()
-#             print("📥 Received POST Data:", request.POST)
-#             print("🔍 Search Term:", term)
-
-#             if not term:
-#                 return JsonResponse({'error': 'No search term provided'}, status=400)
-
-#             # Query matching items
-#             items = Item.objects.filter(serialno__icontains=term)
-#             print("✅ Matching Items Found:", items.count())
-
-#             # Query matching category items
-#             category_items = catogaryitem.objects.filter(serial_no__icontains=term)
-#             print("📦 Matching Category Items Found:", category_items.count())
-
-#             # Initialize configuration dictionary
-#             configuration = {
-#                 'processor': [],
-#                 'ram': [],
-#                 'hdd': [],
-#                 'ssd': []
-#             }
-
-#             # Append category names to their respective keys
-#             for cat_item in category_items:
-#                 print(f"🔎 Checking Category: {cat_item.category}, Name: {cat_item.name} X {cat_item.quantity}")
-#                 if cat_item.category in configuration:
-#                     configuration[cat_item.category].append(cat_item.name + ' X ' + str(cat_item.quantity))
-
-#             # Build response data from matched items
-#             data = []
-#             for item in items[:10]:
-#                 # total = float(item.unit_price) * item.quantity
-#                 item_data = {
-#                     'id': item.id,
-#                     'name': item.name,
-#                     'serial_no': item.serialno,
-#                     'price': '',
-#                     'total_item': ''
-#                 }
-#                 print("📄 Item Data:", item_data)
-#                 data.append(item_data)
-
-#             # Return combined result
-#             return JsonResponse({
-#                 'items': data,
-#                 'configuration': configuration
-#             }, safe=False)
-
-#         except Exception as e:
-#             print("❌ Error:", str(e))
-#             return JsonResponse({'error': str(e)}, status=500)
-
-#     print("⚠️ Not an AJAX request")
-#     return JsonResponse({'error': 'Not an AJAX request'}, status=400)
-
 def get_items_ajax_view(request):
     if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
         try:
@@ -1339,7 +1282,8 @@ def get_items_ajax_view(request):
 from django.http import JsonResponse
 from .models import Item  # Replace with your model
 
-
+@login_required
+@csrf_exempt
 def search_suggestions(request):
     query = request.GET.get('q', '')
     items = catogaryitem.objects.all()  # Start by getting all items
@@ -1357,7 +1301,10 @@ def search_suggestions(request):
         else:
             suggestions = list(set([f"{item.category}" for item in item2])) # or other fields like item.serial_no, etc.
     return JsonResponse({'suggestions': suggestions})
-    
+
+
+@login_required
+@csrf_exempt
 def search_suggestions_product(request):
     query = request.GET.get('q', '')
     items = Item.objects.all()  # Start by getting all items
@@ -1381,6 +1328,9 @@ from django.shortcuts import render
 from django.http import JsonResponse
 from .forms import ProcessorForm, HddForm, SddForm
 
+
+@login_required
+@csrf_exempt
 def add_processor1(request):
     serialno = request.GET.get('serialno', '')
     if serialno:
@@ -1390,6 +1340,9 @@ def add_processor1(request):
     return JsonResponse({"processors": [], 'success': False})
 
 # View for adding a new Processor
+
+@login_required
+@csrf_exempt
 def add_processor(request):
     if request.method == 'POST' and request.is_ajax():
         form = ProcessorForm(request.POST)
@@ -1402,6 +1355,9 @@ def add_processor(request):
     return JsonResponse({'success': False, 'message': 'Invalid request method'})
 
 # View for adding a new HDD
+
+@login_required
+@csrf_exempt
 def add_hdd(request):
     if request.method == 'POST' and request.is_ajax():
         form = HddForm(request.POST)
@@ -1412,6 +1368,9 @@ def add_hdd(request):
             return JsonResponse({'success': False, 'errors': form.errors})
         
 # View for adding a new HDD
+
+@login_required
+@csrf_exempt
 def add_ram(request):
     if request.method == 'POST' and request.is_ajax():
         form = RamForm(request.POST)
@@ -1422,6 +1381,9 @@ def add_ram(request):
             return JsonResponse({'success': False, 'errors': form.errors})
 
 # View for adding a new SSD
+
+@login_required
+@csrf_exempt
 def add_ssd(request):
     if request.method == 'POST' and request.is_ajax():
         form = SddForm(request.POST)
@@ -1432,7 +1394,8 @@ def add_ssd(request):
             return JsonResponse({'success': False, 'errors': form.errors})
         
 
-@csrf_exempt  # or use @csrf_protect and ensure CSRF is handled via token
+@login_required
+@csrf_exempt
 def create_processor(request):
     if request.method == 'POST':
         form = ProcessorForm(request.POST)
@@ -1449,7 +1412,8 @@ def create_processor(request):
             return JsonResponse({'success': False, 'errors': form.errors})
         
 
-
+@login_required
+@csrf_exempt
 def get_category_items(request):
     serial = request.GET.get("serial", "")
     name = request.GET.get("name", "")
@@ -1474,7 +1438,8 @@ def get_category_items(request):
     
     return JsonResponse(data)
 
-
+@login_required
+@csrf_exempt
 def operativedashboard(request):
     user_profile = request.user.profile
     if user_profile.role == 'OP':
@@ -1483,6 +1448,7 @@ def operativedashboard(request):
         return render(request, "store/productslist.html")
 
 
+@csrf_exempt
 def create_category_items(spec_string, serial_no, category, quantity):
     names = [n.strip() for n in str(spec_string).split(',') if n.strip()]
     quantitys = [n for n in str(quantity).split(',') if n]
@@ -1496,50 +1462,64 @@ def create_category_items(spec_string, serial_no, category, quantity):
         )
 
 
+@csrf_exempt
 def upload_category_items(request):
     if request.method == 'POST':
         form = ExcelUploadForm(request.POST, request.FILES)
         if form.is_valid():
             excel_file = request.FILES['file']
-            try:
-                df = pd.read_excel(excel_file)
+            # try:
+            df = pd.read_excel(excel_file)
 
-                for _, row in df.iterrows():
-                    serial_no = str(row.get('Serialno')).strip()
-                    name = row.get('Name', '').strip()
-                    
+            for _, row in df.iterrows():
+                serial_no = str(row.get('Serialno')).strip()
+                name = row.get('Name', '').strip()
+                
 
-                    # Create the Item entry
-                    item = Item.objects.create(
-                        name=name,
-                        serialno=serial_no,
-                        make_and_models=row.get('Make and models', ''),
-                        smps_status=row.get('Smps status', '').strip(),
-                        motherboard_status=row.get('Motherboard status', '').strip(),
-                        quantity=row.get('quantity', '')
-                    )
+                # Create the Item entry
+                item = Item.objects.create(
+                    name=name,
+                    serialno=serial_no,
+                    make_and_models=row.get('Make and models', ''),
+                    smps_status=row.get('Smps status', '').strip(),
+                    motherboard_status=row.get('Motherboard status', '').strip(),
+                    quantity=row.get('quantity', '')
+                )
 
-                    # Inside your row loop
-                    create_category_items(row.get('Processor', ''), serial_no, 'processor', row.get('processor_qty', ''))
-                    create_category_items(row.get('Ram', ''), serial_no, 'ram', row.get('ram_qty', ''))
-                    create_category_items(row.get('Hdd', ''), serial_no, 'hdd', row.get('hdd_qty', ''))
-                    create_category_items(row.get('Ssd', ''), serial_no, 'ssd',row.get('ssd_qty', ''))
+                print('12345', row.get('Processor', ''), serial_no, 'processor', row.get('processor_qty', ''))
+                # Inside your row loop
+                create_category_items(row.get('Processor', ''), serial_no, 'processor', row.get('processor_qty', ''))
+                create_category_items(row.get('Ram', ''), serial_no, 'ram', row.get('ram_qty', ''))
+                create_category_items(row.get('Hdd', ''), serial_no, 'hdd', row.get('hdd_qty', ''))
+                create_category_items(row.get('Ssd', ''), serial_no, 'ssd',row.get('ssd_qty', ''))
 
 
-                return render(request, 'store/productcreate.html', {
-                    'form': ExcelUploadForm(),
-                    'success': "Excel imported successfully!"
-                })
+            return render(request, 'store/productcreate.html', {
+                'form': ExcelUploadForm(),
+                'success': "Excel imported successfully!"
+            })
 
-            except Exception as e:
-                return render(request, 'store/productcreate.html', {
-                    'form': form,
-                    'error': f"Import failed: {e}"
-                })
+            # except Exception as e:
+            #     return render(request, 'store/productcreate.html', {
+            #         'form': form,
+            #         'error': f"Import failed: {e}"
+            #     })
     else:
         form = ExcelUploadForm()
 
     return render(request, 'store/productcreate.html', {'form': form})
+
+
+
+class cashbankListView(LoginRequiredMixin, ListView):
+    """
+    View to list all purchases with pagination.
+    """
+
+    model = Item
+    template_name = "store/bank_acc.html"
+    context_object_name = "purchases"
+    paginate_by = 10
 
 
         
