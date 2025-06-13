@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Sale, SaleDetail, Purchase
+from .models import Sale, SaleDetail, Purchase,Bankaccount
 
 
 @admin.register(Sale)
@@ -78,4 +78,26 @@ class PurchaseAdmin(admin.ModelAdmin):
         Save the Purchase instance and compute the total value.
         """
         obj.total_value = obj.price * obj.quantity
+        super().save_model(request, obj, form, change)
+
+
+@admin.register(Bankaccount)
+class BankAdmin(admin.ModelAdmin):
+    """
+    Admin interface configuration for the Bank model.
+    """
+    # list_display = (
+    #     'id',
+    #     'account_name',
+    #     'as_of_date',
+    # )
+    # search_fields = ('account_name')
+    # list_filter = ('as_of_date', 'account_name')
+    # ordering = ('-as_of_date',)
+    # date_hierarchy = 'as_of_date'
+
+    def save_model(self, request, obj, form, change):
+        """
+        Save the Bank instance, overriding the default save behavior.
+        """
         super().save_model(request, obj, form, change)

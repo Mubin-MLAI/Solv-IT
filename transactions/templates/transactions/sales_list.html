@@ -50,7 +50,7 @@
         <tbody>
             {% for sale in sales %}
             <tr>
-                <td>{{ sale.id }}</td>
+                <th scope="row">{{ forloop.counter|add:page_obj.start_index|add:"-1" }}</th>
                 <td>{{ sale.date_added|date:"Y-m-d H:i:s" }}</td>
                 <td>{{ sale.customer }}</td>
                 <td>{{ sale.sub_total }}</td>

@@ -1,5 +1,5 @@
 from django import forms
-from .models import Purchase
+from .models import Purchase,Bankaccount
 
 
 class BootstrapMixin(forms.ModelForm):
@@ -40,5 +40,27 @@ class PurchaseForm(BootstrapMixin, forms.ModelForm):
             ),
             'price': forms.NumberInput(
                 attrs={'class': 'form-control'}
+            ),
+        }
+
+
+class BankForm(forms.ModelForm):
+    class Meta:
+        model = Bankaccount
+        fields = [
+            'account_name', 'opening_balance', 'as_of_date'
+        ]
+        widgets = {
+            'account_name': forms.TextInput(attrs={'class': 'form-control',
+                'placeholder': 'Enter Account Name',
+                'style': 'text-transform: uppercase;'}),
+            'opening_balance': forms.TextInput(attrs={'class': 'form-control',
+                'placeholder': 'Enter Opening Balance',
+                'style': 'text-transform: uppercase;'}),
+            'as_of_date': forms.DateInput(
+                attrs={
+                    'class': 'form-control',
+                    'type': 'datetime-local'
+                }
             ),
         }

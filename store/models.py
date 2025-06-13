@@ -223,4 +223,6 @@ class Delivery(models.Model):
             f"Delivery of {self.item} to {self.customer_name} "
             f"at {self.location} on {self.date}"
         )
+    
+
 

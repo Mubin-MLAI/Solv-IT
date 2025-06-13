@@ -161,3 +161,22 @@ class Purchase(models.Model):
 
     class Meta:
         ordering = ["order_date"]
+
+class Bankaccount(models.Model):
+    slug = AutoSlugField(unique=False, populate_from='account_name')
+    account_name = models.CharField(max_length=50)
+    opening_balance = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        default=0.0)
+    as_of_date = models.DateTimeField(
+        blank=True, null=True, verbose_name="Created Date"
+    )
+
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+
+
+    def __str__(self):
+        return f"{self.account_name} - opening_balance: {self.opening_balance or 'N/A'}, as_of_date: {self.as_of_date}"
+

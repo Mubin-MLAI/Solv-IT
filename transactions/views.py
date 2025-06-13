@@ -21,8 +21,8 @@ from openpyxl import Workbook
 # Local app imports
 from store.models import Item
 from accounts.models import Customer
-from .models import Sale, Purchase, SaleDetail
-from .forms import PurchaseForm
+from .models import Sale, Purchase, SaleDetail, Bankaccount
+from .forms import PurchaseForm, BankForm
 from store.models import catogaryitem 
 
 
@@ -31,6 +31,46 @@ logger = logging.getLogger(__name__)
 
 def is_ajax(request):
     return request.META.get('HTTP_X_REQUESTED_WITH') == 'XMLHttpRequest'
+
+def export_bank_to_excel(request):
+    # Create a workbook and select the active worksheet.
+    workbook = Workbook()
+    worksheet = workbook.active
+    worksheet.title = 'Bank Details'
+
+    # Define the column headers
+    columns = [
+        'ID', 'Account Name', 'Opening Balance', 'As Of Date'
+    ]
+    worksheet.append(columns)
+
+    # Fetch sales data
+    banks = Bankaccount.objects.all()
+
+    for bank in banks:
+        # Convert timezone-aware datetime to naive datetime
+        if bank.as_of_date.tzinfo is not None:
+            as_of_date = bank.as_of_date.replace(tzinfo=None)
+        else:
+            as_of_date = bank.as_of_date
+
+        worksheet.append([
+            bank.id,
+            bank.account_name,
+            bank.opening_balance,
+            as_of_date
+        ])
+
+    # Set up the response to send the file
+    response = HttpResponse(
+        content_type=(
+            'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+        )
+    )
+    response['Content-Disposition'] = 'attachment; filename=Bank Details.xlsx'
+    workbook.save(response)
+
+    return response
 
 
 def export_sales_to_excel(request):
@@ -490,14 +530,54 @@ class PurchaseDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
         """
         return self.request.user.is_superuser
     
+class BankDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
+    """
+    View to delete a Bank.
+    """
+
+    model = Bankaccount
+    template_name = "transactions/bankdelete.html"
+
+    def get_success_url(self):
+        """
+        Redirect to the Bank list after successful deletion.
+        """
+        return reverse("cashbanklist")
+
+    def test_func(self):
+        """
+        Allow deletion only for superusers.
+        """
+        return self.request.user.is_superuser
+    
 class cashbankListView(LoginRequiredMixin, ListView):
     """
     View to list all purchases with pagination.
     """
 
-    model = Purchase
+    model = Bankaccount
     template_name = "transactions/bank_acc.html"
-    context_object_name = "purchases"
+    context_object_name = "bankaccount"
     paginate_by = 10
+
+
+class BankCreateView(LoginRequiredMixin, CreateView):
+    model = Bankaccount
+    template_name = "transactions/createbankacc.html"
+    form_class = BankForm
+        
+    def get_success_url(self):
+        """
+        Redirect to the Bank list after successful deletion.
+        """
+        return reverse("cashbanklist")
+
+    def test_func(self):
+        """
+        Allow deletion only for superusers.
+        """
+        return self.request.user.is_superuser
+
+
     
 

@@ -1,5 +1,5 @@
 import django_tables2 as tables
-from .models import Sale, Purchase
+from .models import Sale, Purchase, Bankaccount
 
 
 class SaleTable(tables.Table):
@@ -36,3 +36,15 @@ class PurchaseTable(tables.Table):
             'total_value'
         )
         order_by_field = 'sort'
+
+
+class BankTable(tables.Table):
+    class Meta:
+        model = Bankaccount
+        template_name = "django_tables2/semantic.html"
+        fields = (
+            'account_name',
+            'opening_balance',
+            'as_of_date'
+        )
+        order_by_field = 'id'

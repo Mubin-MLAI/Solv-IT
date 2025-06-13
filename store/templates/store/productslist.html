@@ -85,7 +85,7 @@
             <tbody>
                 {% for item in items %}
                 <tr>
-                    <th scope="row">{{ item.id }}</th>
+                    <th scope="row">{{ forloop.counter|add:page_obj.start_index|add:"-1" }}</th>
                     <td>{{ item.name }}</td>
                     <td>{{ item.serialno }}</td>
                     <td>{{ item.make_and_models }}</td>
