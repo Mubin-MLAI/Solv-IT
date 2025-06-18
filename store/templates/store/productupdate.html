@@ -160,6 +160,17 @@ Add Product
                     </div>
 
 
+                    <div class="row mb-3">
+                        <div class="col-md-4">
+                            <label for="{{ form.quantity.id_for_label }}" class="form-label">
+                                Quantity
+                            </label>
+                            {{ form.quantity }}
+                            <div class="text-danger">{{ form.quantity.errors }}</div>
+                        </div>
+                    </div>
+
+
                     <!-- SMPS Section -->
                     <div class="row mb-3">
                         <!-- SMPS Status -->

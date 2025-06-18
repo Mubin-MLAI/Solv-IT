@@ -173,7 +173,17 @@ Update Product
                                 </div>
                             </div>
 
-                            <!-- SMPS Status -->
+                            <div class="row mb-3">
+                                <div class="col-md-4">
+                                    <label for="{{ form.quantity.id_for_label }}" class="form-label">
+                                        Quantity
+                                    </label>
+                                    {{ form.quantity }}
+                                    <div class="text-danger">{{ form.quantity.errors }}</div>
+                                </div>
+                            </div>
+
+                            <!-- SMPS Status
                             <div class="col-md-6 col-lg-8">
                                 <label for="smps_status" class="form-label">SMPS Status</label>
                                 <select id="smps_status1" name="smps_status" class="form-control" onchange="toggleReplacementDescription1()">
@@ -187,7 +197,7 @@ Update Product
 
 
 
-                            <!-- Motherboard Status -->
+                            Motherboard Status
                             <div class="col-md-6 col-lg-8" id="motherboard_status_div">
                                 <label for="motherboard_status" class="form-label">Motherboard Status</label>
                                 <select id="motherboard_status1" name="motherboard_status" class="form-control" onchange="toggleMotherboardReplacementDescription1()">
@@ -196,12 +206,12 @@ Update Product
                                     <option value="replacement" {% if form.motherboard_status.value == 'replacement'%}selected{% endif %}>Replacement</option>
                                 </select>
                                 <div class="text-danger">{{ form.motherboard_status.errors }}</div>
-                            </div>
+                            </div> -->
                     </div>
 
 
-                    <div class="row mb-3">
-                        <!-- SMPS Replacement Description -->
+                    <!-- <div class="row mb-3">
+                        SMPS Replacement Description
                         <div class="col-md-6 col-lg-8" id="smps_replacement_description_div1" style="display: none;">
                             <label for="smps_replacement_description" class="form-label">SMPS Replacement
                                 Description</label>
@@ -209,7 +219,7 @@ Update Product
                                 class="form-control" value="{{ form.smps_replacement_description.value }}">
                         </div>
 
-                        <!-- Motherboard Replacement Description -->
+                        Motherboard Replacement Description
                         <div class="col-md-6 col-lg-8" id="motherboard_replacement_description_div1"
                             style="display: none;">
                             <label for="motherboard_replacement_description" class="form-label">Motherboard
@@ -218,7 +228,7 @@ Update Product
                                 name="motherboard_replacement_description" class="form-control"
                                 value="{{ form.motherboard_replacement_description.value }}">
                         </div>
-                    </div>
+                    </div> -->
 
                     <div class="form-group text-center">
                         <button class="btn btn-success btn-lg" name="button1" type="submit">
@@ -356,9 +366,19 @@ Update Product
                                 </div> -->
                             </div>
 
-
                             <div class="row mb-3">
-                                <!-- SMPS Status -->
+                                <div class="col-md-4">
+                                    <label for="{{ form.quantity.id_for_label }}" class="form-label">
+                                        Quantity
+                                    </label>
+                                    {{ form.quantity }}
+                                    <div class="text-danger">{{ form.quantity.errors }}</div>
+                                </div>
+                            </div>
+
+
+                            <!-- <div class="row mb-3">
+                                SMPS Status
                                 <div class="col-md-6 col-lg-8">
                                     <label for="smps_status" class="form-label">SMPS Status</label>
                                     <select id="smps_status" name="smps_status" class="form-control" onchange="toggleReplacementDescription()">
@@ -369,7 +389,7 @@ Update Product
                                     <div class="text-danger">{{ form.smps_status.errors }}</div>
                                 </div>
 
-                                <!-- Motherboard Status -->
+                                Motherboard Status
                                 <div class="col-md-6 col-lg-8" id="motherboard_status_div">
                                     <label for="motherboard_status" class="form-label">Motherboard Status</label>
                                     <select id="motherboard_status" name="motherboard_status" class="form-control" onchange="toggleMotherboardReplacementDescription()">
@@ -383,7 +403,7 @@ Update Product
 
 
                             <div class="row mb-3">
-                                <!-- SMPS Replacement Description -->
+                                SMPS Replacement Description
                                 <div class="col-md-6 col-lg-8" id="smps_replacement_description_div" style="display: none;">
                                     <label for="smps_replacement_description" class="form-label">SMPS Replacement
                                         Description</label>
@@ -391,7 +411,7 @@ Update Product
                                         class="form-control" value="{{ form.smps_replacement_description.value }}">
                                 </div>
 
-                                <!-- Motherboard Replacement Description -->
+                                Motherboard Replacement Description
                                 <div class="col-md-6 col-lg-8" id="motherboard_replacement_description_div"
                                     style="display: none;">
                                     <label for="motherboard_replacement_description" class="form-label">Motherboard
@@ -400,7 +420,7 @@ Update Product
                                         name="motherboard_replacement_description" class="form-control"
                                         value="{{ form.motherboard_replacement_description.value }}">
                                 </div>
-                            </div>
+                            </div> -->
 
                             <!-- <div class="form-group text-center">
                                 <button class="btn btn-success btn-lg" name="button2" type="submit">
@@ -429,7 +449,6 @@ Update Product
                                         placeholder="Enter Product Name" value="{{ form.name.value }}">
                                     <div class="text-danger">{{ form.name.errors }}</div>
                                 </div>
-
                                 <div class="col-md-6 col-lg-6">
                                     <label for="{{ form.make_and_models.id_for_label }}" class="form-label">
                                         Make & Models
@@ -440,7 +459,6 @@ Update Product
 
                                 </div>
                             </div>
-
                             <div class="row mb-3">
                                 <!-- Make & Models (Full width, below the first two columns) -->
                                 <div class="col-md-12 col-lg-12">
@@ -452,7 +470,6 @@ Update Product
                                     <div class="text-danger">{{ form.serialno.errors }}</div>
                                 </div>
                             </div>
-
                             <div class="row mb-3">
                                 <!-- Reduced width for Processor, RAM, HDD, and SSD details -->
                                 <div class="col-md-6 col-lg-9">
@@ -467,14 +484,12 @@ Update Product
                                     </select>
                                     <div class="text-danger">{{ form.processor.errors }}</div>
                                 </div>
-
                                 <div class="col-md-6 col-lg-3">
                                     <label for="processor_qty" class="form-label">Qty</label>
                                     <input type="text" id="processor_qty" name="processor_qty" class="form-control"
                                         value="{{ form.processor_qty.value }}">
                                 </div>
                             </div>
-
                             <div class="row mb-3">
                                 <div class="col-md-6 col-lg-9">
                                     <label for="ram" class="form-label">
@@ -496,7 +511,6 @@ Update Product
                                         value="{{ form.ram_qty.value }}">
                                 </div>
                             </div>
-
                             <div class="row mb-3">
                                 <div class="col-md-6 col-lg-9">
                                     <label for="hdd" class="form-label">
@@ -518,7 +532,6 @@ Update Product
                                         value="{{ form.hdd_qty.value }}">
                                 </div>
                             </div>
-
                             <div class="row mb-3">
                                 <div class="col-md-6 col-lg-9">
                                     <label for="ssd" class="form-label">
@@ -533,16 +546,24 @@ Update Product
                                         {% endfor %}
                                     </select>
                                 </div>
-
                                 <div class="col-md-6 col-lg-3">
                                     <label for="ssd_qty" class="form-label">Qty</label>
                                     <input type="text" id="ssd_qty" name="ssd_qty" class="form-control"
                                         value="{{ form.ssd_qty.value }}">
                                 </div>
                             </div>
-
                             <div class="row mb-3">
-                                <!-- SMPS Status -->
+                                <div class="col-md-4">
+                                    <label for="{{ form.quantity.id_for_label }}" class="form-label">
+                                        Quantity
+                                    </label>
+                                    {{ form.quantity }}
+                                    <div class="text-danger">{{ form.quantity.errors }}</div>
+                                </div>
+                            </div>
+
+                            <!-- <div class="row mb-3">
+                                SMPS Status
                                 <div class="col-md-6 col-lg-8">
                                     <label for="smps_status" class="form-label">SMPS Status</label>
                                     <select id="smps_status2" name="smps_status" class="form-control" onchange="toggleReplacementDescription2()">
@@ -553,7 +574,7 @@ Update Product
                                     <div class="text-danger">{{ form.smps_status.errors }}</div>
                                 </div>
 
-                                <!-- Motherboard Status -->
+                                Motherboard Status
                                 <div class="col-md-6 col-lg-8" id="motherboard_status_div">
                                     <label for="motherboard_status" class="form-label">Motherboard Status</label>
                                     <select id="motherboard_status2" name="motherboard_status" class="form-control" onchange="toggleMotherboardReplacementDescription2()">
@@ -568,7 +589,7 @@ Update Product
 
 
                             <div class="row mb-3">
-                                <!-- SMPS Replacement Description -->
+                                SMPS Replacement Description
                                 <div class="col-md-6 col-lg-8" id="smps_replacement_description_div2"
                                     style="display: none;">
                                     <label for="smps_replacement_description" class="form-label">SMPS Replacement
@@ -577,7 +598,7 @@ Update Product
                                         class="form-control" value="{{ form.smps_replacement_description.value }}">
                                 </div>
 
-                                <!-- Motherboard Replacement Description -->
+                                Motherboard Replacement Description
                                 <div class="col-md-6 col-lg-8" id="motherboard_replacement_description_div2"
                                     style="display: none;">
                                     <label for="motherboard_replacement_description" class="form-label">Motherboard
@@ -586,8 +607,7 @@ Update Product
                                         name="motherboard_replacement_description" class="form-control"
                                         value="{{ form.motherboard_replacement_description.value }}">
                                 </div>
-                            </div>
-
+                            </div> -->
                             <div class="form-group text-center">
                                 <button class="btn btn-success btn-lg" name="button3"  type="submit">
                                     <i class="fas fa-check"></i> Submit

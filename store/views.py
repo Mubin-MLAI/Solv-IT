@@ -300,6 +300,9 @@ class ProductDetailView(LoginRequiredMixin, FormMixin, DetailView):
 
     def get_success_url(self):
         return reverse("product-detail", kwargs={"slug": self.object.slug})
+    
+
+
 
 
 class ProductCreateView(LoginRequiredMixin, CreateView):
@@ -308,9 +311,12 @@ class ProductCreateView(LoginRequiredMixin, CreateView):
     form_class = ItemForm
 
     def form_valid(self, form):
+
         item = form.save(commit=False)
+        item.created_by = self.request.user  # Set the user who created the item
         item.save()
         serialno = item.serialno.strip()
+
 
         component_fields = ['processor', 'ram', 'hdd', 'ssd']
 
@@ -336,11 +342,12 @@ class ProductCreateView(LoginRequiredMixin, CreateView):
                         continue
 
                     catogaryitem.objects.create(
-                        name=name,
+                        name=name.upper(),
                         category=component,
                         serial_no=serialno,
                         quantity=qty_int,
-                        unit_price=0.00  # Set as needed
+                        unit_price=0.00,  # Set as needed
+                        created_by=self.request.user
                     )
         except Exception as e:
             messages.error(self.request, f"Error while saving components: {str(e)}")
@@ -467,9 +474,13 @@ class ProductUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     form_class = ItemForm
     template_name = "store/productupdate.html"  # Default template name
 
+    def form_invalid(self, form):
+        print("FORM INVALID:", form.errors)
+        return super().form_invalid(form)
 
     def form_valid(self, form):
         # Extract raw strings from POST
+        print("FORM ERRORS:", form.errors)
         ram_names = self.request.POST.get("ram", "")
         ram_qtys = self.request.POST.get("ram_qty", "")
         
@@ -555,7 +566,7 @@ class ProductUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
         
         
         # ------------------- RAM, HDD, SSD: Group by Size -------------------
-        hdd_sizes = ['250GB', '320GB', '500GB', '1TB', '2TB']
+        hdd_sizes = ['250GB', '320GB', '500GB', '1TB', '2TB', '4TB', '6TB']
         ssd_sizes = ['128GB', '256GB', '512GB', '1TB', '2TB']
         ram_sizes = ['4GB', '8GB', '16GB', '32GB', '64GB']
         rambysize = {}
@@ -710,8 +721,10 @@ class ProductUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
         """
         Redirect to the products page upon successful form submission.
         """
+        print('success function')
 
         if 'button1' in self.request.POST:
+            print(self.request.POST)
             print('button1')
             user_profile = self.request.user.profile
             if user_profile.role == 'OP':
@@ -762,6 +775,7 @@ class ProductUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
                         available_item.delete()
                         # print("❌ Deleted {} from {} (Qty reached zero).".format(clean_name, serialno))
                     else:
+                        assigned_item.updated_by = self.request.user
                         available_item.save()
                         # print("➖ Deducted {} from {} ({}). Remaining: {}".format(qty, serialno, clean_name, available_item.quantity))
 
@@ -771,6 +785,7 @@ class ProductUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
                         name=clean_name,
                         category=component,
                         serial_no=serialno,
+                        updated_by = self.request.user,
                         defaults={
                             'quantity': 0,
                             'unit_price': available_item.unit_price,
@@ -779,6 +794,7 @@ class ProductUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
                     )
 
                     assigned_item.quantity += qty
+                    assigned_item.updated_by = self.request.user
                     assigned_item.save()
 
                     # print("✅ Assigned {} of '{}' to {}. {} entry.".format(qty, clean_name, serialno, 'Created new' if created else 'Updated existing'))
@@ -844,10 +860,12 @@ class ProductUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
 
                     # Deduct from source
                     assigned_item.quantity -= qty
+                    
                     if assigned_item.quantity <= 0:
                         assigned_item.delete()
                         # print("❌ Deleted {} from {} (Qty reached zero).".format(clean_name, serialno))
                     else:
+                        assigned_item.updated_by = self.request.user
                         assigned_item.save()
                         # print("➖ Deducted {} from {} ({}). Remaining: {}".format(qty, serialno, clean_name, assigned_item.quantity))
 
@@ -856,12 +874,14 @@ class ProductUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
                         name=clean_name,
                         category=component,
                         serial_no='Solv-IT',
+                        updated_by = self.request.user,
                         defaults={
                             'quantity': 0,
                             'unit_price': assigned_item.unit_price,
                         }
                     )
                     stock_item.quantity += qty
+                    stock_item.updated_by = self.request.user
                     stock_item.save()
 
                     # print("✅ Moved {} of '{}' to Solv-IT. {} entry.".format(qty, clean_name, 'Created new' if created else 'Updated existing'))
@@ -916,15 +936,17 @@ class ProductUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
                     print(f"♻️ Returning {item.category.upper()}: {item.name} X {item.quantity}")
 
                     central_item, created = catogaryitem.objects.get_or_create(
-                        name=item.name,
+                        name=item.name.upper(),
                         category=component,
                         serial_no='Solv-IT',
+                        updated_by = self.request.user,
                         defaults={
                             'quantity': 0,
                             'unit_price': item.unit_price,
                         }
                     )
                     central_item.quantity += item.quantity
+                    central_item.updated_by = self.request.user
                     central_item.save()
                     item.delete()
 
@@ -953,6 +975,7 @@ class ProductUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
                             name=name.upper(),
                             category=component,
                             serial_no=serialno,
+                            updated_by = self.request.user,
                             defaults={
                                 'quantity': qty,
                                 'unit_price': 0,  # or some fallback
@@ -960,6 +983,7 @@ class ProductUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
                         )
                         if not created:
                             assigned_item1.quantity += qty
+                            assigned_item1.updated_by = self.request.user
                             assigned_item1.save()
                         print(f"⚠️ '{name}' not found in Solv-IT, but added directly to {serialno}.")
                         messages.success(self.request,f"⚠️ '{name}' not found in Solv-IT, but added directly to {serialno}.")
@@ -982,12 +1006,14 @@ class ProductUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
                         name=name,
                         category=component,
                         serial_no=serialno,
+                        updated_by = self.request.user,
                         defaults={
                             'quantity': 0,
                             'unit_price': available_item.unit_price,
                         }
                     )
                     assigned_item.quantity += qty
+                    assigned_item.updated_by = self.request.user
                     assigned_item.save()
 
                     messages.success(
@@ -1449,16 +1475,17 @@ def operativedashboard(request):
 
 
 @csrf_exempt
-def create_category_items(spec_string, serial_no, category, quantity):
+def create_category_items(spec_string, serial_no, category, quantity, createdby):
     names = [n.strip() for n in str(spec_string).split(',') if n.strip()]
     quantitys = [n for n in str(quantity).split(',') if n]
     for name, quantity in zip( names, quantitys) :
         catogaryitem.objects.create(
-            name=name,
+            name=name.upper(),
             serial_no=serial_no,
             category=category,
             quantity=quantity,
-            unit_price=0.0
+            unit_price=0.0,
+            created_by=createdby
         )
 
 
@@ -1483,15 +1510,16 @@ def upload_category_items(request):
                     make_and_models=row.get('Make and models', ''),
                     smps_status=row.get('Smps status', '').strip(),
                     motherboard_status=row.get('Motherboard status', '').strip(),
-                    quantity=row.get('quantity', '')
+                    quantity=row.get('quantity', ''),
+                    created_by=request.user
                 )
 
-                print('12345', row.get('Processor', ''), serial_no, 'processor', row.get('processor_qty', ''))
+                print('12345', row.get('Processor', ''), serial_no, 'processor', row.get('processor_qty', ''), request.user)
                 # Inside your row loop
-                create_category_items(row.get('Processor', ''), serial_no, 'processor', row.get('processor_qty', ''))
-                create_category_items(row.get('Ram', ''), serial_no, 'ram', row.get('ram_qty', ''))
-                create_category_items(row.get('Hdd', ''), serial_no, 'hdd', row.get('hdd_qty', ''))
-                create_category_items(row.get('Ssd', ''), serial_no, 'ssd',row.get('ssd_qty', ''))
+                create_category_items(row.get('Processor', ''), serial_no, 'processor', row.get('processor_qty', ''), request.user)
+                create_category_items(row.get('Ram', ''), serial_no, 'ram', row.get('ram_qty', ''), request.user)
+                create_category_items(row.get('Hdd', ''), serial_no, 'hdd', row.get('hdd_qty', ''), request.user)
+                create_category_items(row.get('Ssd', ''), serial_no, 'ssd',row.get('ssd_qty', ''), request.user)
 
 
             return render(request, 'store/productcreate.html', {
@@ -1511,15 +1539,7 @@ def upload_category_items(request):
 
 
 
-class cashbankListView(LoginRequiredMixin, ListView):
-    """
-    View to list all purchases with pagination.
-    """
 
-    model = Item
-    template_name = "store/bank_acc.html"
-    context_object_name = "purchases"
-    paginate_by = 10
 
 
         

@@ -19,7 +19,8 @@ from phonenumber_field.modelfields import PhoneNumberField
 from accounts.models import Vendor
 from django.core.validators import MinValueValidator
 from django import forms
-
+from django.contrib.auth.models import User
+from django.utils import timezone
 
 class Ram(models.Model):
     """
@@ -138,6 +139,15 @@ class catogaryitem(models.Model):
     quantity = models.IntegerField()
     unit_price = models.DecimalField(max_digits=10, decimal_places=2)
 
+    created_by = models.ForeignKey(
+        User, on_delete=models.SET_NULL, null=True, blank=True, related_name='category_items_created'
+    )
+    created_date = models.DateTimeField(default=timezone.now)
+    updated_by = models.ForeignKey(
+        User, on_delete=models.SET_NULL, null=True, blank=True, related_name='category_items_updated'
+    )
+    updated_date = models.DateTimeField(default=timezone.now)
+
     def __str__(self):
         """
         String representation of the Ram.
@@ -165,6 +175,15 @@ class Item(models.Model):
     motherboard_replacement_description = models.TextField(max_length=100, null=True, blank=True)
     quantity = models.IntegerField(default=0)
 
+    created_by = models.ForeignKey(
+        User, on_delete=models.SET_NULL, null=True, blank=True, related_name='items_created'
+    )
+    created_date = models.DateTimeField(default=timezone.now)
+    updated_by = models.ForeignKey(
+        User, on_delete=models.SET_NULL, null=True, blank=True, related_name='items_updated'
+    )
+    updated_date = models.DateTimeField(default=timezone.now)
+
 
     def __str__(self):
         return f"{self.name} - serialno: {self.serialno or 'N/A'}, make_and_models: {self.make_and_models}"
@@ -190,6 +209,11 @@ class Item(models.Model):
             "value": self.id
         }
         return item
+    
+    def delete(self, *args, **kwargs):
+        # Delete associated catogaryitem(s) with the same serialno
+        catogaryitem.objects.filter(serial_no=self.serialno).delete()
+        super().delete(*args, **kwargs)
 
     class Meta:
         ordering = ['name']

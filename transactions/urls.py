@@ -19,12 +19,14 @@ from .views import (
     export_purchases_to_excel,
     export_bank_to_excel,
     BankCreateView,
-    BankDeleteView
+    BankDeleteView,
+    receive_payment
 )
 
 # URL patterns
 urlpatterns = [
     # Purchase URLs
+    path('receive-payment/', receive_payment, name='receive-payment'),
     path('cashbankListView/', cashbankListView.as_view(), name='cashbanklist'),
     path('purchases/', PurchaseListView.as_view(), name='purchaseslist'),
     path(

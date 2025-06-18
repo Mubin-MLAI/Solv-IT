@@ -7,6 +7,7 @@ from django.http import JsonResponse, HttpResponse
 from django.urls import reverse
 from django.shortcuts import render
 from django.db import transaction
+from django.core.paginator import Paginator
 
 # Class-based views
 from django.views.generic import DetailView, ListView
@@ -17,6 +18,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 
 # Third-party packages
 from openpyxl import Workbook
+from openpyxl.styles import Alignment
 
 # Local app imports
 from store.models import Item
@@ -73,32 +75,46 @@ def export_bank_to_excel(request):
     return response
 
 
+from openpyxl import Workbook
+from django.http import HttpResponse
+from .models import Sale  # Adjust if needed
+import datetime
+
 def export_sales_to_excel(request):
-    # Create a workbook and select the active worksheet.
+    # Create a workbook and sheet
     workbook = Workbook()
     worksheet = workbook.active
     worksheet.title = 'Sales'
 
-    # Define the column headers
+    # Define headers (added 'Item Descriptions')
     columns = [
-        'ID', 'Date', 'Customer', 'Sub Total',
+        'INV no', 'Date', 'Customer', 'Sub Total',
         'Grand Total', 'Tax Amount', 'Tax Percentage',
-        'Amount Paid', 'Amount Change'
+        'Amount Paid', 'Amount Change', 'Item Descriptions'
     ]
     worksheet.append(columns)
 
-    # Fetch sales data
+    # Fetch all sales
     sales = Sale.objects.all()
 
     for sale in sales:
-        # Convert timezone-aware datetime to naive datetime
-        if sale.date_added.tzinfo is not None:
-            date_added = sale.date_added.replace(tzinfo=None)
-        else:
-            date_added = sale.date_added
+        # Handle datetime conversion
+        date_added = sale.date_added.replace(tzinfo=None) if sale.date_added.tzinfo else sale.date_added
 
-        worksheet.append([
-            sale.id,
+        # Generate item descriptions
+        items = sale.get_item_descriptions_by_type()
+        description_lines = []
+
+        for category in ['PROCESSOR', 'RAM', 'HDD', 'SSD']:
+            category_items = items.get(category, [])
+            for line in category_items:
+                description_lines.append(line.strip())
+
+        description_text = "\n".join(description_lines)  # Line-by-line text
+
+        # Add row data
+        row_data = [
+            'INV'+ str(sale.id),
             date_added,
             sale.customer.phone,
             sale.sub_total,
@@ -106,19 +122,29 @@ def export_sales_to_excel(request):
             sale.tax_amount,
             sale.tax_percentage,
             sale.amount_paid,
-            sale.amount_change
-        ])
+            sale.amount_change,
+            description_text
+        ]
 
-    # Set up the response to send the file
+        worksheet.append(row_data)
+
+        # Apply wrap text to the "Item Descriptions" column
+        description_cell = worksheet.cell(row=worksheet.max_row, column=10)
+        description_cell.alignment = Alignment(wrap_text=True)
+
+    # Adjust column widths (optional)
+    for col in worksheet.columns:
+        max_length = max((len(str(cell.value)) if cell.value else 0) for cell in col)
+        worksheet.column_dimensions[col[0].column_letter].width = min(max_length + 2, 50)
+
+    # Prepare response
     response = HttpResponse(
-        content_type=(
-            'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
-        )
+        content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
     )
     response['Content-Disposition'] = 'attachment; filename=sales.xlsx'
     workbook.save(response)
-
     return response
+
 
 
 def export_purchases_to_excel(request):
@@ -173,26 +199,59 @@ def export_purchases_to_excel(request):
 
     return response
 
+from django.db.models import Q
 
-class SaleListView(LoginRequiredMixin, ListView):
-    """
-    View to list all sales with pagination.
-    """
-
+class SaleListView(ListView):
     model = Sale
-    template_name = "transactions/sales_list.html"
-    context_object_name = "sales"
+    template_name = 'transactions/sales_list.html'
+    context_object_name = 'sales'
     paginate_by = 10
-    ordering = ['date_added']
+
+    def get_queryset(self):
+        sales = Sale.objects.all().prefetch_related('saledetail_set__item')
+        queryset = super().get_queryset()
+        status = self.request.GET.get('status')
+        serial_filter = self.request.GET.get('serial')
+        inv = self.request.GET.get('inv')
+
+        if status:
+            queryset = queryset.filter(status=status)
+
+        if inv:
+            # Assuming invoice number is derived from `id`, e.g., INV123
+            if inv.lower().startswith("inv"):
+                inv = inv[3:]  # Strip "INV" prefix
+            if inv.isdigit():
+                queryset = queryset.filter(id=inv)
+            else:
+                queryset = queryset.none()
+
+        if serial_filter:
+            queryset = sales.filter(saledetail_set__item__serialno__icontains=serial_filter)
+
+        return queryset
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['status_filter'] = self.request.GET.get('status', '')
+        return context
 
 
 class SaleDetailView(LoginRequiredMixin, DetailView):
     """
     View to display details of a specific sale.
     """
-
     model = Sale
     template_name = "transactions/invoice.html"
+    context_object_name = "sale"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        sale = self.get_object()
+        context["total_after_payment"] = sale.grand_total - sale.amount_paid
+        return context
+
+
 
 
 from django.shortcuts import render
@@ -208,105 +267,133 @@ def SaleCreateView(request):
     context = {
         "active_icon": "sales",
         "customers": [c.to_select2() for c in Customer.objects.all()],
-        "items": [d.to_select3() for d in Item.objects.all()]
+        "items": [d.to_select3() for d in Item.objects.all()],
+        "bank_accounts": Bankaccount.objects.all()
     }
 
     if request.method == 'POST' and is_ajax(request=request):
-        # try:
-        data = json.loads(request.body)
-        logger.info(f"Received data: {data}")
+        try:
+            data = json.loads(request.body)
+            logger.info(f"Received data: {data}")
 
-        # ✅ Validate required fields
-        required_fields = [
-            'customer', 'sub_total', 'grand_total',
-            'amount_paid', 'amount_change', 'items'
-        ]
-        for field in required_fields:
-            if field not in data:
-                raise ValueError(f"Missing required field: {field}")
+            # ✅ Add 'payment_type' to required fields
+            required_fields = [
+                'customer', 'sub_total', 'grand_total',
+                'amount_paid', 'amount_change', 'items', 'payment_type'
+            ]
 
-        # ✅ Build sale (main) attributes — no "item" here
-        sale_attributes = {
-            "customer": Customer.objects.get(id=int(data['customer'])),
-            "sub_total": float(data["sub_total"]),
-            "grand_total": float(data["grand_total"]),
-            "tax_amount": float(data.get("tax_amount", 0.0)),
-            "tax_percentage": float(data.get("tax_percentage", 0.0)),
-            "amount_paid": float(data["amount_paid"]),
-            "amount_change": float(data["amount_change"]),
-        }
+            for field in required_fields:
+                if field not in data:
+                    raise ValueError(f"Missing required field: {field}")
 
-        with transaction.atomic():
-            # ✅ Create Sale (master)
-            new_sale = Sale.objects.create(**sale_attributes)
-            logger.info(f"Sale created: {new_sale}")
+            # ✅ Validate bank account only if payment type is 'Bank'
+            bank_account = None
+            if data['payment_type'] == 'Bank':
+                if 'bank_account' not in data or not data['bank_account']:
+                    raise ValueError("Bank account must be provided for Bank payments")
+                try:
+                    bank_account = Bankaccount.objects.get(id=int(data['bank_account']))
+                except Bankaccount.DoesNotExist:
+                    raise ValueError("Invalid bank account selected")
+                
+            # Calculate dynamic status
+            amount_paid = float(data["amount_paid"])
+            grand_total = float(data["grand_total"])
 
-            # ✅ Process each item
-            items = data["items"]
-            if not isinstance(items, list):
-                raise ValueError("Items should be a list")
+            if amount_paid >= grand_total:
+                sale_status = 'Paid'
+            elif amount_paid == 0:
+                sale_status = 'Unpaid'
+            else:
+                sale_status = 'Balance'
 
-            for item in items:
-                if not all(k in item for k in ["id", "price", "quantity", "total_item"]):
-                    raise ValueError("Item is missing required fields")
+            # ✅ Build sale (main) attributes
+            sale_attributes = {
+                "customer": Customer.objects.get(id=int(data['customer'])),
+                "sub_total": float(data["sub_total"]),
+                "grand_total": float(data["grand_total"]),
+                "tax_amount": float(data.get("tax_amount", 0.0)),
+                "tax_percentage": float(data.get("tax_percentage", 0.0)),
+                "amount_paid": float(data["amount_paid"]),
+                "amount_change": float(data["amount_change"]),
+                "payment_type": data['payment_type'],
+                "bank_account": bank_account,
+                "status": sale_status  # <-- Now saving dynamic status
+            }
+            with transaction.atomic():
+                # ✅ Create Sale (master)
+                new_sale = Sale.objects.create(**sale_attributes)
+                logger.info(f"Sale created: {new_sale}")
 
-                item_instance = Item.objects.get(id=int(item["id"]))
+                # ✅ Process each item
+                items = data["items"]
+                if not isinstance(items, list):
+                    raise ValueError("Items should be a list")
 
-                if item_instance.quantity < int(item["quantity"]):
-                    raise ValueError(f"Not enough stock for item: {item_instance.name}")
+                for item in items:
+                    if not all(k in item for k in ["id", "price", "quantity", "total_item"]):
+                        raise ValueError("Item is missing required fields")
 
-                # ✅ Auto-generate description
-                components = catogaryitem.objects.filter(serial_no=item_instance.serialno)
-                grouped = {
-                    'processor': [],
-                    'ram': [],
-                    'hdd': [],
-                    'ssd': []
-                }
+                    item_instance = Item.objects.get(id=int(item["id"]))
 
-                for comp in components:
-                    grouped[comp.category].append(f"{comp.name} X({comp.quantity})")
+                    if item_instance.quantity < int(item["quantity"]):
+                        raise ValueError(f"Not enough stock for item: {item_instance.name}")
 
-                description = ""
-                for cat in ['processor', 'ram', 'hdd', 'ssd']:
-                    if grouped[cat]:
-                        category_display = cat.upper()
-                        values = ", ".join(grouped[cat])
-                        description += f"{category_display}: {values}<br>"
+                    # ✅ Auto-generate description
+                    components = catogaryitem.objects.filter(serial_no=item_instance.serialno)
+                    grouped = {
+                        'processor': [],
+                        'ram': [],
+                        'hdd': [],
+                        'ssd': []
+                    }
 
-                # ✅ Create SaleDetail with generated description
-                SaleDetail.objects.create(
-                    sale=new_sale,
-                    item=item_instance,
-                    quantity=int(item["quantity"]),
-                    price=float(item["price"]),
-                    total_detail=float(item["total_item"]),
-                    description=description  # Auto-generated HTML
-                )
+                    for comp in components:
+                        grouped[comp.category].append(f"{comp.name} X({comp.quantity})")
 
-                # ✅ Update stock
-                item_instance.quantity -= int(item["quantity"])
-                item_instance.save()
+                    description = ""
+                    for cat in ['processor', 'ram', 'hdd', 'ssd']:
+                        if grouped[cat]:
+                            category_display = cat.upper()
+                            values = ", ".join(grouped[cat])
+                            description += f"{category_display}: {values} ({comp.serial_no})<br>"
 
-        return JsonResponse({
-            'status': 'success',
-            'message': 'Sale created successfully!',
-            'redirect': '/transactions/sales/'
-        })
+                    # ✅ Create SaleDetail with generated description
+                    SaleDetail.objects.create(
+                        sale=new_sale,
+                        item=item_instance,
+                        quantity=int(item["quantity"]),
+                        price=float(item["price"]),
+                        total_detail=float(item["total_item"]),
+                        description=description  # Auto-generated HTML
+                    )
 
-        # except json.JSONDecodeError:
-        #     return JsonResponse({'status': 'error', 'message': 'Invalid JSON format in request body!'}, status=400)
-        # except Customer.DoesNotExist:
-        #     return JsonResponse({'status': 'error', 'message': 'Customer does not exist!'}, status=400)
-        # except Item.DoesNotExist:
-        #     return JsonResponse({'status': 'error', 'message': 'Item does not exist!'}, status=400)
-        # except ValueError as ve:
-        #     return JsonResponse({'status': 'error', 'message': f'Value error: {str(ve)}'}, status=400)
-        # except TypeError as te:
-        #     return JsonResponse({'status': 'error', 'message': f'Type error: {str(te)}'}, status=400)
-        # except Exception as e:
-        #     logger.error(f"Exception during sale creation: {e}")
-        #     return JsonResponse({'status': 'error', 'message': f'There was an error during the creation: {str(e)}'}, status=500)
+                    # ✅ Update stock
+                    item_instance.quantity -= int(item["quantity"])
+                    item_instance.save()
+
+                
+                
+
+            return JsonResponse({
+                'status': 'success',
+                'message': 'Sale created successfully!',
+                'redirect': '/transactions/sales/'
+            })
+
+        except json.JSONDecodeError:
+            return JsonResponse({'status': 'error', 'message': 'Invalid JSON format in request body!'}, status=400)
+        except Customer.DoesNotExist:
+            return JsonResponse({'status': 'error', 'message': 'Customer does not exist!'}, status=400)
+        except Item.DoesNotExist:
+            return JsonResponse({'status': 'error', 'message': 'Item does not exist!'}, status=400)
+        except ValueError as ve:
+            return JsonResponse({'status': 'error', 'message': f'Value error: {str(ve)}'}, status=400)
+        except TypeError as te:
+            return JsonResponse({'status': 'error', 'message': f'Type error: {str(te)}'}, status=400)
+        except Exception as e:
+            logger.error(f"Exception during sale creation: {e}")
+            return JsonResponse({'status': 'error', 'message': f'There was an error during the creation: {str(e)}'}, status=500)
 
     return render(request, "transactions/sale_create.html", context=context)
 
@@ -551,14 +638,26 @@ class BankDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
         return self.request.user.is_superuser
     
 class cashbankListView(LoginRequiredMixin, ListView):
-    """
-    View to list all purchases with pagination.
-    """
-
     model = Bankaccount
     template_name = "transactions/bank_acc.html"
     context_object_name = "bankaccount"
     paginate_by = 10
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        account_id = self.request.GET.get('account_id')
+        sales = Sale.objects.select_related('customer')
+
+        if account_id:
+            sales = sales.filter(bank_account_id=account_id)
+
+        sales = sales.order_by('-date_added')
+        context['sales'] = sales
+        context['selected_account_id'] = account_id  # for UI highlighting if needed
+        return context
+
+
 
 
 class BankCreateView(LoginRequiredMixin, CreateView):
@@ -577,6 +676,43 @@ class BankCreateView(LoginRequiredMixin, CreateView):
         Allow deletion only for superusers.
         """
         return self.request.user.is_superuser
+    
+
+from django.shortcuts import redirect, get_object_or_404
+from django.contrib import messages
+from django.views.decorators.http import require_POST
+from .models import Sale
+from .forms import PaymentForm
+
+@require_POST
+def receive_payment(request):
+    form = PaymentForm(request.POST)
+    if form.is_valid():
+        sale = get_object_or_404(Sale, id=form.cleaned_data['sale_id'])
+        received = form.cleaned_data['amount_received']
+        
+        # Update Sale amounts
+        sale.amount_paid += received
+        # Calculate remaining balance
+        remaining = sale.grand_total - sale.amount_paid
+        
+        # Update amount_change (balance due)
+        sale.amount_change = max(remaining, 0)
+        
+        # Update status
+        if remaining <= 0:
+            sale.status = "Paid"
+        else:
+            sale.status = "Balance"  # Or "Unpaid" depending on your logic
+        
+        sale.save()
+        
+        messages.success(request, f"Payment of ₹{received:.2f} received for sale #{sale.id}.")
+    else:
+        messages.error(request, "Invalid payment data submitted.")
+    
+    return redirect('cashbanklist')  # Replace with your actual list view URL name
+
 
 
     

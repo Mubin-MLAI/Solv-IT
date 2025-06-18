@@ -136,7 +136,7 @@
         <h6 style="color: rgb(254, 251, 251);">
           <b>
           Invoice No. INV{{ sale.id }}
-          Date : {{ sale.date_added|date:"d/m/Y H:i:s" }}
+          Date : {{ sale.date_added|date:"d/m/Y" }}
           </b>
         </h6>
       </div>
@@ -145,6 +145,7 @@
           <em><b>Address:</b> Shop No 3&4, Kulsum Heritage, opposite Animal Quarantine and Certification Centre, Sector 12-E, Bonkode, KoparKhairane, Navi Mumbai, Maharashtra - 400709</em>
         </h6>        
         <p><em><b>Phone:</b> +91 922-296-6631</em></p>
+        
       </div>
     </div>
   </div>
@@ -167,7 +168,7 @@
         <tr>
           <th>{{ forloop.counter }}</th>
           <td>
-            <strong>{{ detail.item.name }}</strong><br>
+            <strong>{{ detail.item.name }} ({{ detail.item.serialno }})</strong><br>
             {{ detail.description|safe }}
           </td>          
           <td>{{ detail.quantity }}</td>
@@ -210,12 +211,40 @@
     <div class="col-6 pr-5">
       <table class="table table-borderless text-right">
         <tbody>
-          <tr><th>Subtotal</th><td>{{ sale.sub_total }} <span class="currency">&#8377;</span></td></tr>
-          <tr><th>GST*</th><td>{{ sale.tax_percentage }} <span class="currency">%</span></td></tr>
-          <tr><th>GST Amount</th><td>{{ sale.tax_amount }} <span class="currency">&#8377;</span></td></tr>
-          <tr><th>Shipping</th><td>NA <span class="currency">&#8377;</span></td></tr>
-          <tr class="last-row"><th><h4>Total</h4></th><td><h4><span class="currency">&#8377;</span>{{ sale.grand_total }}</h4></td></tr>
-        </tbody>
+          <tr>
+              <th>Subtotal</th>
+              <td>₹{{ sale.sub_total|floatformat:2 }}</td>
+          </tr>
+          <tr>
+              <th>GST (%)</th>
+              <td>{{ sale.tax_percentage }}%</td>
+          </tr>
+          <tr>
+              <th>GST Amount</th>
+              <td>₹{{ sale.tax_amount|floatformat:2 }}</td>
+          </tr>
+          <tr>
+              <th>Shipping</th>
+              <td>₹0.00</td> <!-- You can change this if shipping applies -->
+          </tr>
+          <tfoot>
+            <tr class="fw-bold">
+              <th>Total Amount</th>
+              <td>₹{{ sale.grand_total|floatformat:2 }}</td>
+            </tr>
+            <tr class="table-success fw-bold">
+                <th>Amount Paid</th>
+                <td>₹{{ sale.amount_paid|floatformat:2 }}</td>
+            </tr>
+            <tr class="{% if sale.amount_change > 0 %}table-warning{% else %}table-success{% endif %} fw-bold">
+                <th>Balance Due</th>
+                <td>₹{{ total_after_payment|floatformat:2 }}</td>
+            </tr>
+        </tfoot>
+        
+        
+      </tbody>
+      
       </table>
     </div>
   </div>

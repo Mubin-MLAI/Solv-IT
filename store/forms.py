@@ -107,12 +107,13 @@ class ItemForm(forms.ModelForm):
             'quantity': forms.NumberInput(attrs={
                 'class': 'form-control',
                 'placeholder': 'Enter quantity',
-                'min': '0'
+                'min': '0',
+                'readonly': 'readonly',
             }),
-            # 'smps_status': forms.Select(attrs={'class': 'form-control'}),
-            # 'smps_replacement_description': forms.TextInput(attrs={'class': 'form-control'}),
-            # 'motherboard_status': forms.Select(attrs={'class': 'form-control', }),
-            # 'motherboard_replacement_description': forms.TextInput(attrs={'class': 'form-control'}),
+            'smps_status': forms.Select(attrs={'class': 'form-control'}),
+            'smps_replacement_description': forms.TextInput(attrs={'class': 'form-control'}),
+            'motherboard_status': forms.Select(attrs={'class': 'form-control', }),
+            'motherboard_replacement_description': forms.TextInput(attrs={'class': 'form-control'}),
         }
 
     def clean_quantity(self):
@@ -126,10 +127,10 @@ class ItemForm(forms.ModelForm):
         item = super().save(commit=False)
         if commit:
             item.save()
-            item.processors.set(self.cleaned_data['processors'])
-            item.rams.set(self.cleaned_data['rams'])
-            item.hdds.set(self.cleaned_data['hdds'])
-            item.ssds.set(self.cleaned_data['ssds'])
+            # item.processors.set(self.cleaned_data['processors'])
+            # item.rams.set(self.cleaned_data['rams'])
+            # item.hdds.set(self.cleaned_data['hdds'])
+            # item.ssds.set(self.cleaned_data['ssds'])
         return item
 
     

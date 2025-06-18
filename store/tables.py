@@ -17,7 +17,7 @@ class ItemTable(tables.Table):
 
     def render_processor(self, record):
         items = self.get_cat_items(record).filter(category='processor')
-        return ", ".join(f"{item.name} ({item.quantity})" for item in items) if items else "-"
+        return ", ".join(f"{item.name}" for item in items) if items else "-"
 
     def render_processor_qty(self, record):
         items = self.get_cat_items(record).filter(category='processor')
@@ -25,7 +25,7 @@ class ItemTable(tables.Table):
 
     def render_ram(self, record):
         items = self.get_cat_items(record).filter(category='ram')
-        return ", ".join(f"{item.name} ({item.quantity})" for item in items) if items else "-"
+        return ", ".join(f"{item.name}" for item in items) if items else "-"
 
     def render_ram_qty(self, record):
         items = self.get_cat_items(record).filter(category='ram')
@@ -33,7 +33,7 @@ class ItemTable(tables.Table):
 
     def render_hdd(self, record):
         items = self.get_cat_items(record).filter(category='hdd')
-        return ", ".join(f"{item.name} ({item.quantity})" for item in items) if items else "-"
+        return ", ".join(f"{item.name}" for item in items) if items else "-"
 
     def render_hdd_qty(self, record):
         items = self.get_cat_items(record).filter(category='hdd')
@@ -41,7 +41,7 @@ class ItemTable(tables.Table):
 
     def render_ssd(self, record):
         items = self.get_cat_items(record).filter(category='ssd')
-        return ", ".join(f"{item.name} ({item.quantity})" for item in items) if items else "-"
+        return ", ".join(f"{item.name}" for item in items) if items else "-"
 
     def render_ssd_qty(self, record):
         items = self.get_cat_items(record).filter(category='ssd')
@@ -55,7 +55,7 @@ class ItemTable(tables.Table):
         template_name = "django_tables2/semantic.html"
         fields = (
             'id', 'name', 'serialno', 'make_and_models',
-            'processor','processor_qty', 'ram','ram_qty','hdd','hdd_qty','ssd','ssd_qty', 
+            'processor','processor_qty', 'ram','ram_qty','hdd','hdd_qty','ssd','ssd_qty', 'quantity',
             'smps_status', 'motherboard_status'
         )
         order_by_field = 'id'

@@ -1,3 +1,4 @@
+from decimal import Decimal
 from django.db import models
 from django_extensions.db.fields import AutoSlugField
 
@@ -7,10 +8,59 @@ from accounts.models import Vendor, Customer
 DELIVERY_CHOICES = [("P", "Pending"), ("S", "Successful")]
 
 
+class Bankaccount(models.Model):
+    slug = AutoSlugField(unique=False, populate_from='account_name')
+    account_name = models.CharField(max_length=50)
+    opening_balance = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        default=0.0)
+    as_of_date = models.DateTimeField(
+        blank=True, null=True, verbose_name="Created Date"
+    )
+
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+
+
+    def __str__(self):
+        return f"{self.account_name} - opening_balance: {self.opening_balance or 'N/A'}, as_of_date: {self.as_of_date}"
+
+class BankTransaction(models.Model):
+    TRANSACTION_TYPES = [
+        ('credit', 'Credit'),   # Money In
+        ('debit', 'Debit'),     # Money Out
+    ]
+
+    bank_account = models.ForeignKey(Bankaccount, on_delete=models.CASCADE)
+    sale = models.ForeignKey('Sale', null=True, blank=True, on_delete=models.SET_NULL)
+    transaction_type = models.CharField(max_length=10, choices=TRANSACTION_TYPES)
+    amount = models.DecimalField(max_digits=10, decimal_places=2)
+    transaction_date = models.DateTimeField(auto_now_add=True)
+    note = models.CharField(max_length=255, blank=True)
+
+    def __str__(self):
+        return f"{self.transaction_type.title()} of {self.amount} on {self.transaction_date}"
+
+
 class Sale(models.Model):
     """
     Represents a sale transaction involving a customer.
     """
+
+    PAYMENT_CHOICES = [
+        ('Cash', 'Cash'),
+        ('Cheque', 'Cheque'),
+        ('Bank', 'Bank'),
+    ]
+
+    STATUS_CHOICES = [
+    ('Paid', 'Paid'),
+    ('Unpaid', 'Unpaid'),
+    ('Balance', 'Balance')
+    ]
+
+
 
     date_added = models.DateTimeField(
         auto_now_add=True,
@@ -36,7 +86,7 @@ class Sale(models.Model):
         decimal_places=2,
         default=0.0
     )
-    tax_percentage = models.FloatField(default=0.0)
+    tax_percentage = models.FloatField(default=0)
     amount_paid = models.DecimalField(
         max_digits=10,
         decimal_places=2,
@@ -47,11 +97,65 @@ class Sale(models.Model):
         decimal_places=2,
         default=0.0
     )
+    bank_account = models.ForeignKey(Bankaccount,
+    on_delete=models.SET_NULL,
+    null=True,
+    blank=True
+    )
+    payment_type = models.CharField(
+        max_length=10,
+        choices=PAYMENT_CHOICES,
+        default='Cash'
+    )
+
+    status = models.CharField(
+    max_length=10,
+    choices=STATUS_CHOICES,
+    default='Unpaid'
+    )
+
+
+    
 
     class Meta:
         db_table = "sales"
         verbose_name = "Sale"
         verbose_name_plural = "Sales"
+
+    def save(self, *args, **kwargs):
+        is_new = self._state.adding
+        old_instance = None
+
+        if not is_new:
+            old_instance = Sale.objects.get(pk=self.pk)
+
+        super().save(*args, **kwargs)
+
+        if self.payment_type == 'Bank' and self.bank_account:
+            bank = self.bank_account
+
+            # Revert old balance
+            if old_instance and old_instance.bank_account == bank:
+                bank.opening_balance -= Decimal(str(old_instance.amount_paid))
+
+            # Add new payment
+            bank.opening_balance += Decimal(str(self.amount_paid))
+            bank.save()
+
+            # Remove old transaction
+            if old_instance:
+                BankTransaction.objects.filter(sale=old_instance).delete()
+
+            # Log transaction
+            BankTransaction.objects.create(
+                bank_account=bank,
+                sale=self,
+                transaction_type='credit',
+                amount=Decimal(str(self.amount_paid)),
+                note=f"Sale payment received (Sale ID: {self.id})"
+            )
+
+
 
     def __str__(self):
         """
@@ -68,6 +172,21 @@ class Sale(models.Model):
         Returns the total quantity of products in the sale.
         """
         return sum(detail.quantity for detail in self.saledetail_set.all())
+    
+    def get_item_descriptions_by_type(self):
+        grouped = {"PROCESSOR": [], "RAM": [], "HDD": [], "SSD": []}
+        for detail in self.saledetail_set.all():
+            if detail.description:
+                for part in detail.description.split("<br>"):
+                    if "PROCESSOR:" in part:
+                        grouped["PROCESSOR"].append(part.strip())
+                    elif "RAM:" in part:
+                        grouped["RAM"].append(part.strip())
+                    elif "HDD:" in part:
+                        grouped["HDD"].append(part.strip())
+                    elif "SSD:" in part:
+                        grouped["SSD"].append(part.strip())
+        return grouped
 
 
 class SaleDetail(models.Model):
@@ -110,6 +229,8 @@ class SaleDetail(models.Model):
             f"Sale ID: {self.sale.id} | "
             f"Quantity: {self.quantity}"
         )
+    
+        
 
 
 class Purchase(models.Model):
@@ -162,21 +283,6 @@ class Purchase(models.Model):
     class Meta:
         ordering = ["order_date"]
 
-class Bankaccount(models.Model):
-    slug = AutoSlugField(unique=False, populate_from='account_name')
-    account_name = models.CharField(max_length=50)
-    opening_balance = models.DecimalField(
-        max_digits=10,
-        decimal_places=2,
-        default=0.0)
-    as_of_date = models.DateTimeField(
-        blank=True, null=True, verbose_name="Created Date"
-    )
-
-    def save(self, *args, **kwargs):
-        super().save(*args, **kwargs)
 
 
-    def __str__(self):
-        return f"{self.account_name} - opening_balance: {self.opening_balance or 'N/A'}, as_of_date: {self.as_of_date}"
 

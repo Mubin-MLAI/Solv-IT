@@ -1,6 +1,18 @@
 from django.contrib import admin
-from .models import Sale, SaleDetail, Purchase,Bankaccount
+from .models import Sale, SaleDetail, Purchase,Bankaccount,BankTransaction
 
+
+@admin.register(BankTransaction)
+class BankTransAdmin(admin.ModelAdmin):
+
+    def save_model(self, request, obj, form, change):
+        super().save_model(request, obj, form, change)
+
+@admin.register(Bankaccount)
+class BankAdmin(admin.ModelAdmin):
+
+    def save_model(self, request, obj, form, change):
+        super().save_model(request, obj, form, change)
 
 @admin.register(Sale)
 class SaleAdmin(admin.ModelAdmin):
@@ -79,25 +91,5 @@ class PurchaseAdmin(admin.ModelAdmin):
         """
         obj.total_value = obj.price * obj.quantity
         super().save_model(request, obj, form, change)
+        
 
-
-@admin.register(Bankaccount)
-class BankAdmin(admin.ModelAdmin):
-    """
-    Admin interface configuration for the Bank model.
-    """
-    # list_display = (
-    #     'id',
-    #     'account_name',
-    #     'as_of_date',
-    # )
-    # search_fields = ('account_name')
-    # list_filter = ('as_of_date', 'account_name')
-    # ordering = ('-as_of_date',)
-    # date_hierarchy = 'as_of_date'
-
-    def save_model(self, request, obj, form, change):
-        """
-        Save the Bank instance, overriding the default save behavior.
-        """
-        super().save_model(request, obj, form, change)

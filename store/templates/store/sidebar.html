@@ -119,6 +119,11 @@
                     </a>
                 </li>
                 {% if request.user.profile.role != 'OP' %}
+                <!-- <li class="nav-item mb-2">
+                    <a class="nav-link text-light {% if request.resolver_match.url_name == 'bill_list' %}active{% endif %}" href="{% url 'bill_list' %}">
+                        <i class="fa-solid fa-file-invoice me-2"></i> Bills
+                    </a>
+                </li> -->
                 <li class="nav-item dropdown">
                     <a class="nav-link {% if request.resolver_match.url_name == 'productslist' %}active{% endif %} dropdown-toggle"
                         href="#" id="productsDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
@@ -139,7 +144,7 @@
                         <li><a class="dropdown-item text-light {% if request.resolver_match.url_name == 'saleslist' %}active{% endif %}"
                             href="{% url 'saleslist' %}">Sales Orders</a></li>
                         <!-- <li><a class="dropdown-item text-light" href="{% url 'purchaseslist' %}">Purchase Orders</a></li> -->
-                        <li><a class="dropdown-item text-light" href="{% url 'cashbanklist' %}">Cash, Bank</a></li>
+                        <li><a class="dropdown-item text-light" href="{% url 'cashbanklist' %}">Account Details</a></li>
                     </ul>
                 </li>
                     <!-- <li class="nav-item mb-2">

@@ -64,3 +64,10 @@ class BankForm(forms.ModelForm):
                 }
             ),
         }
+
+
+from django import forms
+
+class PaymentForm(forms.Form):
+    sale_id = forms.IntegerField(widget=forms.HiddenInput())
+    amount_received = forms.DecimalField(max_digits=10, decimal_places=2, min_value=0)
