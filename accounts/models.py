@@ -106,17 +106,29 @@ class Vendor(models.Model):
     address = models.CharField(
         max_length=50, blank=True, null=True, verbose_name='Address'
     )
-
+    gstin = models.CharField(max_length=30, blank=True, null=True)
+    
     def __str__(self):
         """
         Returns a string representation of the vendor.
         """
         return self.name
+    
+    
+    def to_select2(self):
+        item = {
+            "label": self.name,
+            "value": self.id
+        }
+        return item
 
     class Meta:
         """Meta options for the Vendor model."""
         verbose_name = 'Vendor'
         verbose_name_plural = 'Vendors'
+
+
+    
 
 
 class Customer(models.Model):

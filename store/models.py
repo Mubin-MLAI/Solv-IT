@@ -136,7 +136,7 @@ class catogaryitem(models.Model):
     )
     name = models.CharField(max_length=100)
     serial_no = models.CharField(max_length=100)
-    quantity = models.IntegerField()
+    quantity = models.IntegerField(default=1, null=True, blank=True)
     unit_price = models.DecimalField(max_digits=10, decimal_places=2)
 
     created_by = models.ForeignKey(
@@ -173,7 +173,9 @@ class Item(models.Model):
     smps_replacement_description = models.TextField(max_length=100,null=True, blank=True)
     motherboard_status = models.CharField(max_length=50, choices=STATUS_CHOICES, default='available')
     motherboard_replacement_description = models.TextField(max_length=100, null=True, blank=True)
-    quantity = models.IntegerField(default=0)
+    quantity = models.IntegerField(default=1, null=True, blank=True)
+    price = models.DecimalField(max_digits=10, decimal_places=2, default=0.0)
+    purchased_code =  models.CharField(max_length=100,null=True, blank=True)
 
     created_by = models.ForeignKey(
         User, on_delete=models.SET_NULL, null=True, blank=True, related_name='items_created'

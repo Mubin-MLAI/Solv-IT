@@ -7,8 +7,8 @@ from django.conf.urls.static import static
 from .views import (
     PurchaseListView,
     PurchaseDetailView,
-    PurchaseCreateView,
-    PurchaseUpdateView,
+    # PurchaseCreateView,
+    # PurchaseUpdateView,
     PurchaseDeleteView,
     SaleListView,
     SaleDetailView,
@@ -20,27 +20,52 @@ from .views import (
     export_bank_to_excel,
     BankCreateView,
     BankDeleteView,
-    receive_payment
+    receive_payment,
+    PurchasedCreateView,
+    PurchaseItemSearchListView,
+    search_suggestions_purchase,
+    PurchaseOrderListView,
+    PurchaseCreateListView,
+    receive_payment_purchase,
+    # add_customer,
+    customer_search,
+    customer_create
 )
 
 # URL patterns
 urlpatterns = [
     # Purchase URLs
+    path(
+        'purchase-order/',
+        PurchaseOrderListView.as_view(),
+        name='purchase-order-create'
+    ),
+    path(
+        'purchase-createlist/',
+        PurchaseCreateListView,
+        name='purchase-create-list'
+    ),
+    path(
+        'new-purchase/',
+        PurchasedCreateView.as_view(),
+        name='purchase-create'
+    ),
     path('receive-payment/', receive_payment, name='receive-payment'),
+    path('receive-payment-purchase/', receive_payment_purchase, name='receive-payment-purchase'),
     path('cashbankListView/', cashbankListView.as_view(), name='cashbanklist'),
     path('purchases/', PurchaseListView.as_view(), name='purchaseslist'),
     path(
-         'purchase/<slug:slug>/', PurchaseDetailView.as_view(),
+         'purchase/<int:pk>/', PurchaseDetailView.as_view(),
          name='purchase-detail'
      ),
-    path(
-         'new-purchase/', PurchaseCreateView.as_view(),
-         name='purchase-create'
-     ),
-    path(
-         'purchase/<int:pk>/update/', PurchaseUpdateView.as_view(),
-         name='purchase-update'
-     ),
+    # path(
+    #      'new-purchase/', PurchaseCreateView.as_view(),
+    #      name='purchase-create'
+    #  ),
+    # path(
+    #      'purchase/<int:pk>/update/', PurchaseUpdateView.as_view(),
+    #      name='purchase-update'
+    #  ),
     path(
          'purchase/<int:pk>/delete/', PurchaseDeleteView.as_view(),
          name='purchase-delete'
@@ -53,6 +78,11 @@ urlpatterns = [
 
     path(
         'new-bank/',BankCreateView.as_view(),name='bank-create'
+    ),
+    path(
+        'search/',
+        PurchaseItemSearchListView.as_view(),
+        name='purchase_item_search_list_view'
     ),
     # Sale URLs
     path('sales/', SaleListView.as_view(), name='saleslist'),
@@ -69,6 +99,14 @@ urlpatterns = [
     path('sales/export/', export_sales_to_excel, name='sales-export'),
     path('purchases/export/', export_purchases_to_excel,
          name='purchases-export'),
+    path('search-suggestions-purchase/', search_suggestions_purchase, name='search-suggestions-purchase'),
+    # path('purchase_item_search_list_view/', purchase_item_search_list_view, name='purchase_item_search_list_view'),
+    # path('add_customer/', add_customer, name='add_customer'),
+    path('customers/', customer_search, name='customer_search'),
+
+    path('customers/create/', customer_create, name='customer_create'),
+
+
 ]
 
 # Static media files configuration for development

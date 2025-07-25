@@ -194,10 +194,22 @@ Add Product
                                 value="{{ form.ssd_qty.value }}" placeholder="e.g. 1,2">
                         </div>
                     </div>
-                    <div class="col-md-6 col-lg-3">
-                        <label for="quantity" class="form-label">Item Quantity</label>
-                        <input type="number" id="quantity" name="quantity" class="form-control"
-                            value="{{ form.quantity.value }}">
+                    <div class="row mb-3">
+                        <div class="col-md-4">
+                            <label for="{{ form.price.id_for_label }}" class="form-label">
+                                Price
+                            </label>
+                            {{ form.price }}
+                            <div class="text-danger">{{ form.price.errors }}</div>
+                        </div>
+
+                        <div class="col-md-4">
+                            <label for="{{ form.purchased_code.id_for_label }}" class="form-label" placeholder="Enter Purchase / LOT Code">
+                                Purchase / LOT Code
+                            </label>
+                            {{ form.purchased_code }}
+                            <div class="text-danger">{{ form.purchased_code.errors }}</div>
+                        </div>
                     </div>
 
                     <!-- SMPS Section -->

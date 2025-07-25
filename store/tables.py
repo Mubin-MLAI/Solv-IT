@@ -55,7 +55,7 @@ class ItemTable(tables.Table):
         template_name = "django_tables2/semantic.html"
         fields = (
             'id', 'name', 'serialno', 'make_and_models',
-            'processor','processor_qty', 'ram','ram_qty','hdd','hdd_qty','ssd','ssd_qty', 'quantity',
+            'processor','processor_qty', 'ram','ram_qty','hdd','hdd_qty','ssd','ssd_qty','price',
             'smps_status', 'motherboard_status'
         )
         order_by_field = 'id'

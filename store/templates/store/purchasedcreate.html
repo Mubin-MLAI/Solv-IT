@@ -1,8 +1,9 @@
 {% extends "store/base.html" %}
 {% load static %}
+{% load querystring from django_tables2 %}
 
 {% block title %}
-Add Product
+Add Purchased
 {% endblock title %}
 
 {% block content %}
@@ -58,16 +59,46 @@ Add Product
 </style>
 <br>
 <div class="container my-5">
+    <!-- Go back -->
+    <div class="mb-4">
+        <a href="{% url 'purchaselist' %}" class="btn btn-outline-success">
+            <i class="fas fa-arrow-left me-2"></i>
+            Go back
+        </a>
+    </div>
     <div class="row justify-content-center">
+        <!-- Excel Import Form -->
+        <div class="card shadow-sm border-light w-100">
+            <div class="card-body">
+                <h5 class="card-title mb-3">Import Purchase from Excel</h5>
+                {% if error %}
+                    <div class="alert alert-danger">{{ error }}</div>
+                {% endif %}
+                {% if success %}
+                    <div class="alert alert-success">{{ success }}</div>
+                {% endif %}
+
+                <form method="POST" enctype="multipart/form-data" action="{% url 'upload_category_items' %}">
+                    {% csrf_token %}
+                    <div class="row mb-3">
+                        <div class="col-md-4">
+                            {{ form.file.label_tag }}
+                            {{ form.file }}
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-success btn-sm rounded-pill shadow-sm"><i class="fa-solid fa-download"></i> Upload Product </button>
+                </form>
+            </div>
+        </div>
         <div class="card shadow-sm border-light">
             <div class="card-body">
                 {% if request.user.profile.role != 'OP' %}
-                <form method="POST" enctype="multipart/form-data">
+                <form method="POST" enctype="multipart/form-data" action="{% url 'purchase-create' %}">
                     {% csrf_token %}
                     <div class="row mb-3">
                         <!-- Product Name -->
                         <div class="col-md-4">
-                            <label for="{{ form.name.id_for_label }}" class="form-label">
+                            <label for="{{ form.name.id_for_label }}" class="form-label" placeholder="Enter Product Name">
                                 Product Name
                             </label>
                             {{ form.name }}
@@ -76,153 +107,131 @@ Add Product
 
                         <!-- Serial No -->
                         <div class="col-md-4">
-                            <label for="id_serialno" class="form-label">Serial No</label>
+                            <label for="id_serialno" class="form-label" placeholder="Enter Serial No">Serial No</label>
                             {{ form.serialno }}
                             <div class="text-danger">{{ form.serialno.errors }}</div>
                         </div>
 
                         <!-- Make & Models -->
                         <div class="col-md-4">
-                            <label for="{{ form.make_and_models.id_for_label }}" class="form-label">
+                            <label for="{{ form.make_and_models.id_for_label }}" class="form-label" >
                                 Make & Models
                             </label>
+                            <div aria-placeholder="Enter Make & Models"></div>
                             {{ form.make_and_models }}
                             <div class="text-danger">{{ form.make_and_models.errors }}</div>
                         </div>
                     </div>
 
+                    <!-- Processor Section -->
                     <div class="row mb-3">
-                        <!-- Processor Details -->
+                        <!-- Processor Details (75% width) -->
                         <div class="col-md-9">
                             <label for="processor" class="form-label">Processor Details</label>
-                            <input type="text" name="processor" id="processor" class="form-control"
-                                value="{{ processor_option3|join:', ' }}"
-                                placeholder="e.g. i5 8th Generation, i7 9th Generation" style="text-transform: uppercase;">
-                            <div class="text-danger">{{ form.processor.errors }}</div>
+                            <input type="text" name="processor" id="processor" class="form-control" placeholder="Enter Processor Name. if more > 1 e.g. i5 8th Generation, i7 9th Generation"
+                                style="text-transform: uppercase;">
+                            <div class="text-danger">{{ form.processors.errors }}</div>   
                         </div>
-                    
-                        <!-- Processor Quantity -->
-                        <div class="col-md-3">
+
+                        <div class="col-md-6 col-lg-3">
                             <label for="processor_qty" class="form-label">Qty</label>
                             <input type="text" id="processor_qty" name="processor_qty" class="form-control"
-                            value="{{ processor_qty3|join:', ' }}" placeholder="e.g. 2,1">
-                            <div class="text-danger">{{ form.processor_qty.errors }}</div>
-                        </div>
-                    </div>
-                    
+                                value="{{ form.processor_qty.value }}" placeholder="e.g. 2,1">
+                        </div> 
 
-                    <!-- 🧠 RAM Section -->
+                    </div>
+
+                    <!-- RAM Section -->
                     <div class="row mb-3">
+                        <!-- RAM Details (75% width) -->
                         <div class="col-md-9">
-                            <label for="ram" class="form-label">RAM</label>
-                            <input type="text" name="ram" id="ram" class="form-control"
-                            value="{{ ram_option3|join:', ' }}" placeholder="e.g. 4GB Kingston, 8GB Samsung" style="text-transform: uppercase;">
-                            <div class="text-danger">{{ form.ram.errors }}</div>
+                            <label for="ram" class="form-label">RAM Details</label>
+                            
+                            <input type="text" name="ram" id="ram" class="form-control" placeholder="Enter RAM details.  if more > 1 e.g. 4GB Company-name, 8GB Company-name"
+                            style="text-transform: uppercase;">
+                            
+                            <div class="text-danger">{{ form.rams.errors }}</div>
                         </div>
-                        <div class="col-md-3">
+
+                        <div class="col-md-6 col-lg-3">
                             <label for="ram_qty" class="form-label">Qty</label>
-                            <input type="text" name="ram_qty" id="ram_qty" class="form-control mt-2"
-                                value="{{ ram_qty3|join:', ' }}" placeholder="e.g. 1,2">
-                            <div class="text-danger">{{ form.ram_qty.errors }}</div>
+                            <input type="text" id="ram_qty" name="ram_qty" class="form-control"
+                                value="{{ form.ram_qty.value }}" placeholder="e.g. 1,2">
                         </div>
                     </div>
 
-                    <!-- 💾 HDD Section -->
+                    <!-- HDD Section -->
                     <div class="row mb-3">
+                        <!-- HDD Details (75% width) -->
                         <div class="col-md-9">
-                            <label for="hdd" class="form-label">HDD</label>
-                            <input type="text" name="hdd" id="hdd" class="form-control"
-                                value="{{ hdd_option3|join:', ' }}" placeholder="e.g. 500GB WD, 1TB Seagate" style="text-transform: uppercase;">
-                            <div class="text-danger">{{ form.hdd.errors }}</div>
+                            <label for="hdd" class="form-label">HDD Details</label>
+                            <input type="text" name="hdd" id="hdd" class="form-control" placeholder="Enter HDD details.  if more > 1 e.g. 500GB Company-name, 1TB Company-name"
+                            style="text-transform: uppercase;">
+                            <div class="text-danger">{{ form.hdds.errors }}</div>
                         </div>
-                        <div class="col-md-3">
+
+                        <div class="col-md-6 col-lg-3">
                             <label for="hdd_qty" class="form-label">Qty</label>
-                            <input type="text" name="hdd_qty" id="hdd_qty" class="form-control mt-2"
-                                value="{{ hdd_qty3|join:', ' }}" placeholder="e.g. 1,1">
-                            <div class="text-danger">{{ form.hdd_qty.errors }}</div>
+                            <input type="text" id="hdd_qty" name="hdd_qty" class="form-control"
+                                value="{{ form.hdd_qty.value }}" placeholder="e.g. 1,2">
                         </div>
                     </div>
 
-                    <!-- ⚡ SSD Section -->
+                    <!-- SSD Section -->
                     <div class="row mb-3">
+                        <!-- SSD Details (75% width) -->
                         <div class="col-md-9">
-                            <label for="ssd" class="form-label">SSD</label>
-                            <input type="text" name="ssd" id="ssd" class="form-control"
-                                value="{{ ssd_option3|join:', ' }}" placeholder="e.g. 256GB Samsung, 512GB Kingston" style="text-transform: uppercase;">
-                            <div class="text-danger">{{ form.ssd.errors }}</div>
+                            <label for="ssd" class="form-label">SSD Details</label>
+                            <input type="text" name="ssd" id="ssd" class="form-control" placeholder="Enter SSD details.  if more > 1 e.g. 256GB Company-name, 512GB Company-name"
+                            style="text-transform: uppercase;">
+                            <div class="text-danger">{{ form.ssds.errors }}</div>
                         </div>
-                        <div class="col-md-3">
+
+
+                        <div class="col-md-6 col-lg-3">
                             <label for="ssd_qty" class="form-label">Qty</label>
-                            <input type="text" name="ssd_qty" id="ssd_qty" class="form-control mt-2"
-                                value="{{ ssd_qty3|join:', ' }}" placeholder="e.g. 1,2">
-                            <div class="text-danger">{{ form.ssd_qty.errors }}</div>
+                            <input type="text" id="ssd_qty" name="ssd_qty" class="form-control"
+                                value="{{ form.ssd_qty.value }}" placeholder="e.g. 1,2">
                         </div>
                     </div>
-
-
                     <div class="row mb-3">
                         <div class="col-md-4">
-                            <label for="{{ form.quantity.id_for_label }}" class="form-label">
-                                Quantity
+                            <label for="{{ form.price.id_for_label }}" class="form-label">
+                                Price
                             </label>
-                            {{ form.quantity }}
-                            <div class="text-danger">{{ form.quantity.errors }}</div>
-                        </div>
-                    </div>
-
-
-                    <div class="row mb-3">
-                        <div class="col-md-6">
-                            <label for="price" class="form-label">Price</label>
-                            <input type="text" id="price" name="price" class="form-control"
-                                value="{{ form.price.value }}" readonly>
+                            {{ form.price }}
                             <div class="text-danger">{{ form.price.errors }}</div>
                         </div>
-
-                        <div class="col-md-4">
-                            <label for="{{ form.purchased_code.id_for_label }}" class="form-label" placeholder="Enter Purchase / LOT Code">
-                                Purchase / LOT Code
-                            </label>
-                            {{ form.purchased_code }}
-                            <div class="text-danger">{{ form.purchased_code.errors }}</div>
-                        </div>
                     </div>
 
-
                     <!-- SMPS Section -->
-                    <div class="row mb-3">
-                        <!-- SMPS Status -->
+                    <!-- <div class="row mb-3">
                         <div class="col-md-4">
                             <label for="smps_status" class="form-label">SMPS Status</label>
                             {{ form.smps_status }}
                             <div class="text-danger">{{ form.smps_status.errors }}</div>
                         </div>
-
-                        <!-- Motherboard Status -->
                         <div class="col-md-4" id="motherboard_status_div">
                             <label for="motherboard_status" class="form-label">Motherboard Status</label>
                             {{ form.motherboard_status }}
                             <div class="text-danger">{{ form.motherboard_status.errors }}</div>
                         </div>
-                    </div>
+                    </div> -->
 
-                    <div class="row mb-3">
-                        <!-- SMPS Replacement Description -->
+                    <!-- <div class="row mb-3">
                         <div class="col-md-4" id="smps_replacement_description_div" style="display: none;">
                             <label for="smps_replacement_description" class="form-label">SMPS Replacement
                                 Description</label>
                             <input type="text" id="smps_replacement_description" name="smps_replacement_description"
                                 class="form-control">
                         </div>
-
-                        <!-- Motherboard Replacement Description -->
                         <div class="col-md-4" id="motherboard_replacement_description_div" style="display: none;">
                             <label for="motherboard_replacement_description" class="form-label">Motherboard
                                 Replacement Description</label>
                             <input type="text" id="motherboard_replacement_description"
                                 name="motherboard_replacement_description" class="form-control">
                         </div>
-                    </div>
+                    </div> -->
 
                     <div class="form-group text-center">
                         <button class="btn btn-success btn-lg" type="submit">
@@ -242,11 +251,10 @@ Add Product
 
 document.addEventListener('DOMContentLoaded', function () {
         const serialInput = document.getElementById("id_serialno");  // Django auto-generates this ID
-        const processorSelect = document.getElementById("processor");
-        const ramSelect = document.getElementById("ram");
-        const hddSelect = document.getElementById("hdd");
-        const ssdSelect = document.getElementById("ssd");
-        
+        const processorSelect = document.getElementById("id_processors");
+        const ramSelect = document.getElementById("id_rams");
+        const hddSelect = document.getElementById("id_hdds");
+        const ssdSelect = document.getElementById("id_ssds");
         const processorfilter = document.getElementById("Processor_Filter");
         const ssdfilter = document.getElementById("SSD_Filter");
         const ramfilter = document.getElementById("RAM_Filter");
@@ -319,10 +327,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
 
         function updateSelectOptions(selectElement, items) {
-            selectElement.innerHTML = '<option value="">-- Select --</option>';
-        if (!items || items.length === 0) {
-            selectElement.innerHTML += '<option value="">No items available</option>';
-        } else {
+            selectElement.innerHTML = "";  // Clear existing options
             items.forEach(item => {
                 const option = document.createElement("option");
                 option.value = item.id;
@@ -330,7 +335,6 @@ document.addEventListener('DOMContentLoaded', function () {
                 selectElement.appendChild(option);
             });
         }
-    }
 
     });
 

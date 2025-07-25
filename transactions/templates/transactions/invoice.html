@@ -13,6 +13,43 @@
   <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
 
   <style>
+
+    /* Fit to A4 and scale properly */
+    #invoice-wrapper {
+    width: 210mm;
+    margin: auto;
+    background: white;
+  }
+
+  .pdf-page {
+    width: 100%;
+    padding: 20mm;
+    box-sizing: border-box;
+    background-color: white;
+  }
+
+
+    @media print {
+      body {
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+      }
+
+      .page-break {
+        page-break-before: always;
+      }
+
+      table {
+        page-break-inside: auto;
+      }
+
+      tr {
+        page-break-inside: avoid;
+        page-break-after: auto;
+      }
+    }
+
+
     @page {
       size: A4;
       margin: 0;
@@ -26,15 +63,13 @@
 	  -webkit-print-color-adjust: exact !important;
 	}
 
-	.container {
-	  width: 210mm;  /* A4 width */
-	  min-height: 297mm; /* A4 height */
-	  padding: 20mm;
-	  box-sizing: border-box;
-	  background: white;
-	  border-radius: 0;
-	  box-shadow: none;
-	}
+    .container {
+    width: 210mm;
+    padding: 20mm;
+    background: white;
+    box-sizing: border-box;
+  }
+
 
 
     .invoice-letter {
@@ -112,159 +147,152 @@
 </head>
 <body>
 
-<div id="invoice" class="container my-3 px-5 py-5">
-  <!-- HEADER SECTION -->
-  <div class="row">
-    <!-- <div class="col-3 contact-details">
-      <h5><b>Solv-IT</b></h5>
-      <h6><em>Shop no 3&4, Kulsum Heritage,Sector 12-E,KoparKhairane, Navi Mumbai, Mah-400709</em></h6>
-      <p><em>Phone:+91 922-296-6631</em></p>
-    </div> -->
-    <div class="col text-center logo">
-      <img src="/static/images/logo/solvit1.png" style="max-width: 50%; height: auto;" alt="Solv-IT Logo" />
-    </div>   
-    <!-- <div class="invoice-details col-3 offset-2 text-right">
-      <h6>Invoice No. INV{{ sale.id }}</h6>
-      <h6>Date : {{ sale.date_added|date:"d/m/Y H:i:s" }}</h6>
-    </div> -->
-  </div>
+  <div id="invoice-wrapper">
+    <div id="invoice" class="pdf-page">
 
-  <!-- LETTER HEADER -->
-  <div class="container-fluid invoice-letter mt-2 text-white">
-    <div class="row">
-      <div class="col-3 pl-5 py-4 letter-title">
-        <h6 style="color: rgb(254, 251, 251);">
-          <b>
-          Invoice No. INV{{ sale.id }}
-          Date : {{ sale.date_added|date:"d/m/Y" }}
-          </b>
-        </h6>
+    <!-- <div id="invoice" class="container my-3 px-5 py-5"> -->
+      <!-- HEADER SECTION -->
+      <div class="row">
+        <!-- <div class="col-3 contact-details">
+          <h5><b>Solv-IT</b></h5>
+          <h6><em>Shop no 3&4, Kulsum Heritage,Sector 12-E,KoparKhairane, Navi Mumbai, Mah-400709</em></h6>
+          <p><em>Phone:+91 922-296-6631</em></p>
+        </div> -->
+        <div class="col text-center logo">
+          <img src="/static/images/logo/solvit1.png" style="max-width: 50%; height: auto;" alt="Solv-IT Logo" />
+        </div>   
+        <!-- <div class="invoice-details col-3 offset-2 text-right">
+          <h6>Invoice No. INV{{ sale.id }}</h6>
+          <h6>Date : {{ sale.date_added|date:"d/m/Y H:i:s" }}</h6>
+        </div> -->
       </div>
-      <div class="col-9 pr-5 py-2 letter-content">
-        <h6 style="color: white;">
-          <em><b>Address:</b> Shop No 3&4, Kulsum Heritage, opposite Animal Quarantine and Certification Centre, Sector 12-E, Bonkode, KoparKhairane, Navi Mumbai, Maharashtra - 400709</em>
-        </h6>        
-        <p><em><b>Phone:</b> +91 922-296-6631</em></p>
-        
-      </div>
-    </div>
-  </div>
 
-  <!-- INVOICE TABLE -->
-  <div class="row table mt-5">
-    <table class="invoice table table-hover">
-      <thead>
-        <tr>
-          <th>NO.</th>
-          <th>Item</th>
-          <th>Qty.</th>
-          <th>Price</th>
-          <th>GST</th>
-          <th>Amount</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for detail in sale.saledetail_set.all %}
-        <tr>
-          <th>{{ forloop.counter }}</th>
-          <td>
-            <strong>{{ detail.item.name }} ({{ detail.item.serialno }})</strong><br>
-            {{ detail.description|safe }}
-          </td>          
-          <td>{{ detail.quantity }}</td>
-          <td>{{ sale.sub_total }} <span class="currency">&#8377;</span></td>
-          <td>{{ sale.tax_amount }} <span class="currency">&#8377;</span></td>
-          <td>{{ sale.grand_total }} <span class="currency">&#8377;</span></td>
-        </tr>
-        {% endfor %}
-        <!-- <tr>
-          <th>2</th>
-          <td>Really, really long item title</td>
-          <td>1</td>
-          <td>25 <span class="currency">&euro;</span></td>
-          <td></td>
-          <td>28,75 <span class="currency">&euro;</span></td>
-        </tr>
-        <tr>
-          <th>3</th>
-          <td>Lorem ipsum dolor sit amet, consectetur adipiscing elit.</td>
-          <td>1</td>
-          <td>25 <span class="currency">&euro;</span></td>
-          <td>13%</td>
-          <td>28,75 <span class="currency">&euro;</span></td>
-        </tr> -->
-      </tbody>
-    </table>
-  </div>
-
-  <!-- INVOICE TOTAL -->
-  <div class="row">
-    <div class="offset-2 col-4">
-      <div class="to text-right">
-        <h5 class="effect-color pt-4">Invoiced to:</h5>
-        <h4 class="theme-color"><strong>{{ sale.customer.first_name }}</strong></h4>
-        <h6>{{ sale.customer.address }}</h6>
-        <p>{{ sale.customer.phone }}</p>
-        <h5>GSTIN : {{ sale.customer.gstin }}</h5>
+      <!-- LETTER HEADER -->
+      <div class="container-fluid invoice-letter mt-2 text-white">
+        <div class="row">
+          <div class="col-3 pl-5 py-4 letter-title">
+            <h6 style="color: rgb(254, 251, 251);">
+              <b>
+              Invoice No. INV{{ sale.id }}
+              Date : {{ sale.date_added|date:"d/m/Y" }}
+              </b>
+            </h6>
+          </div>
+          <div class="col-9 pr-5 py-2 letter-content">
+            <h6 style="color: white;">
+              <em><b>Address:</b> Shop No 3&4, Kulsum Heritage, opposite Animal Quarantine and Certification Centre, Sector 12-E, Bonkode, KoparKhairane, Navi Mumbai, Maharashtra - 400709</em>
+            </h6>        
+            <p><em><b>Phone:</b> +91 922-296-6631</em></p>
+            
+          </div>
+        </div>
       </div>
-    </div>
-    <div class="col-6 pr-5">
-      <table class="table table-borderless text-right">
-        <tbody>
-          <tr>
-              <th>Subtotal</th>
-              <td>₹{{ sale.sub_total|floatformat:2 }}</td>
-          </tr>
-          <tr>
-              <th>GST (%)</th>
-              <td>{{ sale.tax_percentage }}%</td>
-          </tr>
-          <tr>
-              <th>GST Amount</th>
-              <td>₹{{ sale.tax_amount|floatformat:2 }}</td>
-          </tr>
-          <tr>
-              <th>Shipping</th>
-              <td>₹0.00</td> <!-- You can change this if shipping applies -->
-          </tr>
-          <tfoot>
-            <tr class="fw-bold">
-              <th>Total Amount</th>
-              <td>₹{{ sale.grand_total|floatformat:2 }}</td>
+      <br><br>
+      <!-- INVOICE TOTAL -->
+      <div class="row">
+        <div class="offset-2 col-4">
+          <div class="to text-right">
+            <h5 class="effect-color pt-4">Invoiced to:</h5>
+            <h4 class="theme-color"><strong>{{ sale.customer.first_name }}</strong></h4>
+            <h6>{{ sale.customer.address }}</h6>
+            <p>{{ sale.customer.phone }}</p>
+            <h5>GSTIN : {{ sale.customer.gstin }}</h5>
+          </div>
+        </div>
+        <div class="col-6 pr-5">
+          <table class="table table-borderless text-right">
+            <tbody>
+              <tr>
+                  <th>Subtotal</th>
+                  <td>₹{{ sale.sub_total|floatformat:2 }}</td>
+              </tr>
+              <tr>
+                  <th>GST (%)</th>
+                  <td>{{ sale.tax_percentage }}%</td>
+              </tr>
+              <tr>
+                  <th>GST Amount</th>
+                  <td>₹{{ sale.tax_amount|floatformat:2 }}</td>
+              </tr>
+              <tr>
+                  <th>Shipping</th>
+                  <td>₹0.00</td> <!-- You can change this if shipping applies -->
+              </tr>
+              <tfoot>
+                <tr class="fw-bold">
+                  <th>Total Amount</th>
+                  <td>₹{{ sale.grand_total|floatformat:2 }}</td>
+                </tr>
+                <tr class="table-success fw-bold">
+                    <th>Amount Paid</th>
+                    <td>₹{{ sale.amount_paid|floatformat:2 }}</td>
+                </tr>
+                <tr class="{% if sale.amount_change > 0 %}table-warning{% else %}table-success{% endif %} fw-bold">
+                    <th>Balance Due</th>
+                    <td>₹{{ total_after_payment|floatformat:2 }}</td>
+                </tr>
+            </tfoot>
+            
+            
+          </tbody>
+          
+          </table>
+        </div>
+      </div>
+
+      <!-- INVOICE TABLE -->
+      <div class="row table mt-5">
+        <table class="invoice table table-hover" style="width:100%; border-collapse: collapse; page-break-inside: auto;">
+          <thead style="display: table-header-group;">
+            <tr>
+              <th>NO.</th>
+              <th>Item</th>
+              <th>Qty.</th>
+              <th>Price</th>
+              <th>GST</th>
+              <th>Amount</th>
             </tr>
-            <tr class="table-success fw-bold">
-                <th>Amount Paid</th>
-                <td>₹{{ sale.amount_paid|floatformat:2 }}</td>
+          </thead>
+          <tbody>
+            {% for detail in sale.saledetail_set.all %}
+            <tr style="page-break-inside: avoid; page-break-after: auto;">
+              <th>{{ forloop.counter }}</th>
+              <td>
+                <strong>{{ detail.item.name }} ({{ detail.item.serialno }})</strong>
+                {% if forloop.counter < 3 %}
+                  {{ detail.description|safe }}
+                {% endif %}
+              </td>
+              <td>{{ detail.quantity }}</td>
+              <td>₹{{ detail.item.price|floatformat:2 }}</td>
+              <td>₹{{ detail.item.gst|floatformat:2 }}</td>
+              <td>₹{{ detail.total|floatformat:2 }}</td>
             </tr>
-            <tr class="{% if sale.amount_change > 0 %}table-warning{% else %}table-success{% endif %} fw-bold">
-                <th>Balance Due</th>
-                <td>₹{{ total_after_payment|floatformat:2 }}</td>
-            </tr>
-        </tfoot>
-        
-        
-      </tbody>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
       
-      </table>
-    </div>
-  </div>
 
-  <!-- <p class="text-center mt-3"><em>* Taxes calculated in &euro; using default regional values</em></p> -->
 
-  <!-- FOOTER SIGNATURE SECTION -->
-  <div class="footer-signature row mt-5" style="padding-top: 40px; padding-bottom: 40px;">
-    <div class="col-6 signature-block">
-      <div class="signature-line"></div>
-      <p>Company Signature</p>
-    </div>
-    <div class="col-6 signature-block">
-      <div class="signature-line"></div>
-      <p>Client Signature</p>
+      
+
+      <!-- <p class="text-center mt-3"><em>* Taxes calculated in &euro; using default regional values</em></p> -->
+
+      <!-- FOOTER SIGNATURE SECTION -->
+      <div class="footer-signature row mt-5" style="padding-top: 40px; padding-bottom: 40px;">
+        <div class="col-6 signature-block">
+          <div class="signature-line"></div>
+          <p>Company Signature</p>
+        </div>
+        <div class="col-6 signature-block">
+          <div class="signature-line"></div>
+          <p>Client Signature</p>
+        </div>
+      </div>
     </div>
   </div>
 </div>
-
-
 <!-- Download Button -->
 <div class="text-center my-4">
   <button id="downloadBtn" class="btn btn-primary">Download PDF</button>
@@ -274,7 +302,7 @@
 <!-- Scripts -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-<script>
+<!-- <script>
   document.getElementById("downloadBtn").addEventListener("click", function () {
     const { jsPDF } = window.jspdf;
     const invoice = document.getElementById("invoice");
@@ -284,7 +312,7 @@
       useCORS: true
     }).then(canvas => {
       const imgData = canvas.toDataURL("image/jpeg"); // or use image/png for better quality
-      const pdf = new jsPDF("p", "mm", "a4");
+      const pdf = new jsPDF("p", "mm");
 
       const pdfWidth = pdf.internal.pageSize.getWidth();
       const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
@@ -309,6 +337,45 @@
     });
   });
 </script>
+<script src="https://raw.githack.com/eKoopmans/html2pdf/master/dist/html2pdf.bundle.js"></script> -->
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<script>
+  document.getElementById("downloadBtn").addEventListener("click", function () {
+    const element = document.getElementById("invoice-wrapper");
+
+    const now = new Date();
+    const pad = (n) => n.toString().padStart(2, '0');
+    const formattedDate = `${pad(now.getDate())}-${pad(now.getMonth() + 1)}-${now.getFullYear()}_${pad(now.getHours())}-${pad(now.getMinutes())}`;
+    const invoiceNo = "INV{{ sale.id }}";
+    const filename = `${invoiceNo}_${formattedDate}.pdf`;
+
+    const opt = {
+      margin:       0,
+      filename:     filename,
+      image:        { type: 'jpeg', quality: 0.98 },
+      html2canvas:  {
+        scale: 2,
+        useCORS: true,
+        scrollY: 0
+      },
+      jsPDF: {
+        unit: 'mm',
+        format: 'a4',
+        orientation: 'portrait'
+      },
+      pagebreak: {
+        mode: ['css', 'legacy'],
+        avoid: '.avoid-break'
+      }
+    };
+
+    html2pdf().set(opt).from(element).save();
+  });
+</script>
+
+
+
 </body>
 </html>
 {% endblock %}

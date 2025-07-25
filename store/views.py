@@ -44,13 +44,14 @@ from requests import Response
 
 # Local app imports
 from accounts.models import Profile, Vendor
-from transactions.models import Sale
+from transactions.models import Itempurchased, Sale, catogaryitempurchased
 from .models import  Item, Delivery, Ram, Ssd, Hdd, Processor , catogaryitem  #, Nvme, M_2
 from .forms import ItemForm,  DeliveryForm, RamForm, SddForm, HddForm, ProcessorForm , catogaryForm   #, NvmeForm, M_2Form
 from .tables import ItemTable, CategoryItemTable
 import pandas as pd
 from django.db import transaction
 from .forms import ExcelUploadForm
+from django.db.models import Min
 
 
 
@@ -359,101 +360,6 @@ class ProductCreateView(LoginRequiredMixin, CreateView):
         return reverse_lazy('productslist')
 
 
-
-# class ProductCreateView(LoginRequiredMixin, CreateView):
-#     """
-#     View class to create a new product.
-#     """
-#     model = Item
-#     template_name = "store/productcreate.html"
-#     form_class = ItemForm
-
-#     def form_valid(self, form):
-#         response = super().form_valid(form)
-#         serialno = form.instance.serialno.strip()
-#         components = ['processors', 'rams', 'hdds', 'ssds']
-#         quantities = {
-#             'processors': self.request.POST.get('processor_qty', '').strip(),
-#             'rams': self.request.POST.get('ram_qty', '').strip(),
-#             'hdds': self.request.POST.get('hdd_qty', '').strip(),
-#             'ssds': self.request.POST.get('ssd_qty', '').strip(),
-#         }
-
-#         component_map = {
-#             'processors': 'processor',
-#             'rams': 'ram',
-#             'hdds': 'hdd',
-#             'ssds': 'ssd'
-#         }
-
-#         try:
-#             with transaction.atomic():
-#                 for component in components:
-#                     item_id = self.request.POST.get(component, '').strip()
-#                     category_value = component_map[component]
-
-#                     if not item_id:
-#                         continue
-
-#                     qty_raw = quantities[component]
-#                     qty = int(qty_raw) if qty_raw.isdigit() else 0
-#                     if qty <= 0:
-#                         continue
-
-#                     # Get item object from DB
-#                     try:
-#                         item_obj = catogaryitem.objects.get(id=item_id)
-#                     except catogaryitem.DoesNotExist:
-#                         messages.error(self.request, f"Invalid item selected for {component}.")
-#                         continue
-
-#                     clean_name = item_obj.name.strip()
-#                     try:
-#                         available_item = catogaryitem.objects.get(
-#                             name=clean_name,
-#                             category=category_value,
-#                             serial_no='Solv-IT'
-#                         )
-
-                        
-#                     except catogaryitem.DoesNotExist:
-#                         messages.error(self.request, f"No '{clean_name}' available in stock for {component}.")
-#                         continue
-
-#                     if available_item.quantity < qty:
-#                         messages.error(self.request, f"Not enough quantity of '{clean_name}' in {component}.")
-#                         continue
-
-#                     # Deduct from general stock
-#                     available_item.quantity -= qty
-#                     available_item.save()
-
-#                     # Assign to the product (by serial no)
-#                     assigned_item, created = catogaryitem.objects.get_or_create(
-#                         name=clean_name,
-#                         category=category_value,
-#                         serial_no=serialno,
-#                         defaults={
-#                             'quantity': 0,
-#                             'unit_price': available_item.unit_price
-#                         }
-#                     )
-
-#                     assigned_item.quantity += qty
-#                     assigned_item.save()
-
-#                     # print(f"✅ Assigned {qty} of '{clean_name}' to {serialno}. {'Created new' if created else 'Updated existing'}.")
-#         except Exception as e:
-#             messages.error(self.request, f"Error assigning items: {str(e)}")
-#             return response
-
-#         messages.success(self.request, "Product and components saved successfully.")
-#         return response
-
-#     def get_success_url(self):
-#         return reverse_lazy('productslist')
-
-
 def ordinal(n):
     return f"{n}{'th' if 11 <= n <= 14 else {1: 'st', 2: 'nd', 3: 'rd'}.get(n % 10, 'th')}"
 
@@ -547,6 +453,9 @@ class ProductUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
         processor_by_generation = {f"{ordinal(i)} Generation": [] for i in range(1, 14)}
 
         # ------------------- Processor: Group by Generation -------------------
+        processor_by_generation1 = {f"{ordinal(i)} Generation": [] for i in range(1, 14)}
+        processor_by_generation1['Unknown'] = []
+
         for data in all_category_in_table:
             if data.category == 'processor':
                 match = re.search(r'(\d{1,2})(?:st|nd|rd|th)?\s*(?:Gen|Generation)', data.name, re.IGNORECASE)
@@ -560,16 +469,68 @@ class ProductUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
                 else:
                     processor_by_generation['Unknown'].append(f"{data.name} X({data.quantity}) - ({data.serial_no})")
 
+        # Consolidate processor entries with the same name and serial_no
         for generation, options in processor_by_generation.items():
-            print('processor_by_generation',generation, options)
+            # Consolidate entries with the same name and serial_no
+            consolidated = {}
+            for option in options:
+                if not option:  # Skip empty entries
+                    continue
+                    
+                # Parse the option string to extract parts
+                name_parts = option.split(" X(")
+                if len(name_parts) < 2:  # Skip malformed entries
+                    continue
+                    
+                item_name = name_parts[0]
+                qty_serial = name_parts[1]
+                
+                try:
+                    qty = int(qty_serial.split(")")[0])
+                    serial_no = qty_serial.split("- (")[1].rstrip(")")
+                    
+                    # Create a key for consolidation
+                    key = (item_name, serial_no)
+                    
+                    # Add to consolidated dict
+                    if key not in consolidated:
+                        consolidated[key] = {'name': item_name, 'qty': qty, 'serial_no': serial_no}
+                    else:
+                        consolidated[key]['qty'] += qty
+                except (IndexError, ValueError):
+                    # Skip entries that don't match expected format
+                    continue
+            
+            # Rebuild the options list with consolidated items
+            processor_by_generation1[generation] = [
+                f"{item['name']} X({item['qty']}) - ({item['serial_no']})" 
+                for item in consolidated.values()
+            ]
+            
+        for generation, options in processor_by_generation1.items():
+            print('processor_by_generation', generation, options)
 
         
         
         # ------------------- RAM, HDD, SSD: Group by Size -------------------
-        hdd_sizes = ['250GB', '320GB', '500GB', '1TB', '2TB', '4TB', '6TB']
-        ssd_sizes = ['128GB', '256GB', '512GB', '1TB', '2TB']
-        ram_sizes = ['4GB', '8GB', '16GB', '32GB', '64GB']
+        hdd_sizes = [
+            '40GB', '80GB', '120GB', '160GB', '250GB', '320GB', '500GB', '640GB',
+            '750GB', '1TB', '1.5TB', '2TB', '3TB', '4TB', '5TB', '6TB', '8TB',
+            '10TB', '12TB', '14TB', '16TB', '18TB', '20TB'
+        ]
+
+        ssd_sizes = [
+            '64GB', '120GB','140GB' ,'128GB', '240GB', '250GB', '256GB', '480GB', '500GB',
+            '512GB', '1TB', '2TB', '4TB', '8TB'
+        ]
+
+        ram_sizes = [
+            '2GB', '4GB', '6GB', '8GB', '12GB', '16GB', '24GB', '32GB', '48GB',
+            '64GB', '96GB', '128GB'
+        ]
+
         rambysize = {}
+        rambysize1 = {}
         hddbysize = {}
         ssdbysize = {}
 
@@ -589,12 +550,37 @@ class ProductUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
                     rambysize[size_key] = []
 
                 # Add the formatted RAM info
-                rambysize[size_key].append(f"{ram_name} X({data.quantity}) - ({data.serial_no})")\
+                rambysize[size_key].append(f"{ram_name} X({data.quantity}) - ({data.serial_no})")
+                for size, options in rambysize.items():
+                    # Consolidate entries with the same name and serial_no
+                    consolidated = {}
+                    for option in options:
+                        # Parse the option string to extract parts
+                        name_parts = option.split(" X(")
+                        item_name = name_parts[0]
+                        qty_serial = name_parts[1]
+                        qty = int(qty_serial.split(")")[0])
+                        serial_no = qty_serial.split("- (")[1].rstrip(")")
+                        
+                        # Create a key for consolidation
+                        key = (item_name, serial_no)
+                        
+                        # Add to consolidated dict
+                        if key not in consolidated:
+                            consolidated[key] = {'name': item_name, 'qty': qty, 'serial_no': serial_no}
+                        else:
+                            consolidated[key]['qty'] += qty
+                    
+                    # Rebuild the options list with consolidated items
+                    rambysize1[size] = [f"{item['name']} X({item['qty']}) - ({item['serial_no']})" 
+                                    for item in consolidated.values()]
+                    
+                # print('rambysize', ram_size, rambysize1[size])
                 
             elif data.category == 'hdd':
                 hdd_name = data.name.strip()
                 
-                # Try to extract the RAM size from the name
+                # Try to extract the HDD size from the name
                 size_found = next((size for size in hdd_sizes if size in hdd_name), None)
                 
                 # Determine the size label or use 'Unknown'
@@ -604,13 +590,13 @@ class ProductUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
                 if size_key not in hddbysize:
                     hddbysize[size_key] = []
 
-                # Add the formatted RAM info
+                # Add the formatted HDD info
                 hddbysize[size_key].append(f"{hdd_name} X({data.quantity}) - ({data.serial_no})")
 
             elif data.category == 'ssd':
                 ssd_name = data.name.strip()
                 
-                # Try to extract the RAM size from the name
+                # Try to extract the SSD size from the name
                 size_found = next((size for size in ssd_sizes if size in ssd_name), None)
                 
                 # Determine the size label or use 'Unknown'
@@ -620,18 +606,93 @@ class ProductUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
                 if size_key not in ssdbysize:
                     ssdbysize[size_key] = []
 
-                # Add the formatted RAM info
+                # Add the formatted SSD info
                 ssdbysize[size_key].append(f"{ssd_name} X({data.quantity}) - ({data.serial_no})")
 
         # Output the structure
-        for size, options in rambysize.items():
-            print('rambysize', size, options)
+        # Consolidate HDD entries
+        hddbysize1 = {}
+        for size, options in hddbysize.items():
+            # Consolidate entries with the same name and serial_no
+            consolidated = {}
+            for option in options:
+                if not option:  # Skip empty entries
+                    continue
+                
+                # Parse the option string to extract parts
+                name_parts = option.split(" X(")
+                if len(name_parts) < 2:  # Skip malformed entries
+                    continue
+                    
+                item_name = name_parts[0]
+                qty_serial = name_parts[1]
+                
+                try:
+                    qty = int(qty_serial.split(")")[0])
+                    serial_no = qty_serial.split("- (")[1].rstrip(")")
+                    
+                    # Create a key for consolidation
+                    key = (item_name, serial_no)
+                    
+                    # Add to consolidated dict
+                    if key not in consolidated:
+                        consolidated[key] = {'name': item_name, 'qty': qty, 'serial_no': serial_no}
+                    else:
+                        consolidated[key]['qty'] += qty
+                except (IndexError, ValueError):
+                    # Skip entries that don't match expected format
+                    continue
+            
+            # Rebuild the options list with consolidated items
+            hddbysize1[size] = [
+                f"{item['name']} X({item['qty']}) - ({item['serial_no']})" 
+                for item in consolidated.values()
+            ]
+        
+        # Consolidate SSD entries
+        ssdbysize1 = {}
+        for size, options in ssdbysize.items():
+            # Consolidate entries with the same name and serial_no
+            consolidated = {}
+            for option in options:
+                if not option:  # Skip empty entries
+                    continue
+                
+                # Parse the option string to extract parts
+                name_parts = option.split(" X(")
+                if len(name_parts) < 2:  # Skip malformed entries
+                    continue
+                    
+                item_name = name_parts[0]
+                qty_serial = name_parts[1]
+                
+                try:
+                    qty = int(qty_serial.split(")")[0])
+                    serial_no = qty_serial.split("- (")[1].rstrip(")")
+                    
+                    # Create a key for consolidation
+                    key = (item_name, serial_no)
+                    
+                    # Add to consolidated dict
+                    if key not in consolidated:
+                        consolidated[key] = {'name': item_name, 'qty': qty, 'serial_no': serial_no}
+                    else:
+                        consolidated[key]['qty'] += qty
+                except (IndexError, ValueError):
+                    # Skip entries that don't match expected format
+                    continue
+            
+            # Rebuild the options list with consolidated items
+            ssdbysize1[size] = [
+                f"{item['name']} X({item['qty']}) - ({item['serial_no']})" 
+                for item in consolidated.values()
+            ]
 
-
-        context['processor_by_generation'] = processor_by_generation
-        context['rambysize'] = rambysize
-        context['hddbysize'] = hddbysize
-        context['ssdbysize'] = ssdbysize
+        # Add to context with consolidated data
+        context['processor_by_generation'] = processor_by_generation1
+        context['rambysize'] = rambysize1
+        context['hddbysize'] = hddbysize1
+        context['ssdbysize'] = ssdbysize1
         context['item'] = item
 
         #-------------------For Display all Material in Solv-IT DB in OP Form--------------------
@@ -755,47 +816,141 @@ class ProductUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
                     qty2 = qty
 
                     # Get available item from stock
-                    try:
-                        available_item = catogaryitem.objects.get(
-                            name=clean_name,
-                            category=component,
-                            serial_no='Solv-IT'
-                        )
-                    except catogaryitem.DoesNotExist:
+                    # try:
+                    #     available_item = catogaryitem.objects.get(
+                    #         name=clean_name,
+                    #         category=component,
+                    #         serial_no='Solv-IT'
+                    #     )
+                    # except catogaryitem.DoesNotExist:
+                    #     messages.error(self.request, f"No available '{clean_name}' ({component}) in stock.")
+                    #     return reverse_lazy('dashboard')
+
+                    # if available_item.quantity < qty:
+                    #     messages.error(self.request, f"No '{clean_name}' available in {component}.")
+                    #     return reverse_lazy('productslist')
+
+                    # # Deduct from source
+                    # available_item.quantity -= qty
+                    # if available_item.quantity <= 0:
+                    #     available_item.delete()
+                    #     # print("❌ Deleted {} from {} (Qty reached zero).".format(clean_name, serialno))
+                    # else:
+                    #     assigned_item.updated_by = self.request.user
+                    #     available_item.save()
+
+                    # Get all matching items and work with total available quantity
+                    # available_items = catogaryitem.objects.filter(
+                    #     name=clean_name,
+                    #     category=component,
+                    #     serial_no='Solv-IT'
+                    # )
+
+                    # if not available_items.exists():
+                    #     messages.error(self.request, f"No available '{clean_name}' ({component}) in stock.")
+                    #     return reverse_lazy('dashboard')
+
+                    # total_available = sum(item.quantity for item in available_items)
+                    # if total_available < qty:
+                    #     messages.error(self.request, f"Not enough '{clean_name}' available in {component}.")
+                    #     return reverse_lazy('productslist')
+
+                    # # Deduct from items (FIFO approach)
+                    # remaining_to_deduct = qty
+                    # for item in available_items:
+                    #     if remaining_to_deduct <= 0:
+                    #         break
+                            
+                    #     deduct_amount = min(item.quantity, remaining_to_deduct)
+                    #     item.quantity -= deduct_amount
+                    #     remaining_to_deduct -= deduct_amount
+                        
+                    #     if item.quantity <= 0:
+                    #         item.delete()
+                    #     else:
+                    #         item.save()
+                    #     # print("➖ Deducted {} from {} ({}). Remaining: {}".format(qty, serialno, clean_name, available_item.quantity))
+
+
+                    # # Assign to serialno: update if exists, else create new
+                    # assigned_item, created = catogaryitem.objects.get_or_create(
+                    #     name=clean_name,
+                    #     category=component,
+                    #     serial_no=serialno,
+                    #     updated_by = self.request.user,
+                    #     defaults={
+                    #         'quantity': 0,
+                    #         'unit_price': available_item.unit_price,
+                    #         # add other fields if needed
+                    #     }
+                    # )
+
+                    # assigned_item.quantity += qty
+                    # assigned_item.updated_by = self.request.user
+                    # assigned_item.save()
+                    # Get all matching items and work with total available quantity
+                    available_items = catogaryitem.objects.filter(
+                        name=clean_name,
+                        category=component,
+                        serial_no='Solv-IT'
+                    )
+
+                    if not available_items.exists():
                         messages.error(self.request, f"No available '{clean_name}' ({component}) in stock.")
                         return reverse_lazy('dashboard')
 
-                    if available_item.quantity < qty:
-                        messages.error(self.request, f"No '{clean_name}' available in {component}.")
+                    total_available = sum(item.quantity for item in available_items)
+                    if total_available < qty:
+                        messages.error(self.request, f"Not enough '{clean_name}' available in {component}.")
                         return reverse_lazy('productslist')
 
-                    # Deduct from source
-                    available_item.quantity -= qty
-                    if available_item.quantity <= 0:
-                        available_item.delete()
-                        # print("❌ Deleted {} from {} (Qty reached zero).".format(clean_name, serialno))
-                    else:
-                        assigned_item.updated_by = self.request.user
-                        available_item.save()
-                        # print("➖ Deducted {} from {} ({}). Remaining: {}".format(qty, serialno, clean_name, available_item.quantity))
+                    # Get the unit price from the first item (assuming all have the same price)
+                    # unit_price = available_items.first().unit_price
+                    # print('unit_price', unit_price)
 
+                    
+                    # ✅ Get the minimum unit price from available items
+                    unit_price = available_items.aggregate(Min('unit_price'))['unit_price__min']
+                    print('unit_price', unit_price)
+
+                    # Addition of price based on category price on purchased price
+                    update_items = Item.objects.filter(serialno__iexact=serialno)
+                    for items1 in update_items:
+                        print('items1', items1, items1.price)
+                        items1.price += unit_price
+                        items1.save()
+
+                    # Deduct from items (FIFO approach)
+                    remaining_to_deduct = qty
+                    for item in available_items:
+                        if remaining_to_deduct <= 0:
+                            break
+                            
+                        deduct_amount = min(item.quantity, remaining_to_deduct)
+                        item.quantity -= deduct_amount
+                        remaining_to_deduct -= deduct_amount
+                        
+                        if item.quantity <= 0:
+                            item.delete()
+                        else:
+                            item.save()
 
                     # Assign to serialno: update if exists, else create new
                     assigned_item, created = catogaryitem.objects.get_or_create(
                         name=clean_name,
                         category=component,
                         serial_no=serialno,
-                        updated_by = self.request.user,
+                        updated_by=self.request.user,
                         defaults={
                             'quantity': 0,
-                            'unit_price': available_item.unit_price,
+                            'unit_price': unit_price,  # Now using unit_price from first item
                             # add other fields if needed
                         }
                     )
 
                     assigned_item.quantity += qty
                     assigned_item.updated_by = self.request.user
-                    assigned_item.save()
+                    assigned_item.save()    
 
                     # print("✅ Assigned {} of '{}' to {}. {} entry.".format(qty, clean_name, serialno, 'Created new' if created else 'Updated existing'))
 
@@ -857,6 +1012,19 @@ class ProductUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
                     if assigned_item.quantity < qty:
                         messages.error(self.request, "Not enough '{}' in {}.".format(clean_name, serialno))
                         return reverse_lazy('productslist')
+                    
+
+                    # ✅ Get the minimum unit price from available items
+                    # unit_price = assigned_item.aggregate(Min('unit_price'))['unit_price__min']
+                    unit_price = assigned_item.unit_price
+                    print('unit_price', unit_price)
+
+                    # subraction of price based on category price on purchased price
+                    update_items = Item.objects.filter(serialno__iexact=serialno)
+                    for items1 in update_items:
+                        print('items1', items1, items1.price)
+                        items1.price -= unit_price
+                        items1.save()
 
                     # Deduct from source
                     assigned_item.quantity -= qty
@@ -1256,12 +1424,18 @@ def get_items_ajax_view(request):
 
             # Match Items
             items = Item.objects.filter(serialno__icontains=term)
+            if not items.exists():
+                print('🔄 Searching in purchased items')
+                items = Itempurchased.objects.filter(serialno__icontains=term)
             print("✅ Matching Items Found:", items.count())
 
             data = []
             for item in items[:10]:
                 # Get category details for each item's serial number
                 category_items = catogaryitem.objects.filter(serial_no=item.serialno)
+                if not category_items.exists():
+                    print('🔄 Searching in purchased category items')
+                    category_items = catogaryitempurchased.objects.filter(serial_no=item.serialno)
                 print(f"📦 Category items for {item.serialno}: {category_items.count()}")
 
                 # Build description
@@ -1272,6 +1446,7 @@ def get_items_ajax_view(request):
 
                 description_parts = []
                 for cat_item in category_items:
+                    print('cat_itemcat_item',cat_item.category, cat_item.name)
                     description_parts.append(f"<span class='badge bg-secondary me-1'>{cat_item.category.capitalize()}: {cat_item.name}</span>")
                 description = " ".join(description_parts)
 
@@ -1279,12 +1454,14 @@ def get_items_ajax_view(request):
                 description = ", ".join(description_parts)
 
                 # Build response object
+                print('description', description)
                 item_data = {
                     'id': item.id,
                     'name': item.name,
                     'serial_no': item.serialno,
                     'description': description,
-                    # 'quantity': item.quantity,
+                    'price': item.price,
+                    'quantity': item.quantity,
                     # 'total_item': float(item.unit_price) * item.quantity
                 }
 
@@ -1474,6 +1651,7 @@ def operativedashboard(request):
         return render(request, "store/productslist.html")
 
 
+
 @csrf_exempt
 def create_category_items(spec_string, serial_no, category, quantity, createdby):
     names = [n.strip() for n in str(spec_string).split(',') if n.strip()]
@@ -1485,6 +1663,21 @@ def create_category_items(spec_string, serial_no, category, quantity, createdby)
             category=category,
             quantity=quantity,
             unit_price=0.0,
+            created_by=createdby
+        )
+
+@csrf_exempt
+def create_category_itemspurchase(spec_string, serial_no, category, quantity, createdby, purchased_code):
+    names = [n.strip() for n in str(spec_string).split(',') if n.strip()]
+    quantitys = [n for n in str(quantity).split(',') if n]
+    for name, quantity in zip( names, quantitys) :
+        catogaryitempurchased.objects.create(
+            name=name.upper(),
+            serial_no=serial_no,
+            category=category,
+            quantity=quantity,
+            unit_price=0.0,
+            purchased_code = purchased_code,
             created_by=createdby
         )
 
@@ -1501,31 +1694,62 @@ def upload_category_items(request):
             for _, row in df.iterrows():
                 serial_no = str(row.get('Serialno')).strip()
                 name = row.get('Name', '').strip()
-                
+                vendor_name = str(row.get('vendor_name', '')).strip()
+                purchased_code = str(row.get('purchased_code', '')).strip()
 
-                # Create the Item entry
-                item = Item.objects.create(
+                print('dadadadad', vendor_name, purchased_code)
+
+                vendor = Vendor.objects.filter(name__iexact=vendor_name).first()
+                if not vendor and vendor_name:
+                    vendor = Vendor.objects.create(name=vendor_name)
+                if vendor:
+                    Itempurchased.objects.create(
                     name=name,
                     serialno=serial_no,
                     make_and_models=row.get('Make and models', ''),
                     smps_status=row.get('Smps status', '').strip(),
                     motherboard_status=row.get('Motherboard status', '').strip(),
-                    quantity=row.get('quantity', ''),
-                    created_by=request.user
-                )
+                    quantity=row.get('Quantity', 1),
+                    price=row.get('price', 0.0),
+                    vendor_name=vendor,
+                    purchased_code=purchased_code,
+                    created_by = request.user
+                    )
 
-                print('12345', row.get('Processor', ''), serial_no, 'processor', row.get('processor_qty', ''), request.user)
-                # Inside your row loop
-                create_category_items(row.get('Processor', ''), serial_no, 'processor', row.get('processor_qty', ''), request.user)
-                create_category_items(row.get('Ram', ''), serial_no, 'ram', row.get('ram_qty', ''), request.user)
-                create_category_items(row.get('Hdd', ''), serial_no, 'hdd', row.get('hdd_qty', ''), request.user)
-                create_category_items(row.get('Ssd', ''), serial_no, 'ssd',row.get('ssd_qty', ''), request.user)
+                    # print('12345', row.get('Processor', ''), serial_no, 'processor', row.get('processor_qty', ''), request.user)
+                    # Inside your row loop
+                    create_category_itemspurchase(row.get('Processor', ''), serial_no, 'processor', row.get('processor_qty', ''), request.user, purchased_code)
+                    create_category_itemspurchase(row.get('Ram', ''), serial_no, 'ram', row.get('ram_qty', ''), request.user, purchased_code)
+                    create_category_itemspurchase(row.get('Hdd', ''), serial_no, 'hdd', row.get('hdd_qty', ''), request.user, purchased_code)
+                    create_category_itemspurchase(row.get('Ssd', ''), serial_no, 'ssd',row.get('ssd_qty', ''), request.user, purchased_code)
+                    return render(request, 'transactions/purchasecreate.html', {
+                        'form': ExcelUploadForm(),
+                        'success': "Excel imported successfully!"
+                    })
+                else:
+                    # Create the Item entry
+                    item = Item.objects.create(
+                        name=name,
+                        serialno=serial_no,
+                        make_and_models=row.get('Make and models', ''),
+                        smps_status=row.get('Smps status', '').strip(),
+                        motherboard_status=row.get('Motherboard status', '').strip(),
+                        price=row.get('price', ''),
+                        created_by=request.user
+                    )
+
+                    # print('12345', row.get('Processor', ''), serial_no, 'processor', row.get('processor_qty', ''), request.user)
+                    # Inside your row loop
+                    create_category_items(row.get('Processor', ''), serial_no, 'processor', row.get('processor_qty', ''), request.user)
+                    create_category_items(row.get('Ram', ''), serial_no, 'ram', row.get('ram_qty', ''), request.user)
+                    create_category_items(row.get('Hdd', ''), serial_no, 'hdd', row.get('hdd_qty', ''), request.user)
+                    create_category_items(row.get('Ssd', ''), serial_no, 'ssd',row.get('ssd_qty', ''), request.user)
 
 
-            return render(request, 'store/productcreate.html', {
-                'form': ExcelUploadForm(),
-                'success': "Excel imported successfully!"
-            })
+                    return render(request, 'store/productcreate.html', {
+                        'form': ExcelUploadForm(),
+                        'success': "Excel imported successfully!"
+                    })
 
             # except Exception as e:
             #     return render(request, 'store/productcreate.html', {
@@ -1536,6 +1760,8 @@ def upload_category_items(request):
         form = ExcelUploadForm()
 
     return render(request, 'store/productcreate.html', {'form': form})
+
+
 
 
 

@@ -242,6 +242,21 @@ def get_customers(request):
     return JsonResponse({'error': 'Invalid request method'}, status=400)
 
 
+@csrf_exempt
+@require_POST
+@login_required
+def get_vendors(request):
+    print('tytyfhgdfgdfg')
+    if is_ajax(request) and request.method == 'POST':
+        term = request.POST.get('term', '')
+        vendors = Vendor.objects.filter(
+            name__icontains=term
+        ).values('id', 'name')
+        vendor_list = list(vendors)
+        return JsonResponse(vendor_list, safe=False)
+    return JsonResponse({'error': 'Invalid request method'}, status=400)
+
+
 class VendorListView(LoginRequiredMixin, ListView):
     model = Vendor
     template_name = 'accounts/vendor_list.html'
@@ -267,3 +282,10 @@ class VendorDeleteView(LoginRequiredMixin, DeleteView):
     model = Vendor
     template_name = 'accounts/vendor_confirm_delete.html'
     success_url = reverse_lazy('vendor-list')
+
+
+
+
+
+
+

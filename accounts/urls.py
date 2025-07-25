@@ -16,6 +16,7 @@ from .views import (
     CustomerUpdateView,
     CustomerDeleteView,
     get_customers,
+    get_vendors,
     VendorListView,
     VendorCreateView,
     VendorUpdateView,
@@ -52,6 +53,7 @@ urlpatterns = [
     path('get_customers/', get_customers, name='get_customers'),
 
     # Vendor URLs
+    path('get_vendors/', get_vendors, name='get_vendors'),
     path('vendors/', VendorListView.as_view(), name='vendor-list'),
     path('vendors/new/', VendorCreateView.as_view(), name='vendor-create'),
     path('vendors/<int:pk>/update/', VendorUpdateView.as_view(),

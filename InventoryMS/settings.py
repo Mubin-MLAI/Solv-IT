@@ -36,6 +36,7 @@ INSTALLED_APPS = [
     'django_tables2',
     'widget_tweaks',
     'rest_framework',
+    
 
     'store.apps.StoreConfig',
     'accounts.apps.AccountsConfig',

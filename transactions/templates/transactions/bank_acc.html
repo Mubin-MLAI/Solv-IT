@@ -84,7 +84,13 @@
                             {% for sale in sales %}
                             <tr>
                                 <td>{{ sale.payment_type }}</td>
-                                <td>{{ sale.customer.first_name }}</td>  {# Assuming Customer has a 'name' field #}
+                                <td>
+                                  {% if sale.transaction_type == "Sale" %}
+                                      {{ sale.customer.first_name }} ( Client )
+                                  {% elif sale.transaction_type == "Purchase" %}
+                                      {{ sale.vendor.name }} ( Vendor ) 
+                                  {% endif %}
+                                </td>
                                 <td>{{ sale.date_added|date:"Y-m-d" }}</td>
                                 <td>₹{{ sale.grand_total }}</td>
                                 <td>

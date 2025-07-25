@@ -174,12 +174,20 @@ Update Product
                             </div>
 
                             <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <label for="price" class="form-label">Price</label>
+                                    <input type="text" id="price" name="price" class="form-control"
+                                        value="{{ form.price.value }}" readonly>
+                                    <div class="text-danger">{{ form.price.errors }}</div>
+                                </div>
+
                                 <div class="col-md-4">
-                                    <label for="{{ form.quantity.id_for_label }}" class="form-label">
-                                        Quantity
+                                    <label for="{{ form.purchased_code.id_for_label }}" class="form-label" placeholder="Enter Purchase / LOT Code">
+                                        Purchase / LOT Code
                                     </label>
-                                    {{ form.quantity }}
-                                    <div class="text-danger">{{ form.quantity.errors }}</div>
+                                    <input type="text" id="purchased_code" name="purchased_code" class="form-control"
+                                        value="{{ form.purchased_code.value }}" readonly>
+                                    <div class="text-danger">{{ form.purchased_code.errors }}</div>
                                 </div>
                             </div>
 
@@ -367,12 +375,20 @@ Update Product
                             </div>
 
                             <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <label for="price" class="form-label">Price</label>
+                                    <input type="text" id="price" name="price" class="form-control"
+                                        value="{{ form.price.value }}" readonly>
+                                    <div class="text-danger">{{ form.price.errors }}</div>
+                                </div>
+
                                 <div class="col-md-4">
-                                    <label for="{{ form.quantity.id_for_label }}" class="form-label">
-                                        Quantity
+                                    <label for="{{ form.purchased_code.id_for_label }}" class="form-label" placeholder="Enter Purchase / LOT Code">
+                                        Purchase / LOT Code
                                     </label>
-                                    {{ form.quantity }}
-                                    <div class="text-danger">{{ form.quantity.errors }}</div>
+                                    <input type="text" id="purchased_code" name="purchased_code" class="form-control"
+                                        value="{{ form.purchased_code.value }}" readonly>
+                                    <div class="text-danger">{{ form.purchased_code.errors }}</div>
                                 </div>
                             </div>
 
@@ -553,12 +569,20 @@ Update Product
                                 </div>
                             </div>
                             <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <label for="price" class="form-label">Price</label>
+                                    <input type="text" id="price" name="price" class="form-control"
+                                        value="{{ form.price.value }}" readonly>
+                                    <div class="text-danger">{{ form.price.errors }}</div>
+                                </div>
+
                                 <div class="col-md-4">
-                                    <label for="{{ form.quantity.id_for_label }}" class="form-label">
-                                        Quantity
+                                    <label for="{{ form.purchased_code.id_for_label }}" class="form-label" placeholder="Enter Purchase / LOT Code">
+                                        Purchase / LOT Code
                                     </label>
-                                    {{ form.quantity }}
-                                    <div class="text-danger">{{ form.quantity.errors }}</div>
+                                    <input type="text" id="purchased_code" name="purchased_code" class="form-control"
+                                        value="{{ form.purchased_code.value }}" readonly>
+                                    <div class="text-danger">{{ form.purchased_code.errors }}</div>
                                 </div>
                             </div>
 

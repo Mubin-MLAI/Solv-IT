@@ -1,69 +1,68 @@
 {% extends "store/base.html" %}
 {% load static %}
 <!-- Page title  -->
-{% block title %}Create sale{% endblock title %}
+{% block title %}Create Purchase{% endblock title %}
 
 <!-- Specific Page CSS goes HERE  -->
 {% block stylesheets %}
 <!--Select2 CSS-->
 <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
-<link rel="stylesheet"
-    href="https://cdn.jsdelivr.net/npm/@ttskch/select2-bootstrap4-theme@1.5.2/dist/select2-bootstrap4.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@ttskch/select2-bootstrap4-theme@1.5.2/dist/select2-bootstrap4.min.css">
 {% endblock stylesheets %}
 
 <!-- Page Heading -->
-<h2>Add sale</h2>
+<h2>Add Purchase</h2>
 
 <!-- Page content  -->
 {% block content %}
 <div class="container py-5">
     <!-- Go back -->
     <div class="mb-4">
-        <a href="{% url 'saleslist' %}" class="btn btn-outline-success">
+        <a href="{% url 'purchase-order-create' %}" class="btn btn-outline-success">
             <i class="fas fa-arrow-left me-2"></i>
             Go back
         </a>
     </div>
 
-    <form id="form_sale" action="{% url 'sale-create' %}" class="saleForm" method="post">
+    <form id="form_sale" action="{% url 'purchase-create-list' %}" class="saleForm" method="post">
         {% csrf_token %}
-
+    
         <!-- Sale Items Table (Full Width at Top) -->
         <div class="row mb-4">
             <div class="col-12">
                 <div class="card border-light shadow-sm">
                     <div class="card-header bg-success text-white">
-                        <h5 class="mb-0">Sale Items</h5>
+                        <h5 class="mb-0">Purchase Items</h5>
                     </div>
-
-
                     <div class="card-body">
                         <div class="mb-3">
-                            <label for="customer" class="form-label">Search or Create Customer</label>
-                            <select name="customer" class="form-select" id="customer" style="width:100%;"
-                                required></select>
+                            <label for="vendor" class="form-label">Vendor Name</label>
+                            <select name="vendor" class="form-select" id="vendor" aria-label="Vendor" required>
+                                <option value="" selected disabled hidden>Select the Vendor</option>
+                                {% for vendor in vendors %}
+                                <option value="{{ vendor.value }}">{{ vendor.label }}</option>
+                                {% endfor %}
+                            </select>
                         </div>
                     </div>
                     <div class="card-body">
                         <div class="mb-3">
                             <label for="excel_upload" class="form-label">Upload Excel with Serial Numbers</label>
                             <input type="file" id="excel_upload" accept=".xlsx, .xls" class="form-control">
-                            <button type="button" id="process_excel_btn" class="btn btn-primary mt-2">Upload & Add
-                                Items</button>
+                            <button type="button" id="process_excel_btn" class="btn btn-primary mt-2">Upload & Add Items</button>
                         </div>
                         OR
                         <!-- Search item -->
                         <div class="mb-4">
-                            <label for="searchbox_items" class="form-label">Search Item:</label>
-                            <select class="form-select select2" name="searchbox_items" id="searchbox_items"
-                                aria-label="Search items"></select>
+                            <label for="searchbox_items" class="form-label" >Search Item:</label>
+                            <select class="form-select select2" name="searchbox_items" id="searchbox_items" aria-label="Search items" ></select>
                         </div>
-
+    
                         <!-- Delete all items -->
                         <button type="button" class="btn btn-danger btn-sm mb-4 deleteAll">
                             <i class="fas fa-trash-alt me-2"></i> Delete All Items
                         </button>
-
+    
                         <!-- Items Table -->
                         <div class="table-responsive my-3">
                             <table class="table table-bordered table-striped" id="table_items">
@@ -81,8 +80,7 @@
                                 </thead>
                                 <tbody></tbody>
                                 <p class="text-muted mt-2">
-                                    <small><span class="badge bg-warning text-dark">Note:</span> Highlighted rows
-                                        indicate low stock.</small>
+                                    <small><span class="badge bg-warning text-dark">Note:</span> Highlighted rows indicate low stock.</small>
                                 </p>
                             </table>
                         </div>
@@ -90,20 +88,18 @@
                 </div>
             </div>
         </div>
-
+    
         <!-- Sale Details Section -->
         <div class="row">
             <div class="col-lg-6 mb-4">
                 <div class="card border-light shadow-sm">
                     <div class="card-header bg-success text-white">
-                        <h5 class="mb-0">Sale Details</h5>
+                        <h5 class="mb-0">Purchase Details</h5>
                     </div>
                     <div class="card-body">
-
                         <div class="mb-3">
                             <label for="sub_total" class="form-label">Subtotal</label>
-                            <input name="sub_total" type="number" class="form-control" id="sub_total"
-                                aria-label="Subtotal" required>
+                            <input name="sub_total" type="number" class="form-control" id="sub_total" aria-label="Subtotal" required>
                         </div>
                         <div class="mb-3">
                             <label for="tax_percentage" class="form-label">GST Inclusive (%)</label>
@@ -119,18 +115,15 @@
                         </div>
                         <div class="mb-3">
                             <label for="tax_amount" class="form-label">Tax Amount</label>
-                            <input name="tax_amount" type="number" class="form-control" id="tax_amount"
-                                aria-label="Tax Amount">
+                            <input name="tax_amount" type="number" class="form-control" id="tax_amount" aria-label="Tax Amount" >
                         </div>
                         <div class="mb-3">
                             <label for="grand_total" class="form-label">Grand Total</label>
-                            <input name="grand_total" type="number" class="form-control" id="grand_total"
-                                aria-label="Grand Total" required readonly>
+                            <input name="grand_total" type="number" class="form-control" id="grand_total" aria-label="Grand Total" required readonly>
                         </div>
                         <div class="mb-3">
                             <label for="amount_paid" class="form-label">Amount Payed</label>
-                            <input name="amount_paid" type="number" class="form-control" id="amount_paid"
-                                aria-label="Amount Paid">
+                            <input name="amount_paid" type="number" class="form-control" id="amount_paid" aria-label="Amount Paid">
                         </div>
                         <div class="mb-3">
                             <label for="payment_type" class="form-label">Payment Type</label>
@@ -140,22 +133,22 @@
                                 <option value="Bank">Bank</option>
                             </select>
                         </div>
-
+                        
                         <div id="bank_account_group" class="mb-3" style="display: none;">
                             <label for="bank_account" class="form-label">Bank Account</label>
                             <select name="bank_account" id="bank_account" class="form-control">
                                 {% for acc in bank_accounts %}
-                                {% if acc.account_name %}
-                                <option value="{{ acc.id }}">{{ acc.account_name }}</option>
-                                {% endif %}
+                                    {% if acc.account_name %}
+                                        <option value="{{ acc.id }}">{{ acc.account_name }}</option>
+                                    {% endif %}
                                 {% endfor %}
                             </select>
-                        </div>
-                        <button type="submit" class="btn btn-success w-100">Create Sale</button>
+                        </div>                                                               
+                        <button type="submit" class="btn btn-success w-100">Create Purchase</button>
                     </div>
                 </div>
             </div>
-
+    
             <!-- Add optional second column for future use or notes -->
             <div class="col-lg-6 mb-4">
                 <!-- You can add another card or content here if needed -->
@@ -163,36 +156,11 @@
         </div>
     </form>
 </div>
-
-<!-- Customer Create Modal -->
-<div class="modal fade" id="customerModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog">
-        <form id="createCustomerForm">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Create New Customer</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <input type="text" name="first_name" class="form-control" placeholder="Enter First Name"><br>
-                    <input type="text" name="last_name" class="form-control" placeholder="Enter Last Name"><br>
-                    <input type="number" name="phone" class="form-control" placeholder="Enter Phone Number">
-                    <!-- Add other fields as needed -->
-                </div>
-                <div class="modal-footer">
-                    <button type="submit" class="btn btn-primary">Create</button>
-                </div>
-            </div>
-        </form>
-    </div>
-</div>
-
 {% endblock content %}
 
 <!-- Specific Page JS goes HERE  -->
 {% block javascripts %}
 <!-- Datatables -->
-
 <script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js" defer></script>
 <script src="https://cdn.datatables.net/1.11.5/js/dataTables.bootstrap4.min.js" defer></script>
 
@@ -200,104 +168,23 @@
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js" defer></script>
 
 <!-- Bootstrap Touchspin -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-touchspin/3.1.0/jquery.bootstrap-touchspin.min.js"
-    defer></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-touchspin/3.1.0/jquery.bootstrap-touchspin.min.js" defer></script>
 
 <!-- Sweet Alert -->
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.6.15/dist/sweetalert2.all.min.js" defer></script>
 
-
 <script>
-    $('#createCustomerForm').on('submit', function(e) {
-        e.preventDefault();
-        let formData = $(this).serialize();
-    
-        $.ajax({
-            type: 'POST',
-            url: '/transactions/customers/create/',
-            data: formData,
-            headers: { "X-CSRFToken": "{{ csrf_token }}" },
-            success: function (data) {
-                var newOption = new Option(data.text, data.id, true, true);
-                $('#customer').append(newOption).trigger('change');
-                $('#customerModal').modal('hide');
-            },
-            error: function (xhr) {
-                alert("Error creating customer: " + xhr.responseJSON.message);
-            }
-        });
-    });
-    </script>
-    
-
-<script>
-    $(document).ready(function () {
-        $('#customer').select2({
-            placeholder: 'Search or create customer',
-            ajax: {
-                url: '/transactions/customers/',  // <-- Your AJAX endpoint
-                dataType: 'json',
-                delay: 250,
-                data: function (params) {
-                    return { q: params.term };
-                },
-                processResults: function (data) {
-                    return {
-                        results: data.results
-                    };
-                },
-                cache: true
-            },
-            tags: true,
-            createTag: function (params) {
-                return {
-                    id: 'new:' + params.term,
-                    text: 'Create new customer: "' + params.term + '"',
-                    isNew: true
-                };
-            }
-        });
-
-        $('#customer').on('select2:select', function (e) {
-            var data = e.params.data;
-            if (data.id.startsWith('new:')) {
-                let name = data.text.replace('Create new customer: "', '').replace('"', '');
-                $('#customerModal input[name="first_name"]').val(name);
-                $('#customerModal').modal('show');
-            }
-        });
-    });
-</script>
-
-
-
-<script>
-
-    $(document).ready(function () {
-        // Form submission
-        $('#saleForm').submit(function (e) {
-            e.preventDefault();
-
-            if (!$('#customerId').val()) {
-                alert('Please select or add a customer');
-                return;
-            }
-
-            // Here you would submit the full form data
-            alert('Sale would be submitted now for customer ID: ' + $('#customerId').val());
-            // this.submit(); // Uncomment to actually submit the form
-        });
-    });
-
     //show/hide the bank_account field depending on the selected payment_type
     $('#payment_type').on('change', function () {
-        if ($(this).val() === 'Bank') {
-            $('#bank_account_group').show();
-        } else {
-            $('#bank_account_group').hide();
-            $('#bank_account').val('');
-        }
-    });
+    if ($(this).val() === 'Bank') {
+        $('#bank_account_group').show();
+    } else {
+        $('#bank_account_group').hide();
+        $('#bank_account').val('');
+    }
+});
+
+
     // Source: https://stackoverflow.com/a/32605063
     function roundTo(n, digits) {
         if (digits === undefined) {
@@ -315,7 +202,7 @@
     // Variable to store sale details and products
     var sale = {
         products: {
-            customer: 0,
+            vendor: 0,
             sub_total: 0.00,
             grand_total: 0.00,
             tax_amount: 0.00,
@@ -404,22 +291,21 @@
         }
     };
 
-
     $(document).ready(function () {
         // Tax percentage touchspin
         $('#tax_percentage').on('change', function () {
-            sale.calculate_sale();
+            Purchase.calculate_sale();
         });
 
 
-        // Select2 customers
-        $('#searchbox_customers').select2({
+        // Select2 vendors
+        $('#searchbox_vendors').select2({
             delay: 250,
-            placeholder: "Select a customer",
+            placeholder: "Select a vendor",
             allowClear: true,
             minimumInputLength: 1,
             ajax: {
-                url: "{% url 'get_customers' %}",
+                url: "{% url 'get_vendors' %}",
                 type: 'POST',
                 data: function (params) {
                     return {
@@ -434,16 +320,16 @@
                 }
             }
         }).on('select2:select', function (e) {
-            // When a customer is selected
+            // When a vendor is selected
             var data = e.params.data;
-            sale.products.customer = data.id;
+            sale.products.vendor = data.id;
         });
 
         // Select2 items searchbox
         // Select2 for item search
         $('#searchbox_items').select2({
             theme: "bootstrap4",
-            placeholder: "Enter Product Serial Number",
+            placeholder:"Enter Product Serial Number",
             allowClear: true,
             minimumInputLength: 1,
             ajax: {
@@ -469,7 +355,6 @@
                                 name: item.name,
                                 serial_no: item.serial_no,
                                 description: item.description,
-                                unit_price: item.price,
                                 quantity: item.quantity,
                                 price: item.price
                             };
@@ -578,7 +463,7 @@
 
             // Gather sale details
             var formData = {
-                customer: $('select[name="customer"]').val(),
+                vendor: $('select[name="vendor"]').val(),
                 sub_total: $('input[name="sub_total"]').val(),
                 grand_total: grandTotal,
                 tax_amount: $('input[name="tax_amount"]').val(),
@@ -638,70 +523,65 @@
 
 <script>
     $('#process_excel_btn').on('click', function () {
-        const fileInput = document.getElementById('excel_upload');
-        const file = fileInput.files[0];
+    const fileInput = document.getElementById('excel_upload');
+    const file = fileInput.files[0];
 
-        if (!file) {
-            Swal.fire('Please select an Excel file');
+    if (!file) {
+        Swal.fire('Please select an Excel file');
+        return;
+    }
+
+    const reader = new FileReader();
+
+    reader.onload = function (e) {
+        const data = new Uint8Array(e.target.result);
+        const workbook = XLSX.read(data, { type: 'array' });
+
+        const firstSheetName = workbook.SheetNames[0];
+        const worksheet = workbook.Sheets[firstSheetName];
+        const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+
+        const serials = jsonData.flat().filter(s => typeof s === 'string' && s.trim() !== '');
+
+        if (serials.length === 0) {
+            Swal.fire('No serial numbers found in Excel');
             return;
         }
 
-        const reader = new FileReader();
+        const csrfToken = $('input[name="csrfmiddlewaretoken"]').val();
 
-        reader.onload = function (e) {
-            const data = new Uint8Array(e.target.result);
-            const workbook = XLSX.read(data, { type: 'array' });
-
-            const firstSheetName = workbook.SheetNames[0];
-            const worksheet = workbook.Sheets[firstSheetName];
-            const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
-
-            const serials = jsonData.flat().filter(s => typeof s === 'string' && s.trim() !== '');
-
-            if (serials.length === 0) {
-                Swal.fire('No serial numbers found in Excel');
-                return;
-            }
-
-            const csrfToken = $('input[name="csrfmiddlewaretoken"]').val();
-
-            serials.forEach(serial => {
-                $.ajax({
-                    url: "{% url 'get_items' %}",
-                    type: "POST",
-                    headers: { 'X-Requested-With': 'XMLHttpRequest' },
-                    data: {
-                        term: serial,
-                        csrfmiddlewaretoken: csrfToken
-                    },
-                    success: function (data) {
-                        if (data.length > 0) {
-                            let item = data[0]; // Take the first match
-                            item.price = parseFloat(item.price);
-                            item.quantity = 1;
-                            sale.add_item(item);
-                        } else {
-                            console.warn(`No item found for serial: ${serial}`);
-                        }
-                    },
-                    error: function (err) {
-                        console.error(`Error fetching item for serial ${serial}:`, err);
+        serials.forEach(serial => {
+            $.ajax({
+                url: "{% url 'get_items' %}",
+                type: "POST",
+                headers: { 'X-Requested-With': 'XMLHttpRequest' },
+                data: {
+                    term: serial,
+                    csrfmiddlewaretoken: csrfToken
+                },
+                success: function (data) {
+                    if (data.length > 0) {
+                        let item = data[0]; // Take the first match
+                        item.price = parseFloat(item.price);
+                        item.quantity = 1;
+                        sale.add_item(item);
+                    } else {
+                        console.warn(`No item found for serial: ${serial}`);
                     }
-                });
+                },
+                error: function (err) {
+                    console.error(`Error fetching item for serial ${serial}:`, err);
+                }
             });
-        };
+        });
+    };
 
-        reader.readAsArrayBuffer(file);
-    });
+    reader.readAsArrayBuffer(file);
+});
 
 
 </script>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-<!-- Include Select2 CSS and JS -->
-<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
-<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
-
-
 
 {% endblock javascripts %}

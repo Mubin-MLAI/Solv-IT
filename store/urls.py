@@ -2,6 +2,7 @@
 from django.urls import path
 from django.conf import settings
 from django.conf.urls.static import static
+from transactions.views import search_suggestions_purchase
 
 # Local app imports
 from . import views
@@ -40,6 +41,8 @@ from .views import (
 
 # URL patterns
 urlpatterns = [
+
+    
     
     # Dashboard
     path('', views.dashboard, name='dashboard'),
@@ -165,7 +168,7 @@ urlpatterns = [
         name='category-delete'
     ),
     path('search-suggestions/', search_suggestions, name='search-suggestions'),
-    path('search-suggestions-product/', search_suggestions_product, name='search-search-suggestions-product'),
+    path('search-suggestions-product/', search_suggestions_product, name='search-suggestions-product'),
     path('add-processor/', views.add_processor, name='add_processor'),
     path('add-ram/', views.add_ram, name='add_ram'),
     path('add-hdd/', views.add_hdd, name='add_hdd'),
@@ -176,6 +179,7 @@ urlpatterns = [
     path('get-category-items/', get_category_items, name='get-category-items'),
     path('operative-dashboard/', operativedashboard, name='operative-dashboard'),
     path('upload-category-items/', upload_category_items, name='upload_category_items'),
+    path('search-suggestions-purchase/', search_suggestions_purchase, name='search-suggestions-purchase'),
 
 ]
 

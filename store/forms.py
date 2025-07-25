@@ -2,67 +2,6 @@ from django import forms
 from .models import Item, Delivery, Ssd,Hdd,Processor,Ram,catogaryitem
 
 
-
-
-# class ItemForm(forms.ModelForm):
-#     """
-#     A form for creating or updating an Item in the inventory.
-#     """
-#     class Meta:
-#         model = Item
-#         fields = [
-#             'name', 'serialno', 'make_and_models', 'processors', 'rams', 'hdds', 
-#             'ssds', 'smps_status', 'motherboard_status', 'smps_replacement_description','motherboard_replacement_description' 
-#         ]
-#         widgets = {
-#             'name': forms.TextInput(attrs={'class': 'form-control'}),
-#             'serialno': forms.TextInput(attrs={'class': 'form-control'}),
-#             'make_and_models': forms.TextInput(attrs={'class': 'form-control'}),
-            
-#             # Change the processor, ram, hdd, and ssd fields to text input
-#             'processors': forms.SelectMultiple(attrs={'class': 'form-control'}),
-#             # 'processor_qty': forms.NumberInput(attrs={'class': 'form-control', 'min': 1}),
-#             'rams': forms.SelectMultiple(attrs={'class': 'form-control'}),
-#             # 'ram_qty': forms.NumberInput(attrs={'class': 'form-control', 'min': 1}),
-#             'hdds': forms.SelectMultiple(attrs={'class': 'form-control'}),
-#             # 'hdd_qty': forms.NumberInput(attrs={'class': 'form-control', 'min': 1}),
-#             'ssds': forms.SelectMultiple(attrs={'class': 'form-control'}),
-#             # 'ssd_qty': forms.NumberInput(attrs={'class': 'form-control', 'min': 1}),
-            
-#             # For SMPS, motherboard, and their statuses, keeping select dropdowns as is
-#             'smps_status': forms.Select(attrs={'class': 'form-control'}),
-#             'smps_replacement_description' : forms.TextInput(attrs={'class': 'form-control'}),
-#             'motherboard_status': forms.Select(attrs={'class': 'form-control'}),
-#             'motherboard_replacement_description' : forms.TextInput(attrs={'class': 'form-control'}),
-#         }
-
-            
-            
-#             # Quantity fields (NumberInput with min validation)
-            
-            
-            
-            
-#             # Status fields as select dropdowns
-        # labels = {
-        #     'name': 'Item Name',
-        #     'serialno': 'Serial Number',
-        #     'make_and_models': 'Make and Model',
-        #     'processors': 'Processor',
-        #     # 'processor_qty': 'Processor Quantity',
-        #     'rams': 'RAM',
-        #     # 'ram_qty': 'RAM Quantity',
-        #     'hdds': 'HDD',
-        #     # 'hdd_qty': 'HDD Quantity',
-        #     'ssds': 'SSD',
-        #     # 'ssd_qty': 'SSD Quantity',
-        #     'smps_status': 'SMPS Status',
-        #     'smps_replacement_description': 'SMPS Description',
-        #     'motherboard_status': 'Motherboard Status',
-        #     'motherboard_replacement_description': 'Motherboard Description',
-        # }
-
-
 class ItemForm(forms.ModelForm):
     processors = forms.ModelMultipleChoiceField(
         queryset=catogaryitem.objects.filter(category='processor'),
@@ -90,7 +29,7 @@ class ItemForm(forms.ModelForm):
         model = Item
         fields = [
             'name', 'serialno', 'make_and_models',
-            'processors', 'rams', 'hdds', 'ssds', 'quantity'
+            'processors', 'rams', 'hdds', 'ssds', 'price', 'purchased_code'
             # 'smps_status', 'motherboard_status', 
             # 'smps_replacement_description', 'motherboard_replacement_description',
         ]
@@ -104,12 +43,18 @@ class ItemForm(forms.ModelForm):
             'make_and_models': forms.TextInput(attrs={'class': 'form-control',
                 'placeholder': 'Enter make and models',
                 'style': 'text-transform: uppercase;'}),
-            'quantity': forms.NumberInput(attrs={
+            'price': forms.NumberInput(attrs={
                 'class': 'form-control',
-                'placeholder': 'Enter quantity',
-                'min': '0',
-                'readonly': 'readonly',
+                'placeholder': 'Enter Price',
+                'aria-label': 'Price'   
             }),
+            'purchased_code': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Enter Purchased Code',
+                'aria-label': 'Purchased Code'
+                
+            }),
+            
             'smps_status': forms.Select(attrs={'class': 'form-control'}),
             'smps_replacement_description': forms.TextInput(attrs={'class': 'form-control'}),
             'motherboard_status': forms.Select(attrs={'class': 'form-control', }),

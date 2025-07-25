@@ -1,7 +1,10 @@
 {% extends "store/base.html" %}
 {% load static %}{% load crispy_forms_tags %}
 {% block title %}Update purchase transaction{% endblock %}
+{% load static %}
 {% block content %}
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 <div class="container p-5">
     <h2>Create or Update Purchase</h2>
     <form method="post">
@@ -17,6 +20,11 @@
                 {{ form.vendor.label_tag }}
                 {{ form.vendor }}
                 {{ form.vendor.errors }}
+            </div>
+            <div class="form-group col-md-4">
+                {{ form.purchased_code.label_tag }}
+                {{ form.purchased_code }}
+                {{ form.purchased_code.errors }}
             </div>
             <div class="form-group col-md-4">
                 {{ form.description.label_tag }}
@@ -53,4 +61,12 @@
         </button>
     </form>
 </div>
+<script>
+    $(document).ready(function () {
+        $('#id_purchased_code').select2({
+            width: '100%'
+        });
+    });
+</script>
+
 {% endblock %}

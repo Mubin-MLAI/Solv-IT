@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Profile, Vendor
+from .models import Profile, Vendor, Customer
 
 
 @admin.register(Profile)
@@ -14,3 +14,10 @@ class VendorAdmin(admin.ModelAdmin):
     fields = ('name', 'phone_number', 'address')
     list_display = ('name', 'phone_number', 'address')
     search_fields = ('name', 'phone_number', 'address')
+
+
+@admin.register(Customer)
+class CustomerAdmin(admin.ModelAdmin):
+
+    def save_model(self, request, obj, form, change):
+        super().save_model(request, obj, form, change)

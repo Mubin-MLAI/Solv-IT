@@ -1,6 +1,24 @@
 from django.contrib import admin
-from .models import Sale, SaleDetail, Purchase,Bankaccount,BankTransaction
+from .models import Sale, SaleDetail, Purchase,Bankaccount,BankTransaction, catogaryitempurchased, Itempurchased, PurchaseDetail
 
+@admin.register(PurchaseDetail)
+class PurchaseDetailAdmin(admin.ModelAdmin):
+
+    def save_model(self, request, obj, form, change):
+        super().save_model(request, obj, form, change)
+
+@admin.register(catogaryitempurchased)
+class CatogaryitempurchasedAdmin(admin.ModelAdmin):
+
+    def save_model(self, request, obj, form, change):
+        super().save_model(request, obj, form, change)
+
+
+@admin.register(Itempurchased)
+class ItempurchasedAdmin(admin.ModelAdmin):
+
+    def save_model(self, request, obj, form, change):
+        super().save_model(request, obj, form, change)
 
 @admin.register(BankTransaction)
 class BankTransAdmin(admin.ModelAdmin):
@@ -67,29 +85,31 @@ class SaleDetailAdmin(admin.ModelAdmin):
 @admin.register(Purchase)
 class PurchaseAdmin(admin.ModelAdmin):
     """
-    Admin interface configuration for the Purchase model.
+    Admin interface configuration for the Purchase model (linked to vendor, totals, and bank payments).
     """
     list_display = (
-        'slug',
-        'item',
+        'id',
         'vendor',
-        'order_date',
-        'delivery_date',
-        'quantity',
-        'price',
-        'total_value',
-        'delivery_status'
+        'date_added',
+        'payment_type',
+        'amount_paid',
+        'status',
+        'grand_total',
+        'tax_amount',
+        'amount_change'
     )
-    search_fields = ('item__name', 'vendor__name', 'slug')
-    list_filter = ('order_date', 'vendor', 'delivery_status')
-    ordering = ('-order_date',)
-    readonly_fields = ('total_value',)
+    search_fields = ('vendor__name',)
+    list_filter = ('payment_type', 'status', 'vendor', 'date_added')
+    ordering = ('-date_added',)
+    readonly_fields = ('date_added', 'grand_total', 'sub_total', 'tax_amount', 'amount_change')
 
     def save_model(self, request, obj, form, change):
         """
-        Save the Purchase instance and compute the total value.
+        Optionally update financial calculations manually here (if not already done in the model).
         """
-        obj.total_value = obj.price * obj.quantity
+        obj.grand_total = obj.sub_total + obj.tax_amount
+        obj.amount_change = obj.amount_paid - obj.grand_total
         super().save_model(request, obj, form, change)
+
         
 

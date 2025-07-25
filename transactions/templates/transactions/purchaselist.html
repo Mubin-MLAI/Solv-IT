@@ -2,7 +2,7 @@
 {% load static %}
 {% load querystring from django_tables2 %}
 
-{% block title %}Products{% endblock title %}
+{% block title %}Purchase List{% endblock title %}
 
 {% block content %}
 <br>
@@ -32,14 +32,17 @@
 <div class="my-4">
     <div class="row align-items-center">
         <div class="col-md-6">
-            <h4 class="display-6 mb-0 text-success">Products List</h4>
+            <h4 class="display-6 mb-0 text-success">Purchase List</h4>
         </div>
         {% if request.user.profile.role != 'OP' %}
         <div class="col-md-6 d-flex justify-content-end gap-2">
-            <a class="btn btn-success btn-sm rounded-pill shadow-sm" href="{% url 'product-create' %}">
-                <i class="fa-solid fa-plus"></i> Add Item
+            <a class="btn btn-success btn-sm rounded-pill shadow-sm" href="{% url 'purchase-create' %}">
+                <i class="fa-solid fa-plus"></i> Add Purchase
             </a>
-            <a class="btn btn-success btn-sm rounded-pill shadow-sm" href="{% querystring '_export'='xlsx' %}">
+            <a class="btn btn-primary btn-sm rounded-pill shadow-sm" href="{% url 'purchase-order-create' %}">
+                <i class="fa-solid fa-plus"></i> Purchase Billing
+            </a>
+            <a class="btn btn-info btn-sm rounded-pill shadow-sm" href="{% querystring '_export'='xlsx' %}">
                 <i class="fa-solid fa-download"></i> Export to Excel
             </a>
         </div>
@@ -47,8 +50,8 @@
     </div>
 
     <!-- Search Form -->
-    <form class="input-group mt-3 position-relative" role="search1" id="searchform1"
-        action="{% url 'item_search_list_view' %}" method="get">
+    <!-- <form class="input-group mt-3 position-relative" role="search1" id="searchform1"
+        action="{% url 'purchase_item_search_list_view' %}" method="get">
         <input id="searchbox1" name="q" type="text" class="form-control border-2 rounded-pill shadow-sm"
             placeholder="Find products">
         <button class="btn btn-outline-success rounded-pill shadow-sm" type="submit">
@@ -57,6 +60,35 @@
         <button class="btn btn-outline-secondary rounded-pill shadow-sm" type="button" id="clearSearch1">
             <i class="fa-solid fa-times"></i>
         </button>
+    </form> -->
+    
+    <form class="row g-2 mt-3" id="searchform1" action="{% url 'purchase_item_search_list_view' %}" method="get">
+        <div class="col-md-4">
+            <input id="searchbox1" name="q" type="text" class="form-control border-2 rounded-pill shadow-sm"
+                placeholder="Find products">
+        </div>
+        <div class="col-md-3">
+            <select name="vendor" id="vendor" class="form-control border-2 rounded-pill shadow-sm">
+                <option value="">-- Select Vendor --</option>
+                {% for vendor in vendors %}
+                    <option value="{{ vendor.name }}" {% if request.GET.vendor == vendor.name %}selected{% endif %}>
+                        {{ vendor.name }}
+                    </option>
+                {% endfor %}
+            </select>
+        </div>        
+        <div class="col-md-3">
+            <input name="purchased_code" id="purchased_code" type="text" class="form-control border-2 rounded-pill shadow-sm"
+                placeholder="Purchase / LOT Code" value="{{ request.GET.purchased_code }}">
+        </div>
+        <div class="col-md-2 d-flex gap-2">
+            <button class="btn btn-outline-success rounded-pill shadow-sm w-100" type="submit">
+                <i class="fa-solid fa-search"></i>
+            </button>
+            <a href="{% url 'purchase_item_search_list_view' %}" class="btn btn-outline-secondary rounded-pill shadow-sm">
+                <i class="fa-solid fa-times"></i>
+            </a>
+        </div>
     </form>
     <div id="suggestions1" class="list-group position-absolute"
         style="z-index: 9999; width: 100%; background-color: rgb(254, 254, 253);"></div>
@@ -64,13 +96,17 @@
 
 <!-- Product Table Section -->
 <div class="px-4">
-    {% if items %}
+    {% if Itempurchased %}
     <div class="table-responsive">
         <table class="table table-bordered table-striped table-hover table-sm">
             <thead class="thead-light">
                 <tr>
                     <th scope="col">ID</th>
                     <th scope="col">Name</th>
+                    <th scope="col">Vendor Name</th>
+                    <th scope="col">Purchase / LOT Code</th>
+                    <th scope="col">Purchase Date</th> 
+                    <th scope="col">Price</th>
                     <th scope="col">Serial No</th>
                     <th scope="col">Make & Models</th>
                     <th scope="col">Processor</th>
@@ -78,52 +114,45 @@
                     <th scope="col">HDD</th>
                     <th scope="col">SSD</th>
                     <th scope="col">SMPS</th>
-                    <th scope="col">Motherboard</th>
-                    <th scope="col">Actions</th>
+                    <th scope="col">Motherboard</th> 
+
+
                 </tr>
             </thead>
             <tbody>
-                {% for item in items %}
+                {% for item1 in Itempurchased %}
                 <tr>
                     <th scope="row">{{ forloop.counter|add:page_obj.start_index|add:"-1" }}</th>
-                    <td>{{ item.name }}</td>
-                    <td>{{ item.serialno }}</td>
-                    <td>{{ item.make_and_models }}</td>
+                    <td>{{ item1.name }}</td>
+                    <td><b>{{ item1.vendor_name }}</b></td>
+                    <td><b>{{ item1.purchased_code }}</b></td>
+                    <td>{{ item1.created_date|date:"d/m/Y"}}</td>
+                    <td>{{ item1.price }}</td>
+                    <td>{{ item1.serialno }}</td>
+                    <td>{{ item1.make_and_models }}</td>
                     <td>
-                        {% for p in item.processors %}
+                        {% for p in item1.processors %}
                             <li>{{ p }}<br></li>
                         {% endfor %}
                     </td>
                     <td>
-                        {% for p in item.rams %}
+                        {% for p in item1.rams %}
                             <li>{{ p }}<br></li>
                         {% endfor %}
                     </td>
                     <td>
-                        {% for p in item.hdds %}
+                        {% for p in item1.hdds %}
                             <li>{{ p }}<br></li>
                         {% endfor %}
                     </td>
                     <td>
-                        {% for p in item.ssds %}
+                        {% for p in item1.ssds %}
                             <li>{{ p }}<br></li>
                         {% endfor %}
                     </td>
-                    <td>{{ item.smps_status }}</td>
-                    <td>{{ item.motherboard_status }}</td>
-                    <td>
-                        <div class="d-flex gap-2">
-                            <a class="btn btn-outline-info btn-sm" href="{% url 'product-update' item.slug %}">
-                                <i class="fa-solid fa-pen"></i> Edit
-                            </a>
-                            <a class="btn btn-outline-danger btn-sm" href="{% url 'product-delete' item.slug %}">
-                                <i class="fa-solid fa-trash"></i> Delete
-                            </a>
-                            <a class="btn btn-outline-info btn-sm" href="">
-                                <i class="fa-solid fa-eye"></i> Track Changes
-                            </a>
-                        </div>
-                    </td>
+                    <td>{{ item1.smps_status }}</td>
+                    <td>{{ item1.motherboard_status }}</td>
+    
                 </tr>
                 {% endfor %}
             </tbody>
@@ -132,8 +161,8 @@
     {% else %}
     {% if request.user.profile.role != 'OP' %}
     <div class="alert alert-warning text-center">
-        <p>No products found for "{{ request.GET.q }}". You can <a href="{% url 'product-create' %}"
-                class="btn btn-success btn-sm rounded-pill shadow-sm">Add a new product</a>.</p>
+        <p>No purchase found for "{{ request.GET.q }}". You can <a href="{% url 'purchase-create' %}"
+                class="btn btn-success btn-sm rounded-pill shadow-sm">Add a new purchase</a>.</p>
     </div>
     {% endif %}
     {% endif %}
@@ -149,6 +178,11 @@
                 <a class="page-link" href="{% if request.GET.q %}?q={{ request.GET.q }}&page={{ page_obj.previous_page_number }}{% else %}?page={{ page_obj.previous_page_number }}{% endif %}" aria-label="Previous">
                     <span aria-hidden="true">&laquo;</span>
                 </a>
+                <a class="page-link"
+                href="?q={{ request.GET.q }}&vendor={{ request.GET.vendor }}&code={{ request.GET.code }}&page={{ i }}">
+                    {{ i }}
+                </a>
+
             </li>
         {% else %}
             <li class="page-item disabled">
@@ -167,6 +201,10 @@
             {% else %}
                 <li class="page-item">
                     <a class="page-link" href="{% if request.GET.q %}?q={{ request.GET.q }}&page={{ i }}{% else %}?page={{ i }}{% endif %}">{{ i }}</a>
+                    <a class="page-link"
+                        href="?q={{ request.GET.q }}&vendor={{ request.GET.vendor }}&code={{ request.GET.code }}&page={{ i }}">
+                    {{ i }}
+                    </a>
                 </li>
             {% endif %}
         {% endfor %}
@@ -176,6 +214,11 @@
             <li class="page-item">
                 <a class="page-link" href="{% if request.GET.q %}?q={{ request.GET.q }}&page={{ page_obj.next_page_number }}{% else %}?page={{ page_obj.next_page_number }}{% endif %}" aria-label="Next">
                     <span aria-hidden="true">&raquo;</span>
+                </a>
+
+                <a class="page-link"
+                href="?q={{ request.GET.q }}&vendor={{ request.GET.vendor }}&code={{ request.GET.code }}&page={{ i }}">
+                    {{ i }}
                 </a>
             </li>
         {% else %}
@@ -193,46 +236,53 @@
 
 <!-- JavaScript for Search Suggestions -->
 <script>
-    // JavaScript for search suggestions
     const searchBox = document.getElementById('searchbox1');
+    const vendorBox = document.getElementById('vendor');
+    const codeBox = document.getElementById('purchased_code');
     const suggestionsBox = document.getElementById('suggestions1');
-    const searchForm = document.getElementById('searchform1');
-    const clearButton = document.getElementById('clearSearch1');
 
     searchBox.addEventListener('input', function () {
         const query = searchBox.value;
-        if (query.length >= 2) { // trigger after at least 2 characters
-            fetch(`/search-suggestions-product/?q=${query}`)
+        const vendor = vendorBox.value;
+        const code = codeBox.value;
+
+        if (query.length >= 2) {
+            const params = new URLSearchParams({
+                q: query,
+                vendor: vendor,
+                purchased_code: code
+            });
+
+            fetch(`/search-suggestions-purchase/?${params}`)
                 .then(response => response.json())
                 .then(data => {
-                    suggestionsBox.innerHTML = ''; // Clear previous suggestions
+                    suggestionsBox.innerHTML = '';
                     if (data.suggestions.length > 0) {
                         data.suggestions.forEach(suggestion => {
                             const item = document.createElement('a');
-                            item.href = "javascript:void(0);"; // Prevent immediate navigation
+                            item.href = "javascript:void(0);";
                             item.classList.add('list-group-item', 'list-group-item-action');
                             item.textContent = suggestion;
                             item.addEventListener('click', function () {
-                                searchBox.value = suggestion; // Fill input with clicked suggestion
-                                suggestionsBox.innerHTML = ''; // Hide suggestions
+                                searchBox.value = suggestion;
+                                suggestionsBox.innerHTML = '';
                             });
                             suggestionsBox.appendChild(item);
                         });
                     } else {
-                        
                         const noResultsItem = document.createElement('a');
                         noResultsItem.classList.add('list-group-item', 'list-group-item-action', 'text-danger');
                         noResultsItem.textContent = 'No suggestions found! Click here to add item';
-                        noResultsItem.style.cursor = 'pointer'; // Make it look clickable
+                        noResultsItem.style.cursor = 'pointer';
                         noResultsItem.addEventListener('click', function () {
-                            window.location.href = "{% url 'product-create' %}"; // Redirect to add item form
+                            window.location.href = "{% url 'purchase-create' %}";
                         });
                         suggestionsBox.appendChild(noResultsItem);
                     }
                 })
                 .catch(error => console.error('Error fetching suggestions:', error));
         } else {
-            suggestionsBox.innerHTML = ''; // Clear suggestions if input is less than 2 characters
+            suggestionsBox.innerHTML = '';
         }
     });
     
