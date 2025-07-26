@@ -121,6 +121,9 @@ class Vendor(models.Model):
             "value": self.id
         }
         return item
+    
+    def get_full_name(self):
+        return self.name
 
     class Meta:
         """Meta options for the Vendor model."""

@@ -29,7 +29,9 @@ from .views import (
     receive_payment_purchase,
     # add_customer,
     customer_search,
-    customer_create
+    customer_create,
+    vendor_search,
+    vendor_create
 )
 
 # URL patterns
@@ -103,8 +105,9 @@ urlpatterns = [
     # path('purchase_item_search_list_view/', purchase_item_search_list_view, name='purchase_item_search_list_view'),
     # path('add_customer/', add_customer, name='add_customer'),
     path('customers/', customer_search, name='customer_search'),
-
     path('customers/create/', customer_create, name='customer_create'),
+    path('vendors/', vendor_search, name='vendor_search'),
+    path('vendors/create/', vendor_create, name='vendor_create'),
 
 
 ]

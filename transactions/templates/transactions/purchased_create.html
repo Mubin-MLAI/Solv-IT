@@ -36,6 +36,13 @@
                     </div>
                     <div class="card-body">
                         <div class="mb-3">
+                            <label for="vendor" class="form-label">Search or Create Vendor</label>
+                            <select name="vendor" class="form-select" id="vendor" style="width:100%;"
+                                required></select>
+                        </div>
+                    </div>
+                    <!-- <div class="card-body">
+                        <div class="mb-3">
                             <label for="vendor" class="form-label">Vendor Name</label>
                             <select name="vendor" class="form-select" id="vendor" aria-label="Vendor" required>
                                 <option value="" selected disabled hidden>Select the Vendor</option>
@@ -44,7 +51,7 @@
                                 {% endfor %}
                             </select>
                         </div>
-                    </div>
+                    </div> -->
                     <div class="card-body">
                         <div class="mb-3">
                             <label for="excel_upload" class="form-label">Upload Excel with Serial Numbers</label>
@@ -156,6 +163,29 @@
         </div>
     </form>
 </div>
+
+
+<!-- Customer Create Modal -->
+<div class="modal fade" id="vendorModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <form id="createVendorForm">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Create New Vendor</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="text" name="name" class="form-control" placeholder="Enter Full Name"><br>
+                    <input type="number" name="phone_number" class="form-control" placeholder="Enter Phone Number">
+                    <!-- Add other fields as needed -->
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-primary">Create</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
 {% endblock content %}
 
 <!-- Specific Page JS goes HERE  -->
@@ -172,6 +202,70 @@
 
 <!-- Sweet Alert -->
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.6.15/dist/sweetalert2.all.min.js" defer></script>
+
+
+<script>
+    $('#createVendorForm').on('submit', function(e) {
+        e.preventDefault();
+        let formData = $(this).serialize();
+    
+        $.ajax({
+            type: 'POST',
+            url: '/transactions/vendors/create/',
+            data: formData,
+            headers: { "X-CSRFToken": "{{ csrf_token }}" },
+            success: function (data) {
+                var newOption = new Option(data.text, data.id, true, true);
+                $('#vendor').append(newOption).trigger('change');
+                $('#vendorModal').modal('hide');
+            },
+            error: function (xhr) {
+                alert("Error creating vendor: " + xhr.responseJSON.message);
+            }
+        });
+    });
+    </script>
+    
+
+<script>
+    $(document).ready(function () {
+        $('#vendor').select2({
+            placeholder: 'Search or create vendor',
+            ajax: {
+                url: '/transactions/vendors/',  // <-- Your AJAX endpoint
+                dataType: 'json',
+                delay: 250,
+                data: function (params) {
+                    return { q: params.term };
+                },
+                processResults: function (data) {
+                    return {
+                        results: data.results
+                    };
+                },
+                cache: true
+            },
+            tags: true,
+            createTag: function (params) {
+                return {
+                    id: 'new:' + params.term,
+                    text: 'Create new vendor: "' + params.term + '"',
+                    isNew: true
+                };
+            }
+        });
+
+        $('#vendor').on('select2:select', function (e) {
+            var data = e.params.data;
+            if (data.id.startsWith('new:')) {
+                let name = data.text.replace('Create new vendor: "', '').replace('"', '');
+                $('#vendorModal input[name="name"]').val(name);
+                $('#vendorModal').modal('show');
+            }
+        });
+    });
+</script>
+
 
 <script>
     //show/hide the bank_account field depending on the selected payment_type
@@ -294,7 +388,7 @@
     $(document).ready(function () {
         // Tax percentage touchspin
         $('#tax_percentage').on('change', function () {
-            Purchase.calculate_sale();
+            sale.calculate_sale();
         });
 
 
@@ -387,25 +481,25 @@
             const quantity = parseInt($(`.input-quantity[data-index="${index}"]`).val()) || 1;
 
             // Update the item data
-            sale.products.items[index].price = price;
-            sale.products.items[index].quantity = quantity;
-            sale.products.items[index].total_item = price * quantity;
+            purchase.products.items[index].price = price;
+            purchase.products.items[index].quantity = quantity;
+            purchase.products.items[index].total_item = price * quantity;
 
             // Update the total cell directly without full redraw
             const $row = $(this).closest('tr');
             const total = (price * quantity).toFixed(2);
             $row.find('td').eq(6).text(`${total} $`);
 
-            // Recalculate totals for the whole sale
-            sale.calculate_sale();  // This only updates the summary fields
+            // Recalculate totals for the whole purchase
+            purchase.calculate_sale();  // This only updates the summary fields
         });
 
 
         // Handle delete
         $('#table_items tbody').on('click', '.btn-delete', function () {
             const index = $(this).data('index');
-            sale.products.items.splice(index, 1);
-            sale.list_item();
+            purchase.products.items.splice(index, 1);
+            purchase.list_item();
         });
 
 

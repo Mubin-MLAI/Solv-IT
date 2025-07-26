@@ -1231,12 +1231,13 @@ def customer_search(request):
 
     if query:
         customers = Customer.objects.filter(
-            Q(first_name__icontains=query) | Q(last_name__icontains=query)
+            Q(first_name__icontains=query) | Q(last_name__icontains=query) | Q(phone__icontains=query)
         )
         results = [
             {
                 'id': c.id,
-                'text': f"{c.first_name} {c.last_name}".strip()
+                'text': f"{c.first_name} {c.last_name}".strip(),
+                'phone': f"{c.phone}".strip()
             } for c in customers
         ]
     return JsonResponse({'results': results})
@@ -1252,4 +1253,34 @@ def customer_create(request):
 
     customer = Customer.objects.create(first_name=first_name, last_name=last_name)
     return JsonResponse({'id': customer.id, 'text': customer.get_full_name()})
+
+
+def vendor_search(request):
+    query = request.GET.get('q', '')
+    results = []
+
+    if query:
+        vendors = Vendor.objects.filter(
+            Q(name__icontains=query) | Q(phone_number__icontains=query)
+        )
+        results = [
+            {
+                'id': c.id,
+                'text': f"{c.name}".strip(),
+                'phone': f"{c.phone_number}".strip()
+            } for c in vendors
+        ]
+    return JsonResponse({'results': results})
+
+
+
+@require_POST
+def vendor_create(request):
+    name = request.POST.get('name')
+    phone_number = request.POST.get('phone_number')
+    # if not last_name:
+    #     return JsonResponse({'status': 'error', 'message': 'First name is required.'}, status=400)
+
+    vendor = Vendor.objects.create(name=name, phone_number = phone_number)
+    return JsonResponse({'id': vendor.id, 'text': vendor.get_full_name()})
 

@@ -999,27 +999,27 @@ class ProductUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
                     print(f"\nProcessing {component.upper()}: {clean_name} | Qty: {qty}")
 
                     # Get the item from the source device (e.g., LAP786786)
-                    try:
-                        assigned_item = catogaryitem.objects.get(
-                            name=clean_name,
-                            category=component,
-                            serial_no=serialno
-                        )
-                    except catogaryitem.DoesNotExist:
-                        messages.error(self.request, "No '{}' assigned to {}.".format(clean_name, serialno))
-                        return reverse_lazy('productslist')
+                    # try:
+                    assigned_item = catogaryitem.objects.filter(
+                        name=clean_name,
+                        category=component,
+                        serial_no=serialno
+                    )
+                    # except catogaryitem.DoesNotExist:
+                    #     messages.error(self.request, "No '{}' assigned to {}.".format(clean_name, serialno))
+                    #     return reverse_lazy('productslist')
 
-                    if assigned_item.quantity < qty:
+                    total_available = sum(item.quantity for item in assigned_item)
+                    if total_available < qty:
                         messages.error(self.request, "Not enough '{}' in {}.".format(clean_name, serialno))
                         return reverse_lazy('productslist')
                     
 
                     # ✅ Get the minimum unit price from available items
-                    # unit_price = assigned_item.aggregate(Min('unit_price'))['unit_price__min']
-                    unit_price = assigned_item.unit_price
+                    unit_price = assigned_item.aggregate(Min('unit_price'))['unit_price__min']
                     print('unit_price', unit_price)
 
-                    # subraction of price based on category price on purchased price
+                    # Addition of price based on category price on purchased price
                     update_items = Item.objects.filter(serialno__iexact=serialno)
                     for items1 in update_items:
                         print('items1', items1, items1.price)
@@ -1027,9 +1027,9 @@ class ProductUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
                         items1.save()
 
                     # Deduct from source
-                    assigned_item.quantity -= qty
+                    total_available -= qty
                     
-                    if assigned_item.quantity <= 0:
+                    if total_available <= 0:
                         assigned_item.delete()
                         # print("❌ Deleted {} from {} (Qty reached zero).".format(clean_name, serialno))
                     else:
@@ -1045,7 +1045,7 @@ class ProductUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
                         updated_by = self.request.user,
                         defaults={
                             'quantity': 0,
-                            'unit_price': assigned_item.unit_price,
+                            'unit_price': sum(item.unit_price for item in assigned_item) / len(assigned_item) if assigned_item else 0,
                         }
                     )
                     stock_item.quantity += qty
