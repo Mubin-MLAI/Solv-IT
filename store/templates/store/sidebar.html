@@ -131,8 +131,8 @@
                     </a>
                     <ul class="dropdown-menu bg-dark border-0" aria-labelledby="productsDropdown">
                         <li><a class="dropdown-item text-light {% if request.resolver_match.url_name == 'productslist' %}active{% endif %}"
-                                href="{% url 'productslist' %}">All Products</a></li>
-                        <li><a class="dropdown-item text-light" href="{% url 'category-list' %}">All Item</a></li>
+                                href="{% url 'productslist' %}">Add Products</a></li>
+                        <li><a class="dropdown-item text-light" href="{% url 'category-list' %}">Add Item / Spare </a></li>
                     </ul>
                 </li>
                 <li class="nav-item dropdown">
@@ -143,8 +143,9 @@
                     <ul class="dropdown-menu bg-dark border-0" aria-labelledby="productsDropdown1">
                         <li><a class="dropdown-item text-light {% if request.resolver_match.url_name == 'saleslist' %}active{% endif %}"
                             href="{% url 'saleslist' %}">Sales Orders</a></li>
-                        <li><a class="dropdown-item text-light" href="{% url 'purchaseslist' %}">Purchase Orders</a></li>
+                        <li><a class="dropdown-item text-light" href="{% url 'purchaseslist' %}">Add Purchase</a></li>
                         <li><a class="dropdown-item text-light" href="{% url 'cashbanklist' %}">Account Details</a></li>
+                        <li><a class="dropdown-item text-light" href="{% url 'expense-list' %}">Manage Expense</a></li>
                     </ul>
                 </li>
                     <!-- <li class="nav-item mb-2">

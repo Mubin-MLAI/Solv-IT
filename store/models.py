@@ -21,6 +21,7 @@ from django.core.validators import MinValueValidator
 from django import forms
 from django.contrib.auth.models import User
 from django.utils import timezone
+from accounts.models import Vendor, Customer
 
 class Ram(models.Model):
     """
@@ -138,6 +139,7 @@ class catogaryitem(models.Model):
     serial_no = models.CharField(max_length=100)
     quantity = models.IntegerField(default=1, null=True, blank=True)
     unit_price = models.DecimalField(max_digits=10, decimal_places=2)
+    purchase_lot_code = models.CharField(max_length=100, null=True, blank=True)
 
     created_by = models.ForeignKey(
         User, on_delete=models.SET_NULL, null=True, blank=True, related_name='category_items_created'
@@ -159,6 +161,7 @@ class catogaryitem(models.Model):
 
 class Item(models.Model):
     STATUS_CHOICES = [
+        ('NA', 'NA'),
         ('available', 'Available'),
         ('not_available', 'Not Available'),
         ('replacement', 'Replacement'),
@@ -169,13 +172,15 @@ class Item(models.Model):
     serialno = models.CharField(max_length=50, unique=False, null=True)
     make_and_models = models.CharField(max_length=100, null=True)
     catogary_item_clone = models.ManyToManyField(catogaryitem, blank=True) 
-    smps_status = models.CharField(max_length=50, choices=STATUS_CHOICES, default='available')
+    smps_status = models.CharField(max_length=50, choices=STATUS_CHOICES, default='NA')
     smps_replacement_description = models.TextField(max_length=100,null=True, blank=True)
-    motherboard_status = models.CharField(max_length=50, choices=STATUS_CHOICES, default='available')
+    motherboard_status = models.CharField(max_length=50, choices=STATUS_CHOICES, default='NA')
     motherboard_replacement_description = models.TextField(max_length=100, null=True, blank=True)
     quantity = models.IntegerField(default=1, null=True, blank=True)
     price = models.DecimalField(max_digits=10, decimal_places=2, default=0.0)
     purchased_code =  models.CharField(max_length=100,null=True, blank=True)
+    purchased_type =  models.CharField(max_length=100,null=True, blank=True)
+    note = models.TextField(max_length=500, null=True, blank=True, help_text="Additional notes about the item")
 
     created_by = models.ForeignKey(
         User, on_delete=models.SET_NULL, null=True, blank=True, related_name='items_created'
@@ -186,9 +191,14 @@ class Item(models.Model):
     )
     updated_date = models.DateTimeField(default=timezone.now)
 
+    customer = models.ForeignKey(Customer,
+        on_delete=models.DO_NOTHING, null=True, blank=True,
+        db_column="customer"
+    )
+
 
     def __str__(self):
-        return f"{self.name} - serialno: {self.serialno or 'N/A'}, make_and_models: {self.make_and_models}"
+        return f"{self.name} - serialno: {self.serialno or 'N/A'}, make_and_models: {self.make_and_models}, customer_name: {self.customer.first_name if self.customer else 'N/A'}"
 
     def get_absolute_url(self):
         """

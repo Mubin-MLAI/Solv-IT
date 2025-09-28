@@ -113,102 +113,86 @@
   <div id="invoice-wrapper" class="container-fluid">
     
     <!-- HEADER -->
-    <div class="row align-items-center mb-4">
+    <div class="row align-items-center mb-10">
       <div class="col text-center">
   <img src="/static/images/logo/solvit-logo.jpg" class="img-fluid" style="max-width: 70%; height: auto;" alt="Solv-IT Logo" />
       </div>
     </div>
 
-    <!-- INVOICE HEADER BAR -->
-    <div class="invoice-letter" style="align-items: center; justify-content: center; display: flex;">
-      <h5 style="color: #fff; font-weight: bold;">
-        Invoice No. INV{{ sale.id }} <br>
-        Date: {{ sale.date_added|date:"d/m/Y" }}
-      </h5>
+    <div class="row align-items-center mb-10">
+      <div class="col text-center">
+        <h3><strong>SERVICE BILL</strong></h3>
+      </div>  
+    </div>
+
+    <div class="invoice-letter mb-10">
+        <h5 style="color: #fff; font-weight: bold;">
+            Invoice No. SERINV-{{ servicebill.id }} <br>
+            Date: {{ servicebill.date_created|date:"d/m/Y" }}
+        </h5>
     </div>
 
     <!-- CUSTOMER + TOTAL -->
     <div class="row">
-      <div class="col-md-6 mb-3">
+    <div class="col-md-6 mb-10">
         <h5 class="effect-color">Invoiced to:</h5>
-        <h4 class="theme-color"><strong>{{ sale.customer.first_name }}</strong></h4>
-        <p>{{ sale.customer.address }}</p>
-        <p>{{ sale.customer.phone }}</p>
-        <p><strong>GSTIN:</strong> {{ sale.customer.gstin }}</p>
-      </div>
-      <div class="col-md-6">
+        <h4 class="theme-color"><strong>{{ servicebill.customer.first_name }} {{ servicebill.customer.last_name }}</strong></h4>
+        <p>{{ servicebill.customer.address }}</p>
+        <p>{{ servicebill.customer.phone }}</p>
+        <p><strong>GSTIN:</strong> {{ servicebill.customer.gstin }}</p>
+    </div>
+    <div class="col-md-6">
         <table class="table table-sm table-borderless">
-          <tbody>
+        <tbody>
             <tr>
-              <th>Subtotal</th>
-              <td>₹{{ sale.sub_total|floatformat:2 }}</td>
+            <th>Subtotal</th>
+            <td>₹{{ servicebill.total_amount|floatformat:2 }}</td>
             </tr>
             <tr>
-              <th>GST (%)</th>
-              <td>{{ sale.tax_percentage }}%</td>
+            <th>GST (%)</th>
+            <td>{{ servicebill.total_tax|floatformat:2 }}</td>
             </tr>
-            <tr>
-              <th>GST Amount</th>
-              <td>₹{{ sale.tax_amount|floatformat:2 }}</td>
-            </tr>
-            <!-- <tr>
-              <th>Discount Amount</th>
-              <td>-₹{{ sale.total_discount_amount|floatformat:2 }}</td>
-            </tr> -->
-          </tbody>
-          <tfoot>
+        </tbody>
+        <tfoot>
             <tr class="font-weight-bold">
-              <th>Total Amount</th>
-              <td>₹{{ sale.grand_total|floatformat:2 }}</td>
+            <th>Grand Total</th>
+            <td>₹{{ servicebill.grand_total|floatformat:2 }}</td>
             </tr>
-            <tr class="table-success font-weight-bold">
-              <th>Amount Paid</th>
-              <td>₹{{ sale.amount_paid|floatformat:2 }}</td>
-            </tr>
-            <tr class="{% if sale.amount_change > 0 %}table-warning{% else %}table-success{% endif %} font-weight-bold">
-              <th>Balance Due</th>
-              <td>₹{{ total_after_payment|floatformat:2 }}</td>
-            </tr>
-          </tfoot>
+        </tfoot>
         </table>
-      </div>
+    </div>
     </div>
 
     <!-- ITEM TABLE -->
     <div class="table-responsive mt-5">
-      <table class="invoice table-sm table-bordered">
+    <table class="table table-bordered table-sm invoice ">
         <thead>
-          <tr>
+        <tr>
             <th>No.</th>
             <th>Item</th>
-            <th>Qty.</th>
-            <th>Price</th>
-            <th>Discount</th>
-            <th>Final Price</th>
-            <!-- <th>GST</th> -->
+            <th>Description</th>
+            <th>Qty</th>
             <th>Amount</th>
-          </tr>
+            <th>Tax %</th>
+            <th>Tax Amt</th>
+            <th>Total</th>
+        </tr>
         </thead>
         <tbody>
-          {% for detail in sale.saledetail_set.all %}
+          {% for item in items %}
           <tr>
-            <td>{{ forloop.counter }}</td>
-            <td>
-              <strong>{{ detail.item.name }} ({{ detail.item.serialno }})</strong>
-              {% if forloop.counter < 3 %}
-                <div>{{ detail.description|safe }}</div>
-              {% endif %}
-            </td>
-            <td>{{ detail.quantity }}</td>
-            <td>{{ detail.sell_price }}</td>
-            <td>{{ detail.discount_amount }}</td>
-            <td>{{ detail.total_detail|floatformat:2 }}</td>
-            <!-- <td>₹{{ detail.gst_amount|floatformat:2 }}</td> -->
-            <td>{{ detail.total_detail|floatformat:2 }}</td>
+              <td>{{ forloop.counter }}</td>
+              <td>{{ item.item_name }}</td>
+              <td>{{ item.description }}</td>
+              <td>{{ item.qty }}</td>
+              <td>{{ item.amount }}</td>
+              <td>{{ item.tax_percent }}</td>
+              <td>{{ item.tax_amt }}</td>
+              <td>{{ item.total }}</td>
           </tr>
           {% endfor %}
-        </tbody>
-      </table>
+      </tbody>
+    </table>
     </div>
 
     <!-- SIGNATURE -->
@@ -235,7 +219,7 @@
       const now = new Date();
       const pad = (n) => n.toString().padStart(2, '0');
       const formattedDate = `${pad(now.getDate())}-${pad(now.getMonth() + 1)}-${now.getFullYear()}_${pad(now.getHours())}-${pad(now.getMinutes())}`;
-      const invoiceNo = "INV{{ sale.id }}";
+      const invoiceNo = "SERINV-{{ servicebill.id }}";
       const filename = `${invoiceNo}_${formattedDate}.pdf`;
 
       const opt = {

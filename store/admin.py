@@ -69,7 +69,7 @@ class ItemAdmin(admin.ModelAdmin):
     Admin configuration for the Item model.
     """
     list_display = (
-        "serialno","make_and_models","smps_status","motherboard_status"
+        "serialno","make_and_models","smps_status","motherboard_status", "purchased_type"
     )
     # search_fields = ('name', 'category__name', 'vendor__name')
     # list_filter = ('category', 'vendor')

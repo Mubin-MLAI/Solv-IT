@@ -47,6 +47,12 @@ class ProfileUpdateForm(forms.ModelForm):
 
 class CustomerForm(forms.ModelForm):
     """Form for creating/updating customer information."""
+    person_type = forms.ChoiceField(
+        choices=Customer.PERSON_TYPE_CHOICES,
+        initial='customer',
+        widget=forms.Select(attrs={'class': 'form-control'})
+    )
+    
     class Meta:
         model = Customer
         fields = [

@@ -67,7 +67,7 @@ Add Product
                     <div class="row mb-3">
                         <!-- Product Name -->
                         <div class="col-md-4">
-                            <label for="{{ form.name.id_for_label }}" class="form-label">
+                            <label for="{{ form.name.id_for_label }}" class="form-label" placeholder="Enter Product Name">
                                 Product Name
                             </label>
                             {{ form.name }}
@@ -76,16 +76,17 @@ Add Product
 
                         <!-- Serial No -->
                         <div class="col-md-4">
-                            <label for="id_serialno" class="form-label">Serial No</label>
+                            <label for="id_serialno" class="form-label" placeholder="Enter Serial No">Serial No</label>
                             {{ form.serialno }}
                             <div class="text-danger">{{ form.serialno.errors }}</div>
                         </div>
 
                         <!-- Make & Models -->
                         <div class="col-md-4">
-                            <label for="{{ form.make_and_models.id_for_label }}" class="form-label">
+                            <label for="{{ form.make_and_models.id_for_label }}" class="form-label" >
                                 Make & Models
                             </label>
+                            <div aria-placeholder="Enter Make & Models"></div>
                             {{ form.make_and_models }}
                             <div class="text-danger">{{ form.make_and_models.errors }}</div>
                         </div>
@@ -162,20 +163,10 @@ Add Product
 
                     <div class="row mb-3">
                         <div class="col-md-4">
-                            <label for="{{ form.quantity.id_for_label }}" class="form-label">
-                                Quantity
+                            <label for="{{ form.price.id_for_label }}" class="form-label">
+                                Price
                             </label>
-                            {{ form.quantity }}
-                            <div class="text-danger">{{ form.quantity.errors }}</div>
-                        </div>
-                    </div>
-
-
-                    <div class="row mb-3">
-                        <div class="col-md-6">
-                            <label for="price" class="form-label">Price</label>
-                            <input type="text" id="price" name="price" class="form-control"
-                                value="{{ form.price.value }}" readonly>
+                            {{ form.price }}
                             <div class="text-danger">{{ form.price.errors }}</div>
                         </div>
 
@@ -186,6 +177,13 @@ Add Product
                             {{ form.purchased_code }}
                             <div class="text-danger">{{ form.purchased_code.errors }}</div>
                         </div>
+
+                        <div class="col-md-4">
+                            <label for="customer_searchbox" class="form-label">Customer Name</label>
+                            <input type="text" id="customer_searchbox" class="form-control" placeholder="Type to search customer..." autocomplete="off" value="{{ form.instance.customer.get_full_name }}">
+                            <div id="customer_suggestions" class="form-label" style="z-index: 1000;"></div>
+                            <input type="hidden" name="customer_id" id="customer_id" value="{{ form.instance.customer.id }}">  <!-- Hidden field to submit ID -->
+                        </div>
                     </div>
 
 
@@ -193,15 +191,27 @@ Add Product
                     <div class="row mb-3">
                         <!-- SMPS Status -->
                         <div class="col-md-4">
-                            <label for="smps_status" class="form-label">SMPS Status</label>
-                            {{ form.smps_status }}
+                            <label for="id_smps_status" class="form-label">SMPS Status</label>
+                            <select name="smps_status" id="id_smps_status" class="form-control">
+                                <option value="">Select Status</option>
+                                <option value="NA" {% if form.instance.smps_status == 'NA' %}selected{% endif %}>NA</option>
+                                <option value="available" {% if form.instance.smps_status == 'available' %}selected{% endif %}>Available</option>
+                                <option value="not_available" {% if form.instance.smps_status == 'not_available' %}selected{% endif %}>Not Available</option>
+                                <!-- <option value="replacement" {% if form.instance.smps_status == 'replacement' %}selected{% endif %}>Replacement</option> -->
+                            </select>
                             <div class="text-danger">{{ form.smps_status.errors }}</div>
                         </div>
 
                         <!-- Motherboard Status -->
-                        <div class="col-md-4" id="motherboard_status_div">
-                            <label for="motherboard_status" class="form-label">Motherboard Status</label>
-                            {{ form.motherboard_status }}
+                        <div class="col-md-4">
+                            <label for="id_motherboard_status" class="form-label">Motherboard Status</label>
+                            <select name="motherboard_status" id="id_motherboard_status" class="form-control">
+                                <option value="">Select Status</option>
+                                <option value="NA" {% if form.instance.motherboard_status == 'NA' %}selected{% endif %}>NA</option>
+                                <option value="available" {% if form.instance.motherboard_status == 'available' %}selected{% endif %}>Available</option>
+                                <option value="not_available" {% if form.instance.motherboard_status == 'not_available' %}selected{% endif %}>Not Available</option>
+                                <!-- <option value="replacement" {% if form.instance.motherboard_status == 'replacement' %}selected{% endif %}>Replacement</option> -->
+                            </select>
                             <div class="text-danger">{{ form.motherboard_status.errors }}</div>
                         </div>
                     </div>
@@ -212,7 +222,7 @@ Add Product
                             <label for="smps_replacement_description" class="form-label">SMPS Replacement
                                 Description</label>
                             <input type="text" id="smps_replacement_description" name="smps_replacement_description"
-                                class="form-control">
+                                class="form-control" value="{{ form.instance.smps_replacement_description }}">
                         </div>
 
                         <!-- Motherboard Replacement Description -->
@@ -220,7 +230,8 @@ Add Product
                             <label for="motherboard_replacement_description" class="form-label">Motherboard
                                 Replacement Description</label>
                             <input type="text" id="motherboard_replacement_description"
-                                name="motherboard_replacement_description" class="form-control">
+                                name="motherboard_replacement_description" class="form-control" 
+                                value="{{ form.instance.motherboard_replacement_description }}">
                         </div>
                     </div>
 
@@ -241,6 +252,35 @@ Add Product
 <script>
 
 document.addEventListener('DOMContentLoaded', function () {
+        // Set up SMPS and Motherboard status change handlers
+        const smpsStatus = document.getElementById("id_smps_status");
+        const motherboardStatus = document.getElementById("id_motherboard_status");
+        const customerSearchBox = document.getElementById("customer_searchbox");
+        const customerId = document.getElementById("customer_id");
+        
+        // Initialize customer if already set
+        if (customerSearchBox.value && !customerId.value) {
+            // If we have a name but no ID, try to fetch the customer ID
+            fetch(`/search-customer/?q=${encodeURIComponent(customerSearchBox.value)}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.suggestions && data.suggestions.length > 0) {
+                        // Find exact match
+                        const match = data.suggestions.find(s => s.name === customerSearchBox.value);
+                        if (match) {
+                            customerId.value = match.id;
+                        }
+                    }
+                });
+        }
+        
+        smpsStatus.addEventListener('change', toggleReplacementDescription);
+        motherboardStatus.addEventListener('change', toggleMotherboardReplacementDescription);
+        
+        // Initial trigger of display logic
+        toggleReplacementDescription();
+        toggleMotherboardReplacementDescription();
+        
         const serialInput = document.getElementById("id_serialno");  // Django auto-generates this ID
         const processorSelect = document.getElementById("processor");
         const ramSelect = document.getElementById("ram");
@@ -482,6 +522,153 @@ document.addEventListener('DOMContentLoaded', function () {
     searchSuggestions('searchbox1', 'suggestions1');
     searchSuggestions('searchbox2', 'suggestions2');
     searchSuggestions('searchbox3', 'suggestions3');
+</script>
+
+<!-- Customer Create Modal -->
+<div class="modal fade" id="customerModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <form id="createCustomerForm">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Create New Customer</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="person_type" class="form-label">Person Type</label>
+                        <select name="person_type" id="person_type" class="form-control">
+                            <option value="customer">Customer</option>
+                            <option value="vendor">Vendor</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <input type="text" name="first_name" class="form-control" placeholder="Enter First Name">
+                    </div>
+                    <div class="mb-3">
+                        <input type="text" name="last_name" class="form-control" placeholder="Enter Last Name">
+                    </div>
+                    <div class="mb-3">
+                        <input type="number" name="phone" class="form-control" placeholder="Enter Phone Number">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-primary">Create</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+function customerSearchSuggestions() {
+    const searchBox = document.getElementById('customer_searchbox');
+    const suggestionsBox = document.getElementById('customer_suggestions');
+    const hiddenField = document.getElementById('customer_id');
+    const customerModal = new bootstrap.Modal(document.getElementById('customerModal'));
+
+    searchBox.addEventListener('input', function () {
+        const query = searchBox.value;
+        if (query.length >= 2) {
+            fetch(`/search-customer/?q=${query}`)
+                .then(response => response.json())
+                .then(data => {
+                    suggestionsBox.innerHTML = '';
+                    if (data.suggestions.length > 0) {
+                        data.suggestions.forEach(suggestion => {
+                            const item = document.createElement('a');
+                            item.href = 'javascript:void(0);';
+                            item.classList.add('list-group-item', 'list-group-item-action');
+                            item.textContent = suggestion.name;
+
+                            item.addEventListener('click', function () {
+                                searchBox.value = suggestion.name;
+                                hiddenField.value = suggestion.id;
+                                suggestionsBox.innerHTML = '';
+                            });
+
+                            suggestionsBox.appendChild(item);
+                        });
+                    } else {
+                        const noItem = document.createElement('a');
+                        noItem.classList.add('list-group-item', 'list-group-item-action', 'text-danger');
+                        noItem.textContent = 'No customer found. Click to add.';
+                        noItem.style.cursor = 'pointer';
+                        noItem.addEventListener('click', function () {
+                            customerModal.show();
+                            const searchValue = searchBox.value.trim();
+                            if (searchValue) {
+                                const names = searchValue.split(' ');
+                                document.querySelector('#customerModal input[name="first_name"]').value = names[0] || '';
+                                document.querySelector('#customerModal input[name="last_name"]').value = names.slice(1).join(' ') || '';
+                            }
+                        });
+                        suggestionsBox.appendChild(noItem);
+                    }
+                })
+                .catch(err => {
+                    console.error('Error fetching customer suggestions:', err);
+                });
+        } else {
+            suggestionsBox.innerHTML = '';
+            hiddenField.value = '';
+        }
+    });
+
+    // Handle customer form submission
+    document.getElementById('createCustomerForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        const formData = new FormData(this);
+        
+        // Add CSRF token
+        const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+        
+        // Get the person type value
+        const personType = document.getElementById('person_type').value;
+        formData.append('person_type', personType);
+        
+        fetch("{% url 'create_customer_ajax' %}", {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': csrfToken
+            },
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Update the customer search box and hidden field with new customer data
+                searchBox.value = data.customer.name;
+                hiddenField.value = data.customer.id;
+                
+                // Close the modal and clear the form
+                customerModal.hide();
+                document.getElementById('createCustomerForm').reset();
+                
+                // Clear suggestions box
+                suggestionsBox.innerHTML = '';
+                
+                // Show success message
+                const alertDiv = document.createElement('div');
+                alertDiv.className = 'alert alert-success';
+                alertDiv.textContent = 'Customer created successfully!';
+                document.querySelector('.card-body').insertBefore(alertDiv, document.querySelector('form'));
+                
+                // Remove alert after 3 seconds
+                setTimeout(() => alertDiv.remove(), 3000);
+            } else {
+                // Show error message
+                alert(data.error || 'Error creating customer');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Error creating customer');
+        });
+    });
+}
+
+// Call it
+customerSearchSuggestions();
 </script>
 
 {% endblock content %}

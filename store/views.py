@@ -48,6 +48,45 @@ from transactions.models import Itempurchased, Sale, catogaryitempurchased
 from .models import  Item, Delivery, Ram, Ssd, Hdd, Processor , catogaryitem  #, Nvme, M_2
 from .forms import ItemForm,  DeliveryForm, RamForm, SddForm, HddForm, ProcessorForm , catogaryForm   #, NvmeForm, M_2Form
 from .tables import ItemTable, CategoryItemTable
+from accounts.models import Customer
+from django.views.decorators.http import require_http_methods
+import json
+
+@require_http_methods(["POST"])
+def create_customer_ajax(request):
+    try:
+        first_name = request.POST.get('first_name')
+        last_name = request.POST.get('last_name')
+        phone = request.POST.get('phone')
+        
+        if not first_name or not phone:
+            return JsonResponse({
+                'success': False,
+                'error': 'First name and phone number are required'
+            })
+            
+        # Create new customer
+        customer = Customer.objects.create(
+            first_name=first_name,
+            last_name=last_name or '',
+            phone=phone
+        )
+        
+        # Return success response with customer data
+        return JsonResponse({
+            'success': True,
+            'customer': {
+                'id': customer.id,
+                'full_name': f"{customer.first_name} {customer.last_name}".strip(),
+                'phone': customer.phone
+            }
+        })
+        
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'error': str(e)
+        })
 import pandas as pd
 from django.db import transaction
 from .forms import ExcelUploadForm
@@ -304,7 +343,37 @@ class ProductDetailView(LoginRequiredMixin, FormMixin, DetailView):
     
 
 
+from django.http import JsonResponse
+from .models import Customer
 
+def customer_search_suggestions(request):
+    query = request.GET.get('q', '')
+    suggestions = []
+
+    if query and len(query) >= 2:
+        customers = Customer.objects.filter(
+            Q(first_name__icontains=query) | Q(last_name__icontains=query) | Q(phone__icontains=query)
+        )[:10]
+        suggestions = [
+            {
+                'id': customer.pk,
+                'first_name': customer.first_name,
+                'last_name': customer.last_name,
+                'text': (customer.first_name + ' ' + customer.last_name).strip() if customer.last_name else customer.first_name
+            }
+            for customer in customers
+        ]
+
+    return JsonResponse({'results': suggestions})
+
+
+
+
+from django.contrib import messages
+from django.urls import reverse_lazy
+from django.views.generic.edit import CreateView
+from django.contrib.auth.mixins import LoginRequiredMixin
+from .models import Item, Customer, catogaryitem  # make sure to import Customer
 
 class ProductCreateView(LoginRequiredMixin, CreateView):
     model = Item
@@ -312,13 +381,22 @@ class ProductCreateView(LoginRequiredMixin, CreateView):
     form_class = ItemForm
 
     def form_valid(self, form):
-
         item = form.save(commit=False)
         item.created_by = self.request.user  # Set the user who created the item
+
+        # ✅ Get the customer ID from the POST data
+        customer_id = self.request.POST.get('customer_id')
+        if customer_id:
+            try:
+                customer = Customer.objects.get(id=customer_id)
+                item.customer = customer  # Assuming Item has a ForeignKey to Customer
+            except Customer.DoesNotExist:
+                messages.error(self.request, "Selected customer does not exist.")
+                return self.form_invalid(form)
+
         item.save()
+
         serialno = item.serialno.strip()
-
-
         component_fields = ['processor', 'ram', 'hdd', 'ssd']
 
         try:
@@ -347,7 +425,7 @@ class ProductCreateView(LoginRequiredMixin, CreateView):
                         category=component,
                         serial_no=serialno,
                         quantity=qty_int,
-                        unit_price=0.00,  # Set as needed
+                        unit_price=0.00,
                         created_by=self.request.user
                     )
         except Exception as e:
@@ -358,6 +436,7 @@ class ProductCreateView(LoginRequiredMixin, CreateView):
 
     def get_success_url(self):
         return reverse_lazy('productslist')
+
 
 
 def ordinal(n):

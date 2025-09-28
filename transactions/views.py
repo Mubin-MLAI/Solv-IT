@@ -1,3 +1,8 @@
+# ServiceCreateView for rendering service_create.html
+from django.views import View
+from django.shortcuts import render
+
+    
 # Standard library imports
 from functools import reduce
 import json
@@ -18,6 +23,9 @@ from django_tables2.export.views import ExportMixin
 from django.views.generic import DetailView, ListView
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
 
+# Import Expense views
+from .views_expense import ExpenseListView, ExpenseCreateView
+
 # Authentication and permissions
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 
@@ -30,8 +38,9 @@ from openpyxl.styles import Alignment
 from store.models import Item
 from accounts.models import Customer, Vendor
 from transactions.tables import PurchasedItemTable
-from .models import PurchaseDetail, Sale, Purchase, SaleDetail, Bankaccount, Itempurchased, catogaryitempurchased
-from .forms import BankForm, ItemPurchasedForm
+from .models import PurchaseDetail, Sale, Purchase, SaleDetail, Bankaccount, Itempurchased, catogaryitempurchased, ServiceBillItem
+from .forms import BankForm
+from store.forms import ItemForm
 from store.models import catogaryitem 
 from django.db.models import Q
 
@@ -218,40 +227,112 @@ def export_purchases_to_excel(request):
     workbook.save(response)
     return response
 
+
+class ServiceCreateView(View):
+    def get(self, request, *args, **kwargs):
+        return render(request, 'transactions/service_create.html')
+
+
+from django.core.paginator import Paginator
+from django.views.generic import ListView
+from .models import Sale, ServiceBillItem
+
+from django.views.generic import ListView
+from django.db.models import Q
+from .models import Sale, ServiceBillItem
+
 class SaleListView(ListView):
-    model = Sale
     template_name = 'transactions/sales_list.html'
-    context_object_name = 'sales'
+    context_object_name = 'combined_list'
     paginate_by = 10
 
     def get_queryset(self):
-        sales = Sale.objects.all().prefetch_related('saledetail_set__item')
-        queryset = super().get_queryset()
-        status = self.request.GET.get('status')
-        serial_filter = self.request.GET.get('serial')
-        inv = self.request.GET.get('inv')
+        # Get all Sales and ServiceBillItems
+        sales_qs = Sale.objects.select_related('customer').prefetch_related('saledetail_set__item')
+        service_qs = ServiceBillItem.objects.select_related('customer')
 
-        if status:
-            queryset = queryset.filter(status=status)
+        # Get search filters
+        status_filter = self.request.GET.get('status', '')
+        inv_filter = self.request.GET.get('inv', '').upper()
+        serial_filter = self.request.GET.get('serial', '')
+        mobileno_filter = self.request.GET.get('mobileno', '')
 
-        if inv:
-            # Assuming invoice number is derived from `id`, e.g., INV123
-            if inv.lower().startswith("inv"):
-                inv = inv[3:]  # Strip "INV" prefix
-            if inv.isdigit():
-                queryset = queryset.filter(id=inv)
+
+        # --- Filter Sales ---
+        if status_filter:
+            sales_qs = sales_qs.filter(status=status_filter)
+
+        if inv_filter:
+            if inv_filter.startswith("INV"):
+                inv_filter_num = inv_filter[3:]
             else:
-                queryset = queryset.none()
+                inv_filter_num = inv_filter
+            if inv_filter_num.isdigit():
+                sales_qs = sales_qs.filter(id=int(inv_filter_num))
+            else:
+                sales_qs = sales_qs.none()
 
         if serial_filter:
-            queryset = sales.filter(saledetail_set__item__serialno__icontains=serial_filter)
+            sales_qs = sales_qs.filter(saledetail_set__item__serialno__icontains=serial_filter)
 
-        return queryset
+        if mobileno_filter:
+            sales_qs = sales_qs.filter(customer__phone__icontains=mobileno_filter)
+
+        # --- Filter ServiceBillItems ---
+        # Only apply non-status filters to ServiceBillItem
+        if inv_filter:
+            if inv_filter.startswith("SVC"):
+                inv_filter_num = inv_filter[3:]
+            else:
+                inv_filter_num = inv_filter
+            if inv_filter_num.isdigit():
+                service_qs = service_qs.filter(id=int(inv_filter_num))
+            else:
+                service_qs = service_qs.none()
+
+        if serial_filter:
+            service_qs = service_qs.filter(description__icontains=serial_filter)  # Or custom field if serial exists
+
+        if mobileno_filter:
+            service_qs = service_qs.filter(customer__phone__icontains=mobileno_filter)
+
+        servies1 =  self.request.GET.get('status', '')
+        if servies1 == 'Service':
+            combined_list = list(service_qs)
+        elif servies1 == '':
+            combined_list = list(sales_qs) + list(service_qs)
+        else:
+            combined_list = list(sales_qs)
+
+        # Sort combined list by date_created (Sales might have date_added)
+        def get_date(obj):
+            if hasattr(obj, 'date_created') and obj.date_created:
+                return obj.date_created
+            elif hasattr(obj, 'date_added') and obj.date_added:
+                return obj.date_added
+            return None
+
+        combined_list.sort(key=get_date, reverse=True)
+
+        return combined_list
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['status_filter'] = self.request.GET.get('status', '')
+        context['inv_filter'] = self.request.GET.get('inv', '')
+        context['serial_filter'] = self.request.GET.get('serial', '')
+        context['mobileno_filter'] = self.request.GET.get('mobileno', '')
+        # Manual pagination
+        page = self.request.GET.get('page', 1)
+        paginator = Paginator(self.get_queryset(), self.paginate_by)
+        paged_records = paginator.get_page(page)
+        context['sales'] = paged_records
+        context['is_paginated'] = paged_records.has_other_pages()
+        context['page_obj'] = paged_records
+        context['paginator'] = paginator
         return context
+
+
 
 
 class SaleDetailView(LoginRequiredMixin, DetailView):
@@ -268,6 +349,20 @@ class SaleDetailView(LoginRequiredMixin, DetailView):
         context["total_after_payment"] = sale.grand_total - sale.amount_paid
         return context
 
+
+class ServiesDetailView(LoginRequiredMixin, DetailView):
+    """
+    View to display details of a specific sale.
+    """
+    model = ServiceBillItem
+    template_name = "transactions/servies_inv.html"
+    context_object_name = "ServiceBillItem"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        sale = self.get_object()
+        context["total_after_payment"] = sale.grand_total - sale.amount_paid
+        return context
 
 
 
@@ -335,6 +430,8 @@ def SaleCreateView(request):
                 "amount_paid": float(data["amount_paid"]),
                 "amount_change": float(data["amount_change"]),
                 "payment_type": data['payment_type'],
+                "total_discount_amount": data['total_discount_amount'],
+                "actual_total_price_before_discount": data['actual_total_price_before_discount'],
                 "bank_account": bank_account,
                 "status": sale_status  # <-- Now saving dynamic status
             }
@@ -374,7 +471,7 @@ def SaleCreateView(request):
                         if grouped[cat]:
                             category_display = cat.upper()
                             values = ", ".join(grouped[cat])
-                            description += f"{category_display}: {values} ({comp.serial_no})<br>"
+                            description += f"{category_display}: {values}<br>"
 
                     # ✅ Create SaleDetail with generated description
                     SaleDetail.objects.create(
@@ -382,7 +479,10 @@ def SaleCreateView(request):
                         item=item_instance,
                         quantity=int(item["quantity"]),
                         price=float(item["price"]),
+                        sell_price=float(item["sell_price"]),
                         total_detail=float(item["total_item"]),
+                        discount_amount=float(item.get("discount_amount", 0.0)),
+                        gst_amount=float(item.get("gst_amount", 0.0)),
                         description=description  # Auto-generated HTML
                     )
 
@@ -396,7 +496,7 @@ def SaleCreateView(request):
             return JsonResponse({
                 'status': 'success',
                 'message': 'Sale created successfully!',
-                'redirect': '/transactions/sales/'
+                'redirect': f'/transactions/sale/{new_sale.pk}/'  # Redirect to invoice page
             })
 
         except json.JSONDecodeError:
@@ -763,7 +863,7 @@ class PurchaseListView(LoginRequiredMixin, ExportMixin, tables.SingleTableView):
     - success_url: The URL to redirect to upon successful form submission.
     """
 
-    model = Itempurchased
+    model = Item
     table_class = PurchasedItemTable
     context_object_name = "Itempurchased"
     paginate_by = 10
@@ -777,16 +877,21 @@ class PurchaseListView(LoginRequiredMixin, ExportMixin, tables.SingleTableView):
         else:
             return ["transactions/purchaselist.html"]
         
+    def get_queryset(self):
+        # Get base queryset
+        queryset = super().get_queryset()
+        # Filter items where purchased_type == 'vendor'
+        queryset = queryset.filter(purchased_type='vendor')
+        return queryset
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        items = context['Itempurchased']  # assuming your ListView or similar sets this
-
-
+        items = context['Itempurchased']
         # Prefetch vendor data to avoid N+1 queries
-        context['vendors'] = Vendor.objects.all().order_by('name')
+        context['vendors'] = Customer.objects.all().order_by('first_name')
 
         # Get all category items in one go to reduce DB hits
-        all_category_items = catogaryitempurchased.objects.filter(
+        all_category_items = catogaryitem.objects.filter(
             serial_no__in=[item.serialno for item in items]
         )
 
@@ -796,25 +901,22 @@ class PurchaseListView(LoginRequiredMixin, ExportMixin, tables.SingleTableView):
 
         for data in all_category_items:
             serial = data.serial_no
-
-            # Store only the component name, not the category
             if data.category == 'processor':
-                grouped_data[serial]['processors'].append(data.name + 'X' + '(' + str(data.quantity) + ')' )  # Store only the name
-            elif data.category == 'ram':  # Store only the name
-                grouped_data[serial]['rams'].append(data.name + 'X' + '(' + str(data.quantity) + ')' )  # Store only the name
+                grouped_data[serial]['processors'].append(data.name + 'X' + '(' + str(data.quantity) + ')' )
+            elif data.category == 'ram':
+                grouped_data[serial]['rams'].append(data.name + 'X' + '(' + str(data.quantity) + ')' )
             elif data.category == 'hdd':
-                grouped_data[serial]['hdds'].append(data.name +'X' + '(' + str(data.quantity) + ')' )  # Store only the name
+                grouped_data[serial]['hdds'].append(data.name +'X' + '(' + str(data.quantity) + ')' )
             elif data.category == 'ssd':
-                grouped_data[serial]['ssds'].append(data.name + 'X' + '(' + str(data.quantity) + ')' )  # Store only the name
+                grouped_data[serial]['ssds'].append(data.name + 'X' + '(' + str(data.quantity) + ')' )
 
         # Attach to each item
         for item in items:
             serial = item.serialno
-            item.processors = grouped_data[serial]['processors'] 
+            item.processors = grouped_data[serial]['processors']
             item.rams = grouped_data[serial]['rams']
             item.hdds = grouped_data[serial]['hdds']
             item.ssds = grouped_data[serial]['ssds']
-            # item.vendor_display_name = item.vendor_name.name if item.vendor_name else "Unknown"
 
         return context
 
@@ -877,9 +979,10 @@ class PurchaseItemSearchListView(PurchaseListView):
             result = result.filter(
                 reduce(
                     and_,
-                    (Q(vendor_name__name__icontains=q) for q in query_list)
+                        (Q(customer__first_name__icontains=q) | Q(customer__last_name__icontains=q) for q in query_list)
                 )
             )
+            
 
         if purchased_code:
             print('iopioii')
@@ -896,7 +999,7 @@ class PurchaseItemSearchListView(PurchaseListView):
         items = context['Itempurchased']  # assuming your ListView or similar sets this
 
         # Get all category items in one go to reduce DB hits     
-        all_category_items = catogaryitempurchased.objects.filter(
+        all_category_items = catogaryitem.objects.filter(
             serial_no__in=[item.serialno for item in items]
         )
 
@@ -946,14 +1049,15 @@ class PurchaseItemSearchListView(PurchaseListView):
 
 
 class PurchasedCreateView(LoginRequiredMixin, CreateView):
-    model = Itempurchased
+    model = Item
     template_name = "transactions/purchasecreate.html"
-    form_class = ItemPurchasedForm
+    form_class = ItemForm
 
     def form_valid(self, form):
 
         item = form.save(commit=False)
         item.created_by = self.request.user  # Set the user who created the item
+        item.purchased_type = 'vendor'
         item.save()
         serialno = item.serialno.strip()
 
@@ -981,7 +1085,7 @@ class PurchasedCreateView(LoginRequiredMixin, CreateView):
                         messages.error(self.request, f"Invalid quantity '{qty}' for {component} '{name}'")
                         continue
 
-                    catogaryitempurchased.objects.create(
+                    catogaryitem.objects.create(
                         name=name.upper(),
                         category=component,
                         serial_no=serialno,
@@ -1248,11 +1352,21 @@ def customer_search(request):
 def customer_create(request):
     first_name = request.POST.get('first_name')
     last_name = request.POST.get('last_name')
-    # if not last_name:
-    #     return JsonResponse({'status': 'error', 'message': 'First name is required.'}, status=400)
+    person_type = request.POST.get('person_type', 'customer')  # Default to customer if not specified
+    phone = request.POST.get('phone')
+    
+    if not first_name:
+        return JsonResponse({'status': 'error', 'message': 'First name is required.'}, status=400)
 
-    customer = Customer.objects.create(first_name=first_name, last_name=last_name)
-    return JsonResponse({'id': customer.id, 'text': customer.get_full_name()})
+    customer = Customer.objects.create(
+        first_name=first_name,
+        last_name=last_name,
+        phone=phone,
+        person_type=person_type
+    )
+    return JsonResponse({'success': True, 'customer': {'id': customer.id, 'name': customer.get_full_name()}})
+
+    # return JsonResponse({'id': customer.id, 'text': customer.get_full_name()})    
 
 
 def vendor_search(request):
@@ -1283,4 +1397,71 @@ def vendor_create(request):
 
     vendor = Vendor.objects.create(name=name, phone_number = phone_number)
     return JsonResponse({'id': vendor.id, 'text': vendor.get_full_name()})
+
+
+from django.http import JsonResponse
+from django.db import transaction
+from accounts.models import Customer
+from .models import ServiceBillItem
+
+import json
+from django.views import View
+from django.shortcuts import render, redirect
+from .models import ServiceBillItem, Customer
+
+from django.http import JsonResponse
+
+class ServiceBillCreateView(View):
+    def post(self, request, *args, **kwargs):
+        data = request.POST
+        customer_id = data.get("customer_id")
+        customer = Customer.objects.get(id=customer_id)
+
+        items_json = data.get("items")
+        items = json.loads(items_json) if items_json else []
+
+        servicebill_items = []
+        for item in items:
+            sb = ServiceBillItem.objects.create(
+                customer=customer,
+                total_amount=data.get("total_amount"),
+                total_tax=data.get("total_tax"),
+                grand_total=data.get("grand_total"),
+                item_name=item.get("item_name"),
+                description=item.get("description"),
+                qty=item.get("qty"),
+                rate=item.get("rate"),
+                amount=item.get("amount"),
+                tax_percent=item.get("tax_percent"),
+                tax_amt=item.get("tax_amt"),
+                total=item.get("total"),
+            )
+            servicebill_items.append(sb)
+
+        if servicebill_items:
+            redirect_url = f"/transactions/servicebill/{servicebill_items[0].pk}/invoice/"
+            return JsonResponse({"success": True, "redirect_url": redirect_url})
+        else:
+            return JsonResponse({"success": False, "error": "No items to save."})
+
+
+
+class ServiceBillInvoiceView(View):
+    def get(self, request, pk, *args, **kwargs):
+        # Get the first item
+        servicebill = get_object_or_404(ServiceBillItem, pk=pk)
+
+        # Fetch all items from same bill (same customer & grand_total & date)
+        items = ServiceBillItem.objects.filter(
+            customer=servicebill.customer,
+            date_created=servicebill.date_created,
+            grand_total=servicebill.grand_total
+        )
+
+        context = {
+            "servicebill": servicebill,  # for header / customer details
+            "items": items,              # all items
+        }
+        return render(request, "transactions/servies_inv.html", context)
+
 

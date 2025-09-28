@@ -36,12 +36,15 @@
                         <h5 class="mb-0">Sale Items</h5>
                     </div>
 
+                        
+
 
                     <div class="card-body">
                         <div class="mb-3">
-                            <label for="customer" class="form-label">Search or Create Customer</label>
-                            <select name="customer" class="form-select" id="customer" style="width:100%;"
-                                required></select>
+                            <label for="customer_searchbox" class="form-label">Customer Name</label>
+                            <input type="text" id="customer_searchbox" class="form-control" placeholder="Type Customer Name / Phone ... " autocomplete="off">
+                            <div id="customer_suggestions" class="form-label" style="z-index: 1000;"></div>
+                            <input type="hidden" name="customer_id" id="customer_id">  <!-- Hidden field to submit ID -->
                         </div>
                     </div>
                     <div class="card-body">
@@ -53,10 +56,10 @@
                         </div>
                         OR
                         <!-- Search item -->
-                        <div class="mb-4">
+                        <div class="mb-4 position-relative">
                             <label for="searchbox_items" class="form-label">Search Item:</label>
-                            <select class="form-select select2" name="searchbox_items" id="searchbox_items"
-                                aria-label="Search items"></select>
+                            <input type="text" class="form-control select2" name="searchbox_items" id="searchbox_items" aria-label="Search items" placeholder="Enter Product Serial Number" autocomplete="off">
+                            <div id="item_suggestions" class="form-label" style="z-index: 1000;"></div>
                         </div>
 
                         <!-- Delete all items -->
@@ -74,6 +77,8 @@
                                         <th>Serial No</th>
                                         <th>Description</th>
                                         <th>Price</th>
+                                        <th>Sell Price</th>
+                                        <th>Discount Amount</th>
                                         <th>Quantity</th>
                                         <th>Total</th>
                                         <th class="text-center">Actions</th>
@@ -99,11 +104,20 @@
                         <h5 class="mb-0">Sale Details</h5>
                     </div>
                     <div class="card-body">
-
                         <div class="mb-3">
-                            <label for="sub_total" class="form-label">Subtotal</label>
-                            <input name="sub_total" type="number" class="form-control" id="sub_total"
+                            <label for="total_discount_amount" class="form-label">Total Discount Amount (All Items)</label>
+                            <input name="total_discount_amount" type="text" class="form-control" id="total_discount_amount"
+                                aria-label="Total Discount Amount (All Items)" readonly>
+                        </div>
+                        <div class="mb-3">
+                            <label for="sub_total" class="form-label">Sub Total Amount</label>
+                            <input name="sub_total" type="text" class="form-control" id="sub_total"
                                 aria-label="Subtotal" required>
+                        </div>
+                        <div class="mb-3">
+                            <!-- <label for="actual_total_price_before_discount" class="form-label">Sub Total Amount</label> -->
+                            <input name="actual_total_price_before_discount" type="text" class="form-control" id="actual_total_price_before_discount"
+                                aria-label="actual_total_price_before_discount" hidden readonly>
                         </div>
                         <div class="mb-3">
                             <label for="tax_percentage" class="form-label">GST Inclusive (%)</label>
@@ -119,17 +133,17 @@
                         </div>
                         <div class="mb-3">
                             <label for="tax_amount" class="form-label">Tax Amount</label>
-                            <input name="tax_amount" type="number" class="form-control" id="tax_amount"
+                            <input name="tax_amount" type="text" class="form-control" id="tax_amount"
                                 aria-label="Tax Amount">
                         </div>
                         <div class="mb-3">
-                            <label for="grand_total" class="form-label">Grand Total</label>
-                            <input name="grand_total" type="number" class="form-control" id="grand_total"
+                            <label for="grand_total" class="form-label">Grand Total Amount</label>
+                            <input name="grand_total" type="text" class="form-control" id="grand_total"
                                 aria-label="Grand Total" required readonly>
                         </div>
                         <div class="mb-3">
                             <label for="amount_paid" class="form-label">Amount Payed</label>
-                            <input name="amount_paid" type="number" class="form-control" id="amount_paid"
+                            <input name="amount_paid" type="text" class="form-control" id="amount_paid"
                                 aria-label="Amount Paid">
                         </div>
                         <div class="mb-3">
@@ -189,8 +203,101 @@
 
 {% endblock content %}
 
+<style>
+    /* Style for suggestion dropdown */
+    #customer-suggestions.show {
+        display: block;
+    }
+    #customer-suggestions {
+        cursor: pointer;
+        z-index: 1050;
+    }
+    #customer-suggestions .dropdown-item.active, #customer-suggestions .dropdown-item:hover {
+        background-color: #f8f9fa;
+        color: #212529;
+    }
+</style>
+
 <!-- Specific Page JS goes HERE  -->
 {% block javascripts %}
+
+<script>
+$(function() {
+    var $input = $('#customer');
+    var $suggestions = $('#customer-suggestions');
+    var typingTimer;
+    var lastResults = [];
+
+    $input.on('input', function() {
+        clearTimeout(typingTimer);
+        var query = $(this).val();
+        if (query.length < 2) {
+            $suggestions.removeClass('show').empty();
+            return;
+        }
+        typingTimer = setTimeout(function() {
+            $.ajax({
+                url: '/transactions/customers/',
+                data: { q: query },
+                dataType: 'json',
+                success: function(data) {
+                    lastResults = data.results || [];
+                    if (lastResults.length === 0) {
+                        $suggestions.html('<span class="dropdown-item disabled">No matches found</span>').addClass('show');
+                        return;
+                    }
+                    var html = lastResults.map(function(item, idx) {
+                        return '<span class="dropdown-item" data-idx="'+idx+'">'+item.text+'</span>';
+                    }).join('');
+                    $suggestions.html(html).addClass('show');
+                },
+                error: function() {
+                    $suggestions.html('<span class="dropdown-item disabled">Error fetching suggestions</span>').addClass('show');
+                }
+            });
+        }, 250);
+    });
+
+    // Click on suggestion
+    $suggestions.on('click', '.dropdown-item:not(.disabled)', function() {
+        var idx = $(this).data('idx');
+        if (lastResults[idx]) {
+            var item = lastResults[idx];
+            var fullName = (item.first_name && item.last_name) ? (item.first_name + ' ' + item.last_name) : item.text;
+            $input.val(fullName);
+            $suggestions.removeClass('show').empty();
+        }
+    });
+
+    // Hide suggestions on blur (with slight delay for click)
+    $input.on('blur', function() {
+        setTimeout(function() { $suggestions.removeClass('show').empty(); }, 200);
+    });
+
+    // Keyboard navigation
+    $input.on('keydown', function(e) {
+        var $items = $suggestions.find('.dropdown-item:not(.disabled)');
+        var $active = $items.filter('.active');
+        if (!$suggestions.hasClass('show') || !$items.length) return;
+        if (e.key === 'ArrowDown') {
+            e.preventDefault();
+            var idx = $items.index($active);
+            $active.removeClass('active');
+            $items.eq((idx+1)%$items.length).addClass('active');
+        } else if (e.key === 'ArrowUp') {
+            e.preventDefault();
+            var idx = $items.index($active);
+            $active.removeClass('active');
+            $items.eq((idx-1+$items.length)%$items.length).addClass('active');
+        } else if (e.key === 'Enter') {
+            if ($active.length) {
+                $active.click();
+                e.preventDefault();
+            }
+        }
+    });
+});
+</script>
 <!-- Datatables -->
 
 <script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js" defer></script>
@@ -206,6 +313,117 @@
 <!-- Sweet Alert -->
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.6.15/dist/sweetalert2.all.min.js" defer></script>
 
+
+<script>
+    function customerSearchSuggestions() {
+        const searchBox = document.getElementById('customer_searchbox');
+        const suggestionsBox = document.getElementById('customer_suggestions');
+        const hiddenField = document.getElementById('customer_id');
+        const customerModal = new bootstrap.Modal(document.getElementById('customerModal'));
+
+        searchBox.addEventListener('input', function () {
+            const query = searchBox.value;
+            if (query.length >= 2) {
+                fetch(`/search-customer/?q=${query}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        suggestionsBox.innerHTML = '';
+                        if (data.results && data.results.length > 0) {
+                            data.results.forEach(suggestion => {
+                                const item = document.createElement('a');
+                                item.href = 'javascript:void(0);';
+                                item.classList.add('list-group-item', 'list-group-item-action');
+                                item.textContent = suggestion.text;
+
+                                item.addEventListener('click', function () {
+                                    searchBox.value = suggestion.text;
+                                    hiddenField.value = suggestion.id;
+                                    suggestionsBox.innerHTML = '';
+                                });
+
+                                suggestionsBox.appendChild(item);
+                            });
+                        } else {
+                            const noItem = document.createElement('a');
+                            noItem.classList.add('list-group-item', 'list-group-item-action', 'text-danger');
+                            noItem.textContent = 'No customer found. Click to add.';
+                            noItem.style.cursor = 'pointer';
+                            noItem.addEventListener('click', function () {
+                                // Show the modal instead of redirecting
+                                customerModal.show();
+                                // Pre-fill the name if it exists in the search box
+                                const searchValue = searchBox.value.trim();
+                                if (searchValue) {
+                                    const names = searchValue.split(' ');
+                                    document.querySelector('#customerModal input[name="first_name"]').value = names[0] || '';
+                                    document.querySelector('#customerModal input[name="last_name"]').value = names.slice(1).join(' ') || '';
+                                }
+                            });
+                            suggestionsBox.appendChild(noItem);
+                        }
+                    })
+                    .catch(err => {
+                        console.error('Error fetching customer suggestions:', err);
+                    });
+            } else {
+                suggestionsBox.innerHTML = '';
+                hiddenField.value = '';
+            }
+        });
+
+        // Handle customer form submission
+        document.getElementById('createCustomerForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const formData = new FormData(this);
+            
+            // Add CSRF token
+            const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+            
+            fetch("{% url 'create_customer_ajax' %}", {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': csrfToken
+                },
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Update the customer search box and hidden field with new customer data
+                    searchBox.value = data.customer.full_name;
+                    hiddenField.value = data.customer.id;
+                    
+                    // Close the modal and clear the form
+                    customerModal.hide();
+                    document.getElementById('createCustomerForm').reset();
+                    
+                    // Clear suggestions box
+                    suggestionsBox.innerHTML = '';
+                    
+                    // Show success message
+                    const alertDiv = document.createElement('div');
+                    alertDiv.className = 'alert alert-success';
+                    alertDiv.textContent = 'Customer created successfully!';
+                    document.querySelector('.card-body').insertBefore(alertDiv, document.querySelector('form'));
+                    
+                    // Remove alert after 3 seconds
+                    setTimeout(() => alertDiv.remove(), 3000);
+                } else {
+                    // Show error message
+                    alert(data.error || 'Error creating customer');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Error creating customer');
+            });
+        });
+    }
+
+// Call it
+customerSearchSuggestions();
+
+</script>
 
 <script>
     $('#createCustomerForm').on('submit', function(e) {
@@ -227,46 +445,11 @@
             }
         });
     });
-    </script>
+</script>
     
 
 <script>
-    $(document).ready(function () {
-        $('#customer').select2({
-            placeholder: 'Search or create customer',
-            ajax: {
-                url: '/transactions/customers/',  // <-- Your AJAX endpoint
-                dataType: 'json',
-                delay: 250,
-                data: function (params) {
-                    return { q: params.term };
-                },
-                processResults: function (data) {
-                    return {
-                        results: data.results
-                    };
-                },
-                cache: true
-            },
-            tags: true,
-            createTag: function (params) {
-                return {
-                    id: 'new:' + params.term,
-                    text: 'Create new customer: "' + params.term + '"',
-                    isNew: true
-                };
-            }
-        });
-
-        $('#customer').on('select2:select', function (e) {
-            var data = e.params.data;
-            if (data.id.startsWith('new:')) {
-                let name = data.text.replace('Create new customer: "', '').replace('"', '');
-                $('#customerModal input[name="first_name"]').val(name);
-                $('#customerModal').modal('show');
-            }
-        });
-    });
+    // Removed Select2 initialization for #customer since it is now a plain text input
 </script>
 
 
@@ -322,33 +505,59 @@
             tax_percentage: 0.00,
             amount_payed: 0.00,
             amount_change: 0.00,
+            discount_amount: 0.00,
             items: []
         },
         calculate_sale: function () {
             // Subtotal of all items added
             var sub_total = 0.00;
+            var total_discount_amount = 0.00;
+            var actual_total_price_before_discount = 0.00;
 
             var tax_percentage = parseFloat($('#tax_percentage').val()) || 0;
+            var discount_amount = parseFloat($('#discount_amount').val()) || 0;
 
-
-            // Calculates the total for each item
+            // Calculates the total for each item using sell price minus discount
             $.each(this.products.items, function (pos, dict) {
                 dict.pos = pos;
-                dict.total_item = roundTo(dict.quantity * dict.price, 2);
-                // Add the item total to the sale subtotal
-                sub_total += roundTo(dict.total_item, 2);
+                var sellPrice = (dict.sell_price !== undefined && !isNaN(dict.sell_price)) ? parseFloat(dict.sell_price) : 0;
+                var discountAmount = (dict.discount_amount !== undefined && !isNaN(dict.discount_amount)) ? parseFloat(dict.discount_amount) : 0;
+                var quantity = dict.quantity || 0;
+                // Calculate and accumulate the actual total price before discount (raw sell price * quantity)
+                actual_total_price_before_discount += quantity * sellPrice;
+                var totalAfterDiscount = roundTo(quantity * (sellPrice - discountAmount), 2);
+                dict.total_item = totalAfterDiscount;
+                // Add the item total after discount to the sale subtotal
+                sub_total += totalAfterDiscount;
+                // Add per-item discount to total_discount_amount
+                total_discount_amount += discountAmount * quantity;
             });
 
-            // Update the sale subtotal, grand total, and tax amount
-            this.products.sub_total = roundTo(sub_total, 2);
-            this.products.grand_total = roundTo(this.products.sub_total, 2);
-            this.products.tax_amount = roundTo(this.products.sub_total * (tax_percentage / 100), 2);
+            // Update the actual_total_price_before_discount field (hidden input)
+            $('#actual_total_price_before_discount').val(roundTo(actual_total_price_before_discount, 2));
 
+            // Update the total discount amount field
+            $('#total_discount_amount').val(roundTo(total_discount_amount, 2));
+
+            // Update the sale subtotal
+            this.products.sub_total = roundTo(sub_total, 2);
             $('input[name="sub_total"]').val(this.products.sub_total);
+
+            // Apply extra/overall discount to subtotal
+            var discounted_subtotal = this.products.sub_total - discount_amount;
+            if (discounted_subtotal < 0) discounted_subtotal = 0;
+            this.products.discount_amount = discount_amount;
+            $('input[name="discount_amount"]').val(this.products.discount_amount);
+
+            this.products.sub_total = roundTo(discounted_subtotal, 2);
+            $('input[name="sub_total"]').val(this.products.sub_total);
+
+            // Calculate tax on discounted subtotal
+            this.products.tax_amount = roundTo(discounted_subtotal * (tax_percentage / 100), 2);
             $('input[name="tax_amount"]').val(this.products.tax_amount);
 
-            // Grand total = subtotal + tax
-            this.products.grand_total = roundTo(this.products.sub_total + this.products.tax_amount, 2);
+            // Grand total = discounted subtotal + tax
+            this.products.grand_total = roundTo(discounted_subtotal + this.products.tax_amount, 2);
             $('input[name="grand_total"]').val(this.products.grand_total);
 
             // Auto-fill Amount Payed = Grand Total
@@ -377,8 +586,13 @@
             const tbody = $('#table_items tbody');
             tbody.empty();
 
+
             this.products.items.forEach((item, index) => {
-                const total = (item.price * item.quantity).toFixed(2);
+                const sellPrice = (item.sell_price !== undefined && !isNaN(item.sell_price)) ? parseFloat(item.sell_price) : 0;
+                const discountAmount = (item.discount_amount !== undefined && !isNaN(item.discount_amount)) ? parseFloat(item.discount_amount) : 0;
+                const quantity = item.quantity || 0;
+                const totalAfterDiscount = ((sellPrice - discountAmount) * quantity).toFixed(2);
+
                 const row = `
                     <tr>
                         <td>${index + 1}</td>
@@ -390,8 +604,22 @@
                             </ul>
                         </td>
                         <td>${item.price}</td>
+                        <td>
+                            <input type="text" 
+                                    class="form-control input-sell-price" 
+                                    style="width: 120px;" 
+                                    data-index="${index}" 
+                                    value="${item.sell_price !== undefined ? item.sell_price : ''}">
+                        </td>
+                        <td>
+                            <input type="text" 
+                                    class="form-control input-discount-amount" 
+                                    style="width: 120px;" 
+                                    data-index="${index}" 
+                                    value="${item.discount_amount !== undefined ? item.discount_amount : ''}">
+                        </td>
                         <td>${item.quantity}</td>
-                        <td class="text-end">${total} RS</td>
+                        <td class="text-end total-sell-price" data-index="${index}">${totalAfterDiscount} RS</td>
                         <td class="text-center">
                             <button type="button" class="btn btn-sm btn-danger btn-delete" data-index="${index}">
                                 <i class="fas fa-trash-alt"></i>
@@ -401,6 +629,23 @@
                 `;
                 tbody.append(row);
             });
+
+        // Handle sell price or discount amount input change
+        $('#table_items tbody').off('input', '.input-sell-price');
+        $('#table_items tbody').off('input', '.input-discount-amount');
+        $('#table_items tbody').on('input', '.input-sell-price, .input-discount-amount', function () {
+            const index = $(this).data('index');
+            const sellPrice = parseFloat($(`.input-sell-price[data-index="${index}"]`).val()) || 0;
+            const discountAmount = parseFloat($(`.input-discount-amount[data-index="${index}"]`).val()) || 0;
+            sale.products.items[index].sell_price = sellPrice;
+            sale.products.items[index].discount_amount = discountAmount;
+            // Update the total cell for this row
+            const quantity = sale.products.items[index].quantity || 0;
+            const totalAfterDiscount = ((sellPrice - discountAmount) * quantity).toFixed(2);
+            $(`.total-sell-price[data-index="${index}"]`).text(`${totalAfterDiscount} RS`);
+            // Recalculate overall totals
+            sale.calculate_sale();
+        });
         }
     };
 
@@ -408,6 +653,9 @@
     $(document).ready(function () {
         // Tax percentage touchspin
         $('#tax_percentage').on('change', function () {
+            sale.calculate_sale();
+        });
+        $('#discount_amount').on('change', function () {
             sale.calculate_sale();
         });
 
@@ -439,57 +687,88 @@
             sale.products.customer = data.id;
         });
 
-        // Select2 items searchbox
-        // Select2 for item search
-        $('#searchbox_items').select2({
-            theme: "bootstrap4",
-            placeholder: "Enter Product Serial Number",
-            allowClear: true,
-            minimumInputLength: 1,
-            ajax: {
-                url: "{% url 'get_items' %}",  // Make sure this URL is correct
-                type: 'POST',
-                dataType: 'json',
-                delay: 250,
-                data: function (params) {
-                    return {
-                        term: params.term,
-                        csrfmiddlewaretoken: $('input[name="csrfmiddlewaretoken"]').val()
-                    };
-                },
-                processResults: function (data) {
-                    if (data.error) {
-                        return { results: [] };
-                    }
+        // Autocomplete for item serial number
+        var itemTypingTimer;
+        var $itemInput = $('#searchbox_items');
+        var $itemSuggestions = $('#item_suggestions');
+        var lastItemResults = [];
 
-                    return {
-                        results: $.map(data, function (item) {
-                            return {
-                                id: item.id,
-                                name: item.name,
-                                serial_no: item.serial_no,
-                                description: item.description,
-                                unit_price: item.price,
-                                quantity: item.quantity,
-                                price: item.price
-                            };
-                        })
-                    };
-                }
-            },
-            templateResult: template_item_searchbox,
-            templateSelection: function (repo) {
-                return repo.name || repo.text;
-            },
-            escapeMarkup: function (markup) {
-                return markup;
+        $itemInput.on('input', function() {
+            clearTimeout(itemTypingTimer);
+            var query = $(this).val().trim();
+            if (query.length < 2) {
+                $itemSuggestions.empty().hide();
+                return;
             }
-        }).on('select2:select', function (e) {
-            var data = e.params.data;
-            data.price = parseFloat(data.price);
-            data.quantity = 1;
-            sale.add_item(data);
-            $(this).val(null).trigger('change'); // clear the search box
+            itemTypingTimer = setTimeout(function() {
+                var csrfToken = $('input[name="csrfmiddlewaretoken"]').val();
+                $.ajax({
+                    url: "{% url 'get_items' %}",
+                    type: 'POST',
+                    dataType: 'json',
+                    data: {
+                        term: query,
+                        csrfmiddlewaretoken: csrfToken
+                    },
+                    success: function(data) {
+                        lastItemResults = data || [];
+                        if (lastItemResults.length === 0) {
+                            $itemSuggestions.html('<div class="list-group-item disabled">No items found</div>').show();
+                            return;
+                        }
+                        var html = lastItemResults.map(function(item, idx) {
+                            return '<a href="#" class="list-group-item list-group-item-action" data-idx="'+idx+'">' +
+                                item.name + ' (' + item.serial_no + ') - ' + item.description + '</a>';
+                        }).join('');
+                        $itemSuggestions.html(html).show();
+                    },
+                    error: function() {
+                        $itemSuggestions.html('<div class="list-group-item disabled">Error fetching items</div>').show();
+                    }
+                });
+            }, 250);
+        });
+
+        // Click on suggestion
+        $itemSuggestions.on('click', '.list-group-item-action:not(.disabled)', function(e) {
+            e.preventDefault();
+            var idx = $(this).data('idx');
+            if (lastItemResults[idx]) {
+                var item = lastItemResults[idx];
+                item.price = parseFloat(item.price);
+                item.quantity = 1;
+                sale.add_item(item);
+                $itemInput.val("");
+                $itemSuggestions.empty().hide();
+            }
+        });
+
+        // Hide suggestions on blur (with slight delay for click)
+        $itemInput.on('blur', function() {
+            setTimeout(function() { $itemSuggestions.empty().hide(); }, 200);
+        });
+
+        // Keyboard navigation for suggestions
+        $itemInput.on('keydown', function(e) {
+            var $items = $itemSuggestions.find('.list-group-item-action:not(.disabled)');
+            var $active = $items.filter('.active');
+            if (!$itemSuggestions.is(':visible') || !$items.length) return;
+            if (e.key === 'ArrowDown') {
+                e.preventDefault();
+                var idx = $items.index($active);
+                $active.removeClass('active');
+                $items.eq((idx+1)%$items.length).addClass('active');
+            } else if (e.key === 'ArrowUp') {
+                e.preventDefault();
+                var idx = $items.index($active);
+                $active.removeClass('active');
+                $items.eq((idx-1+$items.length)%$items.length).addClass('active');
+            } else if (e.key === 'Enter') {
+                if ($active.length) {
+                    $active.click();
+                    e.preventDefault();
+                }
+            }
         });
 
 
@@ -578,7 +857,7 @@
 
             // Gather sale details
             var formData = {
-                customer: $('select[name="customer"]').val(),
+                customer: $('#customer_id').val(),
                 sub_total: $('input[name="sub_total"]').val(),
                 grand_total: grandTotal,
                 tax_amount: $('input[name="tax_amount"]').val(),
@@ -587,6 +866,8 @@
                 amount_change: amountChange,
                 payment_type: $('select[name="payment_type"]').val(),
                 bank_account: $('select[name="bank_account"]').val(),  // might be null if not Bank
+                total_discount_amount: $('input[name="total_discount_amount"]').val(),
+                actual_total_price_before_discount: $('input[name="actual_total_price_before_discount"]').val(),
                 items: sale.products.items
             };
 
@@ -615,6 +896,10 @@
                 data: JSON.stringify(formData),
                 success: function (response) {
                     // Handle success response
+                    if (response.redirect) {
+                        window.location.href = response.redirect;
+                        return;
+                    }
                     sale.products.items = [];
                     sale.list_item();
                     $('form#form_sale').trigger('reset');

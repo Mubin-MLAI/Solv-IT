@@ -37,6 +37,7 @@ INSTALLED_APPS = [
     'widget_tweaks',
     'rest_framework',
     
+    
 
     'store.apps.StoreConfig',
     'accounts.apps.AccountsConfig',

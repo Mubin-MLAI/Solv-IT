@@ -6,6 +6,15 @@ from .models import Purchase,Bankaccount
 from django_select2.forms import ModelSelect2Widget
 
 
+from .models import ServiceBillItem
+
+class ServiceBillItemForm(forms.ModelForm):
+    class Meta:
+        model = ServiceBillItem
+        fields = ['customer', 'description','total_amount', 'total_tax', 'grand_total', 'item_name', 'qty', 'rate', 'amount', 'tax_percent', 'tax_amt', 'total']
+
+
+
 class BootstrapMixin(forms.ModelForm):
     """
     A mixin to add Bootstrap classes to form fields.

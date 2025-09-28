@@ -4,6 +4,8 @@ from django.conf import settings
 from django.conf.urls.static import static
 from transactions.views import search_suggestions_purchase
 
+from transactions.views import customer_create, customer_search
+
 # Local app imports
 from . import views
 from .views import (
@@ -35,14 +37,14 @@ from .views import (
     create_processor,
     get_category_items,
     operativedashboard,
-    upload_category_items,
+    upload_category_items
     
 )
 
 # URL patterns
 urlpatterns = [
-
-    
+    # Customer AJAX
+    path('create-customer-ajax/', views.create_customer_ajax, name='create_customer_ajax'),
     
     # Dashboard
     path('', views.dashboard, name='dashboard'),
@@ -180,6 +182,9 @@ urlpatterns = [
     path('operative-dashboard/', operativedashboard, name='operative-dashboard'),
     path('upload-category-items/', upload_category_items, name='upload_category_items'),
     path('search-suggestions-purchase/', search_suggestions_purchase, name='search-suggestions-purchase'),
+    path('customers/', customer_search, name='customer_search'),
+    path('customer_create11/', customer_create, name='customer_create11'),
+    path('search-customer/', views.customer_search_suggestions, name='customer_search_suggestions'),
 
 ]
 

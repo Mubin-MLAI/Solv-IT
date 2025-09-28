@@ -16,7 +16,10 @@
             </div>
             <div class="col-md-6 text-md-end mt-3 mt-md-0">
                 <a class="btn btn-success btn-sm rounded-pill me-2" href="{% url 'sale-create' %}">
-                    <i class="fa-solid fa-plus"></i> Add Sale Order
+                    <i class="fa-solid fa-plus"></i> Create Billing
+                </a>
+                <a class="btn btn-success btn-sm rounded-pill me-2" href="{% url 'service-create' %}">
+                    <i class="fa-solid fa-plus"></i> Service Billing
                 </a>
                 <a class="btn btn-primary btn-sm rounded-pill" href="{% url 'sales-export' %}">
                     <i class="fa-solid fa-download"></i> Export to Excel
@@ -26,28 +29,43 @@
     </div>
 
     <form method="get" class="row g-2 mb-3 align-items-end">
+        <!-- Status filter (Sales only) -->
         <div class="col-auto">
             <select name="status" class="form-select form-select-sm" onchange="this.form.submit()">
-                <option value="">All Status</option>
-                <option value="Paid" {% if status_filter == "Paid" %}selected{% endif %}>Paid</option>
-                <option value="Unpaid" {% if status_filter == "Unpaid" %}selected{% endif %}>Unpaid</option>
-                <option value="Balance" {% if status_filter == "Balance" %}selected{% endif %}>Balance</option>
+                <option value="" style="color:#333;">All Status / Type</option>
+                <option value="Paid" style="color:green; font-weight:bold;" {% if status_filter == "Paid" %}selected{% endif %}>Paid</option>
+                <option value="Unpaid" style="color:red; font-weight:bold;" {% if status_filter == "Unpaid" %}selected{% endif %}>Unpaid</option>
+                <option value="Balance" style="color:orange; font-weight:bold;" {% if status_filter == "Balance" %}selected{% endif %}>Balance</option>
+                <option value="Service" style="color:#0dcaf0; font-weight:bold;" {% if status_filter == "Service" %}selected{% endif %}>Service Bill Only</option>
             </select>
         </div>
+
+        <!-- Invoice number filter (both Sales & Services) -->
         <div class="col-auto">
-            <input type="text" name="inv" class="form-control form-control-sm" placeholder="Search by Inv No" value="{{ request.GET.inv }}" style="text-transform: uppercase;">
+            <input type="text" name="inv" class="form-control form-control-sm" placeholder="Search by Invoice No" value="{{ request.GET.inv }}" style="text-transform: uppercase;">
         </div>
+
+        <!-- Serial number / Item name filter (both Sales & Services) -->
         <div class="col-auto">
-            <input type="text" name="serial" class="form-control form-control-sm" placeholder="Search by Serial No" value="{{ request.GET.serial }}">
+            <input type="text" name="serial" class="form-control form-control-sm" placeholder="Search by Serial / Item Name" value="{{ request.GET.serial }}">
         </div>
+
+        <!-- Mobile / Customer phone filter (both Sales & Services) -->
+        <div class="col-auto">
+            <input type="text" name="mobileno" class="form-control form-control-sm" placeholder="Search by Mobile No" value="{{ request.GET.mobileno }}">
+        </div>
+
+        <!-- Submit button -->
         <div class="col-auto">
             <button type="submit" class="btn btn-sm btn-outline-success">Search</button>
         </div>
-        <!-- ✅ Clear All Button -->
+
+        <!-- Clear All Button -->
         <div class="col-auto">
             <a href="{% url 'saleslist' %}" class="btn btn-sm btn-outline-danger">Clear All</a>
         </div>
     </form>
+
     
     
 
@@ -58,12 +76,13 @@
             <table class="table table-bordered table-hover align-middle text-center table-sm mb-0">
                 <thead class="table-light">
                     <tr>
+                        <th>Type</th>
                         <th>Inv No</th>
                         <th>Customer</th>
-                        <th>Item Descriptions</th>
-                        <th>Serial No</th>
-                        <th>Date</th>
-                        <th>Sub Total</th>
+                        <th>Item Descriptions / Item Name</th>
+                        <th>Price</th>
+                        <th>Discount Amount</th>
+                        <th>Sell / Total Price</th>
                         <th>Tax (%)</th>
                         <th>Tax Amount</th>
                         <th>Grand Total</th>
@@ -74,51 +93,108 @@
                     </tr>
                 </thead>
                 <tbody>
-                    {% for sale in sales %}
+                    {% for record in combined_list %}
                     <tr>
-                        <td>INV{{ sale.id }}</td>
-                        <td>{{ sale.customer }}</td>
-                        <td class="text-start">
-                            {% with sale.get_item_descriptions_by_type as items %}
-                                {{ items.PROCESSOR|join:"<br>" }}<br>
-                                {{ items.RAM|join:"<br>" }}<br>
-                                {{ items.HDD|join:"<br>" }}<br>
-                                {{ items.SSD|join:"<br>" }}
-                            {% endwith %}
-                        </td>
+                        <!-- Type Badge -->
                         <td>
-                            {% for detail in sale.saledetail_set.all %}
-                                {{ detail.item.serialno }}<br>
-                                <b>({{ detail.item.name }})</b><br>
-                            {% empty %}
-                                <span class="text-muted">—</span>
-                            {% endfor %}
+                            {% if record.type_label == "Sale" %}
+                                <span class="badge bg-success">Sale</span>
+                            {% elif record.type_label == "ServiceBillItem" %}
+                                <span class="badge bg-info text-dark">Service</span>
+                            {% endif %} 
                         </td>
-                        <td>{{ sale.date_added|date:"Y-m-d" }}</td>
-                        <td>{{ sale.sub_total }}</td>
-                        <td>{{ sale.tax_percentage }}</td>
-                        <td>{{ sale.tax_amount }}</td>
-                        <td>{{ sale.grand_total }}</td>
-                        <td>{{ sale.amount_paid }}</td>
-                        <td>{{ sale.amount_change }}</td>
+
+                        <!-- Invoice Number -->
                         <td>
-                            {% if sale.status == 'Paid' %}
-                                <span class="badge bg-success">Paid</span>
-                            {% elif sale.status == 'Unpaid' %}
-                                <span class="badge bg-danger">Unpaid</span>
-                            {% elif sale.status == 'Balance' %}
-                                <span class="badge bg-warning text-dark">Balance</span>
+                            {% if record.type_label == "Sale" %}
+                                INV{{ record.id }}
+                            {% else %}
+                                SVC{{ record.id }}
                             {% endif %}
                         </td>
+
+                        <!-- Customer -->
+                        <td>{{ record.customer.first_name }}</td>
+
+                        <!-- Item Descriptions -->
+                        <td class="text-start align-top">
+                            {% if record.type_label == "Sale" %}
+                                {% for detail in record.saledetail_set.all %}
+                                    <div style="margin-bottom:12px; border-bottom:1px dashed #ccc; padding-bottom:8px;">
+                                        <b>{{ detail.item.serialno }}</b> ({{ detail.item.name }})<br>
+                                        <span class="text-muted small">Date: {{ detail.sale.date_added|date:"Y-m-d" }}</span><br>
+                                        <span>{{ detail.description|safe }}</span>
+                                    </div>
+                                {% empty %}
+                                    <span class="text-muted">—</span>
+                                {% endfor %}
+                            {% elif record.type_label    == 'ServiceBillItem' %}
+                                <b>{{ record.item_name }}</b><br>
+                                <span>{{ record.description|safe }}</span>
+                            {% endif %}
+                        </td>
+
+                        <!-- Prices / Totals -->
                         <td>
-                            <a class="btn btn-outline-info btn-sm" href="{% url 'sale-detail' sale.id %}">
-                                <i class="fa-solid fa-eye"></i> View Bill
-                            </a>
+                            {% if record.type_label  == 'Sale' %}₹ {{ record.actual_total_price_before_discount }}
+                            {% else %}₹ {{ record.total_amount }}{% endif %}
+                        </td>
+                        <td>
+                            {% if record.type_label  == 'Sale' %}-₹ {{ record.total_discount_amount }}{% else %} NA {% endif %}
+                        </td>
+                        <td>
+                            {% if record.type_label  == 'Sale' %}₹ {{ record.sub_total }}
+                            {% else %}₹ {{ record.total }}{% endif %}
+                        </td>
+                        <td>
+                            {% if record.type_label  == 'Sale' %}{{ record.tax_percentage }}%
+                            {% else %}{{ record.tax_percent }}%{% endif %}
+                        </td>
+                        <td>
+                            {% if record.type_label  == 'Sale' %}₹ {{ record.tax_amount }}
+                            {% else %}₹ {{ record.tax_amt }}{% endif %}
+                        </td>
+                        <td>₹ {{ record.grand_total|default:"-" }}</td>
+                        <td>
+                            {% if record.type_label  == 'Sale' %}₹ {{ record.amount_paid }}
+                            {% else %} NA {{ record.amount_paid }}{% endif %}
+                        </td>
+                        <td>
+                            {% if record.type_label  == 'Sale' %}₹ {{ record.amount_change }}
+                            {% else %} NA {{ record.amount_change }}{% endif %}
+                        </td>
+
+                        <!-- Status (Sales only) -->
+                        <td>
+                            {% if record.type_label  == 'Sale' %}
+                                {% if record.status == 'Paid' %}
+                                    <span class="badge bg-success">Paid</span>
+                                {% elif record.status == 'Unpaid' %}
+                                    <span class="badge bg-danger">Unpaid</span>
+                                {% elif record.status == 'Balance' %}
+                                    <span class="badge bg-warning text-dark">Balance</span>
+                                {% endif %}
+                            {% else %}
+                                <span class="badge bg-info text-dark ">Paid</span>
+                            {% endif %}
+                        </td>
+
+                        <!-- Actions -->
+                        <td>
+                            {% if record.type_label  == 'Sale' %}
+                                <a class="btn btn-outline-info btn-sm" href="{% url 'sale-detail' record.id %}">
+                                    <i class="fa-solid fa-eye"></i> View Sales Bill
+                                </a>
+                            {% elif record.type_label    == 'ServiceBillItem' %}
+                                <a class="btn btn-outline-info btn-sm" href="{% url 'servicebill_invoice' record.id %}">
+                                    <i class="fa-solid fa-eye"></i> View Service Bill
+                                </a>
+                            {% endif %}
                         </td>
                     </tr>
                     {% empty %}
                     <tr>
-                        <td colspan="12" class="text-center text-muted">No sales records found.</td>
+                        <td colspan="14" class="text-center text-muted">No records found.</td>
                     </tr>
                     {% endfor %}
                 </tbody>
@@ -128,12 +204,14 @@
 
     <!-- Pagination -->
     {% if is_paginated %}
+    {% with request.GET.urlencode as current_query %}
+    {% with current_query|cut:'page=' as query_without_page %}
     <div class="d-flex justify-content-center mt-4">
         <nav aria-label="Page navigation">
             <ul class="pagination pagination-sm">
                 {% if page_obj.has_previous %}
                 <li class="page-item">
-                    <a class="page-link" href="?page={{ page_obj.previous_page_number }}" aria-label="Previous">
+                    <a class="page-link" href="?{{ query_without_page }}&page={{ page_obj.previous_page_number }}" aria-label="Previous">
                         <span aria-hidden="true">&laquo;</span>
                     </a>
                 </li>
@@ -146,12 +224,12 @@
                     {% if page_obj.number == i %}
                         <li class="page-item active"><span class="page-link">{{ i }}</span></li>
                     {% else %}
-                        <li class="page-item"><a class="page-link" href="?page={{ i }}">{{ i }}</a></li>
+                        <li class="page-item"><a class="page-link" href="?{{ query_without_page }}&page={{ i }}">{{ i }}</a></li>
                     {% endif %}
                 {% endfor %}
                 {% if page_obj.has_next %}
                 <li class="page-item">
-                    <a class="page-link" href="?page={{ page_obj.next_page_number }}" aria-label="Next">
+                    <a class="page-link" href="?{{ query_without_page }}&page={{ page_obj.next_page_number }}" aria-label="Next">
                         <span aria-hidden="true">&raquo;</span>
                     </a>
                 </li>
@@ -163,6 +241,8 @@
             </ul>
         </nav>
     </div>
+    {% endwith %}
+    {% endwith %}
     {% endif %}
 </div>
 {% endblock content %}

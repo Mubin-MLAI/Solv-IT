@@ -1,3 +1,4 @@
+
 from decimal import Decimal
 from django.db import models
 from django.forms import model_to_dict
@@ -9,6 +10,9 @@ from accounts.models import Vendor, Customer
 from django.contrib.auth.models import User
 from django.utils import timezone
 
+# Import Expense model
+from .models_expense import Expense
+
 DELIVERY_CHOICES = [("P", "Pending"), ("S", "Successful")]
 
 
@@ -18,7 +22,7 @@ class Bankaccount(models.Model):
     opening_balance = models.DecimalField(
         max_digits=10,
         decimal_places=2,
-        default=0.0)
+        default=Decimal('0.0'))
     as_of_date = models.DateTimeField(
         blank=True, null=True, verbose_name="Created Date"
     )
@@ -30,19 +34,31 @@ class Bankaccount(models.Model):
     def __str__(self):
         return f"{self.account_name} - opening_balance: {self.opening_balance or 'N/A'}, as_of_date: {self.as_of_date}"
 
+# Model for manual service billing items
+class ServiceItem(models.Model):
+    name = models.CharField(max_length=255)
+    description = models.TextField()
+    price = models.DecimalField(max_digits=10, decimal_places=2)
+    discount_amount = models.DecimalField(max_digits=10, decimal_places=2, default=Decimal('0.0'))
+    quantity = models.PositiveIntegerField(default=1)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.name} (x{self.quantity})"
+
 class BankTransaction(models.Model):
     TRANSACTION_TYPES = [
         ('credit', 'Credit'),   # Money In
         ('debit', 'Debit'),     # Money Out
     ]
 
-    bank_account = models.ForeignKey(Bankaccount, on_delete=models.CASCADE)
+    bank_account = models.ForeignKey(Bankaccount, on_delete=models.CASCADE, null=True, blank=True,)
     sale = models.ForeignKey('Sale', null=True, blank=True, on_delete=models.SET_NULL)
     purchase = models.ForeignKey('Purchase', null=True, blank=True, on_delete=models.SET_NULL)
-    transaction_type = models.CharField(max_length=10, choices=TRANSACTION_TYPES)
-    amount = models.DecimalField(max_digits=10, decimal_places=2)
-    transaction_date = models.DateTimeField(auto_now_add=True)
-    note = models.CharField(max_length=255, blank=True)
+    transaction_type = models.CharField(max_length=10, choices=TRANSACTION_TYPES, null=True, blank=True,)
+    amount = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    transaction_date = models.DateTimeField(auto_now_add=True, null=True, blank=True,)
+    note = models.CharField(max_length=255, null=True, blank=True,)
 
     def __str__(self):
         return f"{self.transaction_type.title()} of {self.amount} on {self.transaction_date} id is {self.id}"
@@ -88,28 +104,28 @@ class Sale(models.Model):
     sub_total = models.DecimalField(
         max_digits=10,
         decimal_places=2,
-        default=0.0
+        default=Decimal('0.0')
     )
     grand_total = models.DecimalField(
         max_digits=10,
         decimal_places=2,
-        default=0.0
+        default=Decimal('0.0')
     )
     tax_amount = models.DecimalField(
         max_digits=10,
         decimal_places=2,
-        default=0.0
+        default=Decimal('0.0')
     )
     tax_percentage = models.FloatField(default=0)
     amount_paid = models.DecimalField(
         max_digits=10,
         decimal_places=2,
-        default=0.0
+        default=Decimal('0.0')
     )
     amount_change = models.DecimalField(
         max_digits=10,
         decimal_places=2,
-        default=0.0
+        default=Decimal('0.0')
     )
     bank_account = models.ForeignKey(Bankaccount,
     on_delete=models.SET_NULL,
@@ -126,6 +142,16 @@ class Sale(models.Model):
     max_length=10,
     choices=STATUS_CHOICES,
     default='Unpaid'
+    )
+    total_discount_amount = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        default=Decimal('0.0')
+    )
+    actual_total_price_before_discount = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        default=Decimal('0.0')
     )
 
 
@@ -201,6 +227,11 @@ class Sale(models.Model):
                     elif "SSD:" in part:
                         grouped["SSD"].append(part.strip())
         return grouped
+    
+
+    @property
+    def type_label(self):
+        return "Sale"
 
 
 class SaleDetail(models.Model):
@@ -225,9 +256,26 @@ class SaleDetail(models.Model):
     )
     quantity = models.PositiveIntegerField()
     total_detail = models.DecimalField(max_digits=10, decimal_places=2)
+    discount_amount = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        default=0.0
+    )
+    gst_amount = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        default=0.0
+    )
 
     # ✅ Add this field
     description = models.TextField(blank=True, null=True)
+
+    sell_price = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        null=True, blank=True
+    )
+
 
     class Meta:
         db_table = "sale_details"
@@ -727,6 +775,32 @@ class PurchaseDetail(models.Model):
             f"Quantity: {self.quantity}"
         )
 
+class ServiceBillItem(models.Model):
+    customer = models.ForeignKey(Customer, on_delete=models.CASCADE, related_name='service_bills', null=True, blank=True)
+    date_created = models.DateTimeField(auto_now_add=True, null=True, blank=True)
+    total_amount = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    total_tax = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    grand_total = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    item_name = models.CharField(max_length=255, null=True, blank=True)
+    description = models.TextField(blank=True, null=True)
+    qty = models.PositiveIntegerField(default=1, null=True, blank=True)
+    rate = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    amount = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    tax_percent = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
+    tax_amt = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    total = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
 
+    def __str__(self):
+        """
+        Returns a string representation of the SaleDetail instance.
+        """
+        return (
+            f"Detail ID: {self.id} | "
+            f"Customer Name: {self.customer.first_name} | "
+            f"Service Name: {self.item_name}"
+        )
+    
 
-
+    @property
+    def type_label(self):
+        return "ServiceBillItem"

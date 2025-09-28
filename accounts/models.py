@@ -135,6 +135,12 @@ class Vendor(models.Model):
 
 
 class Customer(models.Model):
+    PERSON_TYPE_CHOICES = [
+        ('customer', 'Customer'),
+        ('vendor', 'Vendor'),
+    ]
+    
+    person_type = models.CharField(max_length=20, choices=PERSON_TYPE_CHOICES, default='customer')
     first_name = models.CharField(max_length=256)
     last_name = models.CharField(max_length=256, blank=True, null=True)
     address = models.TextField(max_length=256, blank=True, null=True)

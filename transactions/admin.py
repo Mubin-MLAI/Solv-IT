@@ -1,5 +1,23 @@
 from django.contrib import admin
-from .models import Sale, SaleDetail, Purchase,Bankaccount,BankTransaction, catogaryitempurchased, Itempurchased, PurchaseDetail
+from .models import Sale, SaleDetail, Purchase,Bankaccount,BankTransaction, catogaryitempurchased, Itempurchased, PurchaseDetail, Expense, ServiceItem, ServiceBillItem
+
+@admin.register(ServiceBillItem)
+class ServiceBillItemAdmin(admin.ModelAdmin):
+
+    def save_model(self, request, obj, form, change):
+        super().save_model(request, obj, form, change)
+
+@admin.register(ServiceItem)
+class ServiceItemAdmin(admin.ModelAdmin):
+
+    def save_model(self, request, obj, form, change):
+        super().save_model(request, obj, form, change)
+
+@admin.register(Expense)
+class ExpenseAdmin(admin.ModelAdmin):
+
+    def save_model(self, request, obj, form, change):
+        super().save_model(request, obj, form, change)
 
 @admin.register(PurchaseDetail)
 class PurchaseDetailAdmin(admin.ModelAdmin):

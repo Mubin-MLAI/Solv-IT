@@ -1,5 +1,6 @@
 import django_tables2 as tables
 from .models import Sale, Purchase, Bankaccount, catogaryitempurchased, Itempurchased
+from store.models import catogaryitem, Item
 
 
 class PurchasedItemTable(tables.Table):
@@ -13,7 +14,7 @@ class PurchasedItemTable(tables.Table):
     ssd_qty = tables.Column(empty_values=(), verbose_name='Ssd_Qty')
 
     def get_cat_items(self, record):
-        return catogaryitempurchased.objects.filter(serial_no=record.serialno)
+        return catogaryitem.objects.filter(serial_no=record.serialno)
 
     def render_processor(self, record):
         items = self.get_cat_items(record).filter(category='processor')
@@ -51,10 +52,10 @@ class PurchasedItemTable(tables.Table):
 
 
     class Meta:
-        model = Itempurchased
+        model = Item
         template_name = "django_tables2/semantic.html"
         fields = (
-            'id', 'name','vendor_name','purchased_code','created_date','price', 'serialno', 'make_and_models',
+            'id', 'name','customer','purchased_code','created_date','price', 'serialno', 'make_and_models',
             'processor','processor_qty', 'ram','ram_qty','hdd','hdd_qty','ssd','ssd_qty','smps_status', 'motherboard_status'
         )
         order_by_field = 'id'

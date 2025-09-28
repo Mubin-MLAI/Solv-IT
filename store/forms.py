@@ -29,8 +29,8 @@ class ItemForm(forms.ModelForm):
         model = Item
         fields = [
             'name', 'serialno', 'make_and_models',
-            'processors', 'rams', 'hdds', 'ssds', 'price', 'purchased_code'
-            # 'smps_status', 'motherboard_status', 
+            'processors', 'rams', 'hdds', 'ssds', 'price', 'purchased_code', 'note',
+            'smps_status', 'motherboard_status', 
             # 'smps_replacement_description', 'motherboard_replacement_description',
         ]
         widgets = {

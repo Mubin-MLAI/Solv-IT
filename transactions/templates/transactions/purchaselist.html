@@ -15,7 +15,6 @@
         overflow-y: auto;
         background: white;
         border: 1px solid #ccc;
-        z-index: 1050;
         display: none;
         /* Ensure it's hidden initially */
     }
@@ -39,9 +38,9 @@
             <a class="btn btn-success btn-sm rounded-pill shadow-sm" href="{% url 'purchase-create' %}">
                 <i class="fa-solid fa-plus"></i> Add Purchase
             </a>
-            <a class="btn btn-primary btn-sm rounded-pill shadow-sm" href="{% url 'purchase-order-create' %}">
+            <!-- <a class="btn btn-primary btn-sm rounded-pill shadow-sm" href="{% url 'purchase-order-create' %}">
                 <i class="fa-solid fa-plus"></i> Purchase Billing
-            </a>
+            </a> -->
             <a class="btn btn-info btn-sm rounded-pill shadow-sm" href="{% querystring '_export'='xlsx' %}">
                 <i class="fa-solid fa-download"></i> Export to Excel
             </a>
@@ -68,15 +67,11 @@
                 placeholder="Find products">
         </div>
         <div class="col-md-3">
-            <select name="vendor" id="vendor" class="form-control border-2 rounded-pill shadow-sm">
-                <option value="">-- Select Vendor --</option>
-                {% for vendor in vendors %}
-                    <option value="{{ vendor.name }}" {% if request.GET.vendor == vendor.name %}selected{% endif %}>
-                        {{ vendor.name }}
-                    </option>
-                {% endfor %}
-            </select>
-        </div>        
+            <input type="text" id="customer_searchbox" class="form-control border-2 rounded-pill shadow-sm" placeholder="Type to search customer..." autocomplete="off">
+            <div id="customer_suggestions" class="list-group position-absolute" style="z-index: 1000; min-width: 250px; max-width: 100%; background-color: #fff;"></div>
+            <input type="hidden" name="customer_id" id="customer_id">  <!-- Hidden field to submit ID -->
+        </div>       
+        
         <div class="col-md-3">
             <input name="purchased_code" id="purchased_code" type="text" class="form-control border-2 rounded-pill shadow-sm"
                 placeholder="Purchase / LOT Code" value="{{ request.GET.purchased_code }}">
@@ -124,7 +119,7 @@
                 <tr>
                     <th scope="row">{{ forloop.counter|add:page_obj.start_index|add:"-1" }}</th>
                     <td>{{ item1.name }}</td>
-                    <td><b>{{ item1.vendor_name }}</b></td>
+                    <td><b>{{ item1.customer }}</b></td>
                     <td><b>{{ item1.purchased_code }}</b></td>
                     <td>{{ item1.created_date|date:"d/m/Y"}}</td>
                     <td>{{ item1.price }}</td>
@@ -168,7 +163,7 @@
     {% endif %}
 </div>
 
-{% if is_paginated %}
+{% if is_paginated and paginator.count > 10 %}
 <nav aria-label="Page navigation">
     <ul class="pagination justify-content-center">
 
@@ -200,11 +195,7 @@
                 </li>
             {% else %}
                 <li class="page-item">
-                    <a class="page-link" href="{% if request.GET.q %}?q={{ request.GET.q }}&page={{ i }}{% else %}?page={{ i }}{% endif %}">{{ i }}</a>
-                    <a class="page-link"
-                        href="?q={{ request.GET.q }}&vendor={{ request.GET.vendor }}&code={{ request.GET.code }}&page={{ i }}">
-                    {{ i }}
-                    </a>
+                    <a class="page-link" href="?q={{ request.GET.q }}&vendor={{ request.GET.vendor }}&code={{ request.GET.code }}&page={{ i }}">{{ i }}</a>
                 </li>
             {% endif %}
         {% endfor %}
@@ -234,73 +225,141 @@
 {% endif %}
 
 
-<!-- JavaScript for Search Suggestions -->
+
+<!-- Customer Create Modal -->
+<div class="modal fade" id="customerModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <form id="createCustomerForm">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Create New Customer</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="text" name="first_name" class="form-control" placeholder="Enter First Name"><br>
+                    <input type="text" name="last_name" class="form-control" placeholder="Enter Last Name"><br>
+                    <input type="number" name="phone" class="form-control" placeholder="Enter Phone Number">
+                    <!-- Add other fields as needed -->
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-primary">Create</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+
+
 <script>
-    const searchBox = document.getElementById('searchbox1');
-    const vendorBox = document.getElementById('vendor');
-    const codeBox = document.getElementById('purchased_code');
-    const suggestionsBox = document.getElementById('suggestions1');
+    function customerSearchSuggestions() {
+        const searchBox = document.getElementById('customer_searchbox');
+        const suggestionsBox = document.getElementById('customer_suggestions');
+        const hiddenField = document.getElementById('customer_id');
+        const customerModal = new bootstrap.Modal(document.getElementById('customerModal'));
 
-    searchBox.addEventListener('input', function () {
-        const query = searchBox.value;
-        const vendor = vendorBox.value;
-        const code = codeBox.value;
+        searchBox.addEventListener('input', function () {
+            const query = searchBox.value;
+            if (query.length >= 2) {
+                fetch(`/search-customer/?q=${query}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        suggestionsBox.innerHTML = '';
+                        if (data.suggestions.length > 0) {
+                            data.suggestions.forEach(suggestion => {
+                                const item = document.createElement('a');
+                                item.href = 'javascript:void(0);';
+                                item.classList.add('list-group-item', 'list-group-item-action');
+                                item.textContent = suggestion.name;
 
-        if (query.length >= 2) {
-            const params = new URLSearchParams({
-                q: query,
-                vendor: vendor,
-                purchased_code: code
-            });
+                                item.addEventListener('click', function () {
+                                    searchBox.value = suggestion.name;
+                                    hiddenField.value = suggestion.id;
+                                    suggestionsBox.innerHTML = '';
+                                });
 
-            fetch(`/search-suggestions-purchase/?${params}`)
-                .then(response => response.json())
-                .then(data => {
-                    suggestionsBox.innerHTML = '';
-                    if (data.suggestions.length > 0) {
-                        data.suggestions.forEach(suggestion => {
-                            const item = document.createElement('a');
-                            item.href = "javascript:void(0);";
-                            item.classList.add('list-group-item', 'list-group-item-action');
-                            item.textContent = suggestion;
-                            item.addEventListener('click', function () {
-                                searchBox.value = suggestion;
-                                suggestionsBox.innerHTML = '';
+                                suggestionsBox.appendChild(item);
                             });
-                            suggestionsBox.appendChild(item);
-                        });
-                    } else {
-                        const noResultsItem = document.createElement('a');
-                        noResultsItem.classList.add('list-group-item', 'list-group-item-action', 'text-danger');
-                        noResultsItem.textContent = 'No suggestions found! Click here to add item';
-                        noResultsItem.style.cursor = 'pointer';
-                        noResultsItem.addEventListener('click', function () {
-                            window.location.href = "{% url 'purchase-create' %}";
-                        });
-                        suggestionsBox.appendChild(noResultsItem);
-                    }
-                })
-                .catch(error => console.error('Error fetching suggestions:', error));
-        } else {
-            suggestionsBox.innerHTML = '';
-        }
-    });
-    
+                        } else {
+                            const noItem = document.createElement('a');
+                            noItem.classList.add('list-group-item', 'list-group-item-action', 'text-danger');
+                            noItem.textContent = 'No customer found. Click to add.';
+                            noItem.style.cursor = 'pointer';
+                            noItem.addEventListener('click', function () {
+                                // Show the modal instead of redirecting
+                                customerModal.show();
+                                // Pre-fill the name if it exists in the search box
+                                const searchValue = searchBox.value.trim();
+                                if (searchValue) {
+                                    const names = searchValue.split(' ');
+                                    document.querySelector('#customerModal input[name="first_name"]').value = names[0] || '';
+                                    document.querySelector('#customerModal input[name="last_name"]').value = names.slice(1).join(' ') || '';
+                                }
+                            });
+                            suggestionsBox.appendChild(noItem);
+                        }
+                    })
+                    .catch(err => {
+                        console.error('Error fetching customer suggestions:', err);
+                    });
+            } else {
+                suggestionsBox.innerHTML = '';
+                hiddenField.value = '';
+            }
+        });
 
+        // Handle customer form submission
+        document.getElementById('createCustomerForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const formData = new FormData(this);
+            
+            // Add CSRF token
+            const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+            
+            fetch("{% url 'create_customer_ajax' %}", {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': csrfToken
+                },
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Update the customer search box and hidden field with new customer data
+                    searchBox.value = data.customer.full_name;
+                    hiddenField.value = data.customer.id;
+                    
+                    // Close the modal and clear the form
+                    customerModal.hide();
+                    document.getElementById('createCustomerForm').reset();
+                    
+                    // Clear suggestions box
+                    suggestionsBox.innerHTML = '';
+                    
+                    // Show success message
+                    const alertDiv = document.createElement('div');
+                    alertDiv.className = 'alert alert-success';
+                    alertDiv.textContent = 'Customer created successfully!';
+                    document.querySelector('.card-body').insertBefore(alertDiv, document.querySelector('form'));
+                    
+                    // Remove alert after 3 seconds
+                    setTimeout(() => alertDiv.remove(), 3000);
+                } else {
+                    // Show error message
+                    alert(data.error || 'Error creating customer');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Error creating customer');
+            });
+        });
+    }
 
-    // Hide suggestions when clicking outside the input
-    document.addEventListener('click', function (event) {
-        if (!searchBox.contains(event.target) && !suggestionsBox.contains(event.target)) {
-            suggestionsBox.innerHTML = '';
-        }
-    });
+// Call it
+customerSearchSuggestions();
 
-    // Handle the clearing of the search input
-    clearButton.addEventListener('click', function () {
-        // Clear the search box and submit the form to show all items
-        searchBox.value = '';
-        searchForm.submit(); // Submit the form to refresh the page
-    });
 </script>
 
 {% endblock content %}
