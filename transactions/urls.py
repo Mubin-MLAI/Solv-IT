@@ -68,7 +68,7 @@ urlpatterns = [
     path('new-service/', ServiceCreateView.as_view(), name='service-create'),
     # path('service-bill/',ServiceBillCreateView.as_view(), name='service-bill-create'),
     path('servicebill/create/', ServiceBillCreateView.as_view(), name='servicebill_create'),
-    path('servicebill/<int:pk>/', ServiceBillInvoiceView.as_view(), name='servicebill_invoice'),
+    path('servicebill/<int:pk>/invoice/', ServiceBillInvoiceView.as_view(), name='servicebill_invoice'),
 ]
 
 

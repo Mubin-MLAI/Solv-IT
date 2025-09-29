@@ -90,7 +90,31 @@
                 </div>
             </div>
         </div>
-
+        
+        
+        <div class="form-group form-control mt-3">
+        <div class="form-group form-control mt-3">
+            <label for="amount_paid" class="form-label">Amount Paid</label>
+            <input name="amount_paid" id="amount_paid" type="number" class="form-control" min="0" step="0.01" placeholder="Enter amount paid">
+        </div>
+        <div class="form-group form-control mt-3">
+            <label for="payment_type" class="form-label">Payment Type</label>
+            <select name="payment_type" id="payment_type" class="form-control">
+                <option value="Cash">Cash</option>
+                <option value="Cheque">Cheque</option>
+                <option value="Bank">Bank</option>
+            </select>
+        </div>
+        <div id="bank_account_group" class="form-group form-control mt-3" style="display: none;">
+            <label for="bank_account" class="form-label">Bank Account</label>
+            <select name="bank_account" id="bank_account" class="form-control">
+                {% for acc in bank_accounts %}
+                    {% if acc.account_name %}
+                        <option value="{{ acc.id }}">{{ acc.account_name }}</option>
+                    {% endif %}
+                {% endfor %}
+            </select>
+        </div>
         <button type="submit" class="btn btn-success">Submit Sale</button>
     </form>
 </div>
@@ -276,6 +300,16 @@ $(document).ready(function () {
         updateSummary();
     });
 
+    // ------------------ Payment Type Logic ------------------ //
+    $('#payment_type').on('change', function () {
+        if ($(this).val() === 'Bank') {
+            $('#bank_account_group').show();
+        } else {
+            $('#bank_account_group').hide();
+            $('#bank_account').val('');
+        }
+    });
+
     // ------------------ Form Submit ------------------ //
     $("#saleForm").submit(function (e) {
         e.preventDefault();
@@ -306,6 +340,9 @@ $(document).ready(function () {
         data['total_amount'] = $('#total_amount').val();
         data['total_tax'] = $('#total_tax').val();
         data['grand_total'] = $('#grand_total').val();
+        data['amount_paid'] = $('#amount_paid').val();
+        data['payment_type'] = $('#payment_type').val();
+        data['bank_account'] = $('#bank_account').val();
 
         $.ajax({
             url: $(this).attr('action'),

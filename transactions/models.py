@@ -790,6 +790,25 @@ class ServiceBillItem(models.Model):
     tax_amt = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
     total = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
 
+    PAYMENT_CHOICES = [
+        ('Cash', 'Cash'),
+        ('Cheque', 'Cheque'),
+        ('Bank', 'Bank'),
+    ]
+    STATUS_CHOICES = [
+        ('Paid', 'Paid'),
+        ('Unpaid', 'Unpaid'),
+        ('Balance', 'Balance'),
+    ]
+    bank_account = models.ForeignKey(Bankaccount, on_delete=models.SET_NULL, null=True, blank=True)
+    payment_type = models.CharField(max_length=10, choices=PAYMENT_CHOICES, default='Cash')
+    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='Unpaid')
+    amount_paid = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        default=Decimal('0.0')
+    )
+
     def __str__(self):
         """
         Returns a string representation of the SaleDetail instance.

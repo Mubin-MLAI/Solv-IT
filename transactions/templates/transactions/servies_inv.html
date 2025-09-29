@@ -158,6 +158,14 @@
             <th>Grand Total</th>
             <td>₹{{ servicebill.grand_total|floatformat:2 }}</td>
             </tr>
+            <tr>
+            <th>Payment Status</th>
+            <td>{{ servicebill.status }}</td>
+            </tr>
+            <tr>
+            <th>Balance</th>
+            <td>₹ {{ balance|floatformat:2 }}</td>
+            </tr>
         </tfoot>
         </table>
     </div>

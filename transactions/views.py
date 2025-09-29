@@ -230,7 +230,62 @@ def export_purchases_to_excel(request):
 
 class ServiceCreateView(View):
     def get(self, request, *args, **kwargs):
-        return render(request, 'transactions/service_create.html')
+        # Pass bank accounts for dropdown
+        context = {
+            "bank_accounts": Bankaccount.objects.all()
+        }
+        return render(request, 'transactions/service_create.html', context)
+
+    def post(self, request, *args, **kwargs):
+        data = request.POST
+        customer_id = data.get("customer_id")
+        customer = Customer.objects.get(id=customer_id)
+
+        items_json = data.get("items")
+        items = json.loads(items_json) if items_json else []
+
+        payment_type = data.get("payment_type", "Cash")
+        bank_account_id = data.get("bank_account")
+        amount_paid = data.get("amount_paid")
+        bank_account_obj = None
+        if payment_type == "Bank" and bank_account_id:
+            try:
+                bank_account_obj = Bankaccount.objects.get(id=bank_account_id)
+            except Bankaccount.DoesNotExist:
+                bank_account_obj = None
+
+        servicebill_items = []
+        for item in items:
+            sb = ServiceBillItem.objects.create(
+                customer=customer,
+                total_amount=data.get("total_amount"),
+                total_tax=data.get("total_tax"),
+                grand_total=data.get("grand_total"),
+                item_name=item.get("item_name"),
+                description=item.get("description"),
+                qty=item.get("qty"),
+                rate=item.get("rate"),
+                amount=item.get("amount"),
+                tax_percent=item.get("tax_percent"),
+                tax_amt=item.get("tax_amt"),
+                total=item.get("total"),
+                payment_type=payment_type,
+                bank_account=bank_account_obj,
+                status="Paid" if amount_paid and float(amount_paid) >= float(data.get("grand_total", 0)) else ("Unpaid" if not amount_paid or float(amount_paid) == 0 else "Balance"),
+            )
+            servicebill_items.append(sb)
+
+        # Optionally, update bank balance if payment_type is Bank
+        from decimal import Decimal
+        if payment_type == "Bank" and bank_account_obj and amount_paid:
+            bank_account_obj.opening_balance += Decimal(str(amount_paid))
+            bank_account_obj.save()
+
+        if servicebill_items:
+            redirect_url = f"/transactions/servicebill/{servicebill_items[0].pk}/invoice/"
+            return JsonResponse({"success": True, "redirect_url": redirect_url})
+        else:
+            return JsonResponse({"success": False, "error": "No items to save."})
 
 
 from django.core.paginator import Paginator
@@ -1417,6 +1472,37 @@ class ServiceBillCreateView(View):
         customer_id = data.get("customer_id")
         customer = Customer.objects.get(id=customer_id)
 
+        # ✅ Add 'payment_type' to required fields
+        # required_fields = [
+        #     'customer', 'sub_total', 'grand_total',
+        #     'amount_paid', 'amount_change', 'items', 'payment_type'
+        # ]
+
+        # for field in required_fields:
+        #     if field not in data:
+        #         raise ValueError(f"Missing required field: {field}")
+
+        # ✅ Validate bank account only if payment type is 'Bank'
+        bank_account = None
+        if data['payment_type'] == 'Bank':
+            if 'bank_account' not in data or not data['bank_account']:
+                raise ValueError("Bank account must be provided for Bank payments")
+            try:
+                bank_account = Bankaccount.objects.get(id=int(data['bank_account']))
+            except Bankaccount.DoesNotExist:
+                raise ValueError("Invalid bank account selected")
+            
+        # Calculate dynamic status
+        amount_paid = float(data["amount_paid"])
+        grand_total = float(data["grand_total"])
+
+        if amount_paid >= grand_total:
+            sale_status = 'Paid'
+        elif amount_paid == 0:
+            sale_status = 'Unpaid'
+        else:
+            sale_status = 'Balance'
+
         items_json = data.get("items")
         items = json.loads(items_json) if items_json else []
 
@@ -1435,6 +1521,11 @@ class ServiceBillCreateView(View):
                 tax_percent=item.get("tax_percent"),
                 tax_amt=item.get("tax_amt"),
                 total=item.get("total"),
+                payment_type=data.get("payment_type"),
+                bank_account=bank_account,
+                status=sale_status,
+                amount_paid=data.get("amount_paid")
+                
             )
             servicebill_items.append(sb)
 
@@ -1458,9 +1549,19 @@ class ServiceBillInvoiceView(View):
             grand_total=servicebill.grand_total
         )
 
+
+        # Calculate balance
+        try:
+            grand_total = servicebill.grand_total or 0
+            amount_paid = servicebill.amount_paid or 0
+            balance = grand_total - amount_paid
+        except Exception:
+            balance = 0
+
         context = {
-            "servicebill": servicebill,  # for header / customer details
-            "items": items,              # all items
+            "servicebill": servicebill,
+            "items": items,
+            "balance": balance,
         }
         return render(request, "transactions/servies_inv.html", context)
 
