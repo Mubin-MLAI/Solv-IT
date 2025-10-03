@@ -1,3 +1,52 @@
+from django.views.decorators.http import require_POST
+from .models import ServiceBillItem
+
+# Receive payment for ServiceBillItem
+@require_POST
+def receive_payment_service(request):
+    from .forms import PaymentForm
+    from django.shortcuts import get_object_or_404, redirect
+    from django.contrib import messages
+    form = PaymentForm(request.POST)
+    if form.is_valid():
+        servicebill = get_object_or_404(ServiceBillItem, id=form.cleaned_data['servicebill_id'])
+        received = form.cleaned_data['amount_received']
+        # Update ServiceBillItem amounts
+        servicebill.amount_paid += received
+        # Update amount_change (balance due)
+        servicebill.amount_change = max((servicebill.grand_total or 0) - (servicebill.amount_paid or 0), 0)
+        # Update status
+        if servicebill.amount_change <= 0:
+            servicebill.status = "Paid"
+        else:
+            servicebill.status = "Balance"
+        servicebill.save()
+        messages.success(request, f"Payment of ₹{received:.2f} received for service bill #{servicebill.id}.")
+    else:
+        messages.error(request, "Invalid payment data submitted.")
+    return redirect('cashbanklist')
+from django.views.decorators.http import require_GET
+
+# API endpoint to get balance for a ServiceBillItem
+@require_GET
+def service_balance_api(request):
+    servicebill_id = request.GET.get('servicebill_id')
+    if not servicebill_id:
+        return JsonResponse({'error': 'Missing servicebill_id'}, status=400)
+    try:
+        servicebill = ServiceBillItem.objects.get(id=servicebill_id)
+        grand_total = servicebill.grand_total or 0
+        amount_paid = servicebill.amount_paid or 0
+        balance = grand_total - amount_paid
+        return JsonResponse({
+            'servicebill_id': servicebill.id,
+            'grand_total': float(grand_total),
+            'amount_paid': float(amount_paid),
+            'balance': float(balance),
+            'status': servicebill.status
+        })
+    except ServiceBillItem.DoesNotExist:
+        return JsonResponse({'error': 'ServiceBillItem not found'}, status=404)
 # ServiceCreateView for rendering service_create.html
 from django.views import View
 from django.shortcuts import render
@@ -256,6 +305,13 @@ class ServiceCreateView(View):
 
         servicebill_items = []
         for item in items:
+            # Calculate amount_change for this item
+            try:
+                grand_total_val = float(data.get("grand_total", 0))
+                amount_paid_val = float(amount_paid or 0)
+                amount_change_val = grand_total_val - amount_paid_val
+            except Exception:
+                amount_change_val = 0
             sb = ServiceBillItem.objects.create(
                 customer=customer,
                 total_amount=data.get("total_amount"),
@@ -264,14 +320,14 @@ class ServiceCreateView(View):
                 item_name=item.get("item_name"),
                 description=item.get("description"),
                 qty=item.get("qty"),
-                rate=item.get("rate"),
                 amount=item.get("amount"),
                 tax_percent=item.get("tax_percent"),
                 tax_amt=item.get("tax_amt"),
-                total=item.get("total"),
                 payment_type=payment_type,
                 bank_account=bank_account_obj,
                 status="Paid" if amount_paid and float(amount_paid) >= float(data.get("grand_total", 0)) else ("Unpaid" if not amount_paid or float(amount_paid) == 0 else "Balance"),
+                amount_paid=amount_paid,
+                amount_change=amount_change_val,
             )
             servicebill_items.append(sb)
 
@@ -1218,40 +1274,55 @@ from itertools import chain
 from operator import attrgetter
 
 class cashbankListView(LoginRequiredMixin, ListView):
-    model = Bankaccount
+
     template_name = "transactions/bank_acc.html"
-    context_object_name = "bankaccount"
-    paginate_by = 10
+    paginate_by = None
+
+    def get_queryset(self):
+        # Not used, but required by ListView
+        return Bankaccount.objects.none()
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+
+        # Provide all bank accounts for sidebar
+        context['all_bankaccounts'] = Bankaccount.objects.all().order_by('id')
 
         account_id = self.request.GET.get('account_id')
 
         # Fetch related transactions
         sales = Sale.objects.select_related('customer').all()
         purchases = Purchase.objects.select_related('vendor').all()
+        services = ServiceBillItem.objects.select_related('customer').all()
 
         if account_id:
             sales = sales.filter(bank_account_id=account_id)
             purchases = purchases.filter(bank_account_id=account_id)
+            services = services.filter(bank_account_id=account_id)
 
-        # Add transaction type tag
+        # Add transaction type tag safely
         for s in sales:
-            s.transaction_type = "Sale"
+            setattr(s, 'transaction_type', "Sale")
         for p in purchases:
-            p.transaction_type = "Purchase"
+            setattr(p, 'transaction_type', "Purchase")
+        for sv in services:
+            setattr(sv, 'transaction_type', "Service")
 
-        # Merge and sort by date_added descending
-        merged_transactions = sorted(
-            chain(sales, purchases),
-            key=attrgetter('date_added'),
-            reverse=True
-        )
+        # Only keep objects with a valid date for sorting
+        def get_sort_date(obj):
+            date = getattr(obj, 'date_added', None) or getattr(obj, 'date_created', None)
+            return date if date is not None else ''
 
-        # Pass to context
-        context['sales'] = merged_transactions
+        merged_transactions = [t for t in chain(sales, purchases, services) if get_sort_date(t)]
+        merged_transactions.sort(key=get_sort_date, reverse=True)
+
+        
+
+
+        
+        # No pagination: show all records
         context['selected_account_id'] = account_id
+        context['page_obj'] = merged_transactions
         return context
 
 
@@ -1292,19 +1363,20 @@ def receive_payment(request):
         # Update Sale amounts
         sale.amount_paid += received
         # Calculate remaining balance
+        from decimal import Decimal
         remaining = sale.grand_total - sale.amount_paid
-        
+
         # Update amount_change (balance due)
-        sale.amount_change = max(remaining, 0)
-        
+        sale.amount_change = max(remaining, Decimal('0.00'))
+
         # Update status
         if remaining <= 0:
             sale.status = "Paid"
         else:
             sale.status = "Balance"  # Or "Unpaid" depending on your logic
-        
+
         sale.save()
-        
+
         messages.success(request, f"Payment of ₹{received:.2f} received for sale #{sale.id}.")
     else:
         messages.error(request, "Invalid payment data submitted.")
@@ -1507,30 +1579,60 @@ class ServiceBillCreateView(View):
         items = json.loads(items_json) if items_json else []
 
         servicebill_items = []
+        total_received = 0
         for item in items:
+            try:
+                item_amount = float(item.get("amount") or 0)
+            except Exception:
+                item_amount = 0
+            total_received += item_amount
+        try:
+            grand_total_val = float(data.get("grand_total", 0))
+        except Exception:
+            grand_total_val = 0
+        amount_change_val = grand_total_val - float(data.get("amount_paid", 0))
+
+        # Create the main bill summary item (first item, or a summary row)
+        if items:
+            first_item = items[0]
             sb = ServiceBillItem.objects.create(
                 customer=customer,
                 total_amount=data.get("total_amount"),
                 total_tax=data.get("total_tax"),
                 grand_total=data.get("grand_total"),
-                item_name=item.get("item_name"),
-                description=item.get("description"),
-                qty=item.get("qty"),
-                rate=item.get("rate"),
-                amount=item.get("amount"),
-                tax_percent=item.get("tax_percent"),
-                tax_amt=item.get("tax_amt"),
-                total=item.get("total"),
+                item_name=first_item.get("item_name"),
+                description=first_item.get("description"),
+                qty=first_item.get("qty"),
+                amount=first_item.get("amount"),
+                tax_percent=first_item.get("tax_percent"),
+                tax_amt=first_item.get("tax_amt"),
                 payment_type=data.get("payment_type"),
                 bank_account=bank_account,
                 status=sale_status,
-                amount_paid=data.get("amount_paid")
-                
+                amount_paid=float(data.get("amount_paid", 0)),
+                amount_change=amount_change_val
             )
             servicebill_items.append(sb)
-
-        if servicebill_items:
-            redirect_url = f"/transactions/servicebill/{servicebill_items[0].pk}/invoice/"
+            # Add the rest of the items as detail rows (amount_paid and amount_change = 0)
+            for item in items[1:]:
+                ServiceBillItem.objects.create(
+                    customer=customer,
+                    total_amount=None,
+                    total_tax=None,
+                    grand_total=None,
+                    item_name=item.get("item_name"),
+                    description=item.get("description"),
+                    qty=item.get("qty"),
+                    amount=item.get("amount"),
+                    tax_percent=item.get("tax_percent"),
+                    tax_amt=item.get("tax_amt"),
+                    payment_type=data.get("payment_type"),
+                    bank_account=bank_account,
+                    status=sale_status,
+                    amount_paid=0,
+                    amount_change=0
+                )
+            redirect_url = f"/transactions/servicebill/{sb.pk}/invoice/"
             return JsonResponse({"success": True, "redirect_url": redirect_url})
         else:
             return JsonResponse({"success": False, "error": "No items to save."})

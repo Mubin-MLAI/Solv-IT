@@ -11,7 +11,7 @@ from .models import ServiceBillItem
 class ServiceBillItemForm(forms.ModelForm):
     class Meta:
         model = ServiceBillItem
-        fields = ['customer', 'description','total_amount', 'total_tax', 'grand_total', 'item_name', 'qty', 'rate', 'amount', 'tax_percent', 'tax_amt', 'total']
+        fields = ['customer', 'description', 'total_amount', 'total_tax', 'grand_total', 'item_name', 'qty', 'amount', 'tax_percent', 'tax_amt', 'amount_change']
 
 
 
@@ -93,8 +93,11 @@ class BankForm(forms.ModelForm):
 
 from django import forms
 
+
+# Accept both sale_id and servicebill_id as optional fields for PaymentForm
 class PaymentForm(forms.Form):
-    sale_id = forms.IntegerField(widget=forms.HiddenInput())
+    sale_id = forms.IntegerField(widget=forms.HiddenInput(), required=False)
+    servicebill_id = forms.IntegerField(widget=forms.HiddenInput(), required=False)
     amount_received = forms.DecimalField(max_digits=10, decimal_places=2, min_value=0)
 
 

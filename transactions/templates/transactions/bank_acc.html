@@ -37,7 +37,7 @@
                     </div>
                 </div>
                 
-                {% for bank in bankaccount %}
+                {% for bank in all_bankaccounts %}
                     <div class="mb-3 p-2 border rounded d-flex justify-content-between align-items-center bg-light {% if selected_account_id == bank.id|stringformat:"s" %}border-success bg-success bg-opacity-10{% endif %}">
                         <div>
                             <a href="?account_id={{ bank.id }}" class="{% if selected_account_id == bank.id|stringformat:"s" %}text-success{% endif %}">
@@ -67,66 +67,92 @@
 
         <div class="col-md-8">
             <div class="card shadow-sm p-3">
-                <h5 class="mb-3 text-success">Account Transactions</h5>
-                <div class="table-responsive">
-                    <table class="table table-sm table-bordered table-striped align-middle text-center mb-0">
-                        <thead class="table-light">
-                            <tr>
-                                <th>Type</th>
-                                <th>Name</th>
-                                <th>Date</th>
-                                <th>Amount</th>
-                                <th>Balance Due</th>
-                                <th>Action</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for sale in sales %}
-                            <tr>
-                                <td>{{ sale.payment_type }}</td>
-                                <td>
-                                  {% if sale.transaction_type == "Sale" %}
-                                      {{ sale.customer.first_name }} ( Client )
-                                  {% elif sale.transaction_type == "Purchase" %}
-                                      {{ sale.vendor.name }} ( Vendor ) 
-                                  {% endif %}
-                                </td>
-                                <td>{{ sale.date_added|date:"Y-m-d" }}</td>
-                                <td>₹{{ sale.grand_total }}</td>
-                                <td>
-                                    {% if sale.status == "Paid" %}
-                                        <span class="text-success">₹0.00</span>
-                                    {% elif sale.status == "Unpaid" or sale.status == "Balance" %}
-                                        <span class="text-danger">₹{{ sale.amount_change|floatformat:2 }}</span>
-                                    {% else %}
-                                        <span>-</span>
-                                    {% endif %}
-                                </td>
-                                <td>
-                                    {% if sale.status != "Paid" %}
-                                      <button type="button" class="btn btn-sm btn-danger open-payment-modal" 
-                                        data-bs-toggle="modal" data-bs-target="#paymentModal"
-                                        data-balance="{{ sale.amount_change|floatformat:2 }}"
-                                        data-sale-id="{{ sale.id }}"
-                                        data-customer-name="{{ sale.customer.first_name }}">
-                                        <i class="fa fa-money-bill-wave"></i>
-                                      </button>
-                                    {% else %}
-                                    <button type="button" class="btn btn-sm btn-success open-payment-modal" disabled>
-                                        <i class="fa fa-money-bill-wave"></i>
-                                    </button>
-                                      <!-- <span class="text-success">₹0.00</span> -->
-                                    {% endif %}
-                                  </td>                                  
-                            </tr>
-                            {% empty %}
-                            <tr>
-                                <td colspan="5" class="text-muted">No transactions found.</td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
+        <h5 class="mb-3 text-success">Account Transactions</h5>
+        <!-- Filter Section -->
+                <form id="filterForm" class="row g-2 mb-3">
+                  <div class="col-md-3">
+                    <input type="text" id="filterName" class="form-control" placeholder="Filter by Name/Description/Type">
+                  </div>
+                  <div class="col-md-3">
+                    <input type="date" id="filterDateStart" class="form-control" placeholder="Start Date">
+                  </div>
+                  <div class="col-md-3">
+                    <input type="date" id="filterDateEnd" class="form-control" placeholder="End Date">
+                  </div>
+                  <div class="col-md-3">
+                    <button type="button" id="clearFilters" class="btn btn-outline-secondary">Clear Filters</button>
+                  </div>
+                </form>
+        <div class="table-responsive">
+          <div style="max-height: 500px; overflow-y: auto;">
+            <table class="table table-sm table-bordered table-striped align-middle text-center mb-0" id="transactionsTable">
+            <thead class="table-light">
+              <tr>
+                <th>Type</th>
+                <th>Name</th>
+                <th>Date</th>
+                <th>Amount</th>
+                <th>Balance Due</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for sale in page_obj %}
+              <tr>
+                <td>{{ sale.payment_type }}</td>
+                <td class="name-cell">
+                  {% if sale.transaction_type == "Sale" %}
+                    {{ sale.customer.first_name }} ( Client )
+                  {% elif sale.transaction_type == "Purchase" %}
+                    {{ sale.vendor.name }} ( Vendor ) 
+                  {% elif sale.transaction_type == "Service" %}
+                    {{ sale.item_name|default:sale.description }} ( Service )
+                  {% endif %}
+                </td>
+                <td class="date-cell">
+                  {% if sale.transaction_type == "Service" %}
+                    {{ sale.date_created|date:"Y-m-d" }}
+                  {% else %}
+                    {{ sale.date_added|date:"Y-m-d" }}
+                  {% endif %}
+                </td>
+                <td>₹{{ sale.amount_paid }}</td>
+                <td>
+                  {% if sale.status == "Paid" %}
+                    <span class="text-success">₹0.00</span>
+                  {% elif sale.status == "Unpaid" or sale.status == "Balance" %}
+                    <span class="text-danger">₹{{ sale.amount_change|floatformat:2 }}</span>
+                  {% else %}
+                    <span>-</span>
+                  {% endif %}
+                </td>
+                <td>
+                  {% if sale.status != "Paid" %}
+                    <button type="button" class="btn btn-sm btn-danger open-payment-modal" 
+                    data-bs-toggle="modal" data-bs-target="#paymentModal"
+                    data-transaction-type="{{ sale.transaction_type }}"
+                    data-balance="{{ sale.amount_change|floatformat:2 }}"
+                    data-sale-id="{% if sale.transaction_type == 'Sale' %}{{ sale.id }}{% endif %}"
+                    data-servicebill-id="{% if sale.transaction_type == 'Service' %}{{ sale.id }}{% endif %}"
+                    data-customer-name="{{ sale.customer.first_name }}">
+                    <i class="fa fa-money-bill-wave"></i>
+                    </button>
+                  {% else %}
+                  <button type="button" class="btn btn-sm btn-success open-payment-modal" disabled>
+                    <i class="fa fa-money-bill-wave"></i>
+                  </button>
+                  {% endif %}
+                  </td>                                  
+              </tr>
+              {% empty %}
+              <tr>
+                <td colspan="6" class="text-muted">No transactions found.</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+            </table>
+          </div>
+        </div>
             </div>
         </div>
     </div>
@@ -134,7 +160,7 @@
     <!-- Payment Modal -->
 <div class="modal fade" id="paymentModal" tabindex="-1" aria-labelledby="paymentModalLabel" aria-hidden="true">
     <div class="modal-dialog">
-      <form id="paymentForm" method="post" action="{% url 'receive-payment' %}">
+      <form id="paymentForm" method="post">
         {% csrf_token %}
         <div class="modal-content">
           <div class="modal-header">
@@ -142,23 +168,20 @@
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
           <div class="modal-body">
-            <input type="hidden" name="sale_id" id="saleIdInput">
-            
+            <input type="hidden" name="sale_id" id="saleIdInput" style="display:none;">
+            <input type="hidden" name="servicebill_id" id="serviceBillIdInput" style="display:none;">
             <div class="mb-3">
               <label for="customerName" class="form-label">Customer</label>
               <input type="text" id="customerName" class="form-control" readonly>
             </div>
-            
             <div class="mb-3">
               <label for="balanceDue" class="form-label">Balance Due</label>
               <input type="text" id="balanceDue" class="form-control" readonly>
             </div>
-            
             <div class="mb-3">
               <label for="amountReceived" class="form-label">Received</label>
               <input type="text" step="0.01" min="0" max="9999999" name="amount_received" id="amountReceived" class="form-control" required>
             </div>
-            
             <div class="mb-3">
               <label for="remainingBalance" class="form-label">Remaining Balance</label>
               <input type="text" id="remainingBalance" class="form-control" readonly>
@@ -175,32 +198,49 @@
 </div>
 <script>
   document.addEventListener('DOMContentLoaded', function () {
+    // Payment Modal Logic
     const paymentModal = document.getElementById('paymentModal');
     const balanceDueInput = document.getElementById('balanceDue');
     const amountReceivedInput = document.getElementById('amountReceived');
     const remainingBalanceInput = document.getElementById('remainingBalance');
     const saleIdInput = document.getElementById('saleIdInput');
+    const serviceBillIdInput = document.getElementById('serviceBillIdInput');
     const customerNameInput = document.getElementById('customerName');
+    const paymentForm = document.getElementById('paymentForm');
 
     paymentModal.addEventListener('show.bs.modal', function (event) {
       const button = event.relatedTarget;
+      const transactionType = button.getAttribute('data-transaction-type');
       const balance = parseFloat(button.getAttribute('data-balance'));
       const saleId = button.getAttribute('data-sale-id');
+      const serviceBillId = button.getAttribute('data-servicebill-id');
       const customerName = button.getAttribute('data-customer-name');
 
-      saleIdInput.value = saleId;
       customerNameInput.value = customerName;
-      balanceDueInput.value = `₹${balance.toFixed(2)}`;
-      remainingBalanceInput.value = `₹${balance.toFixed(2)}`;
+      balanceDueInput.value = balance.toFixed(2);
+      remainingBalanceInput.value = balance.toFixed(2);
       amountReceivedInput.value = '';
       amountReceivedInput.setAttribute('max', balance.toFixed(2));
+
+      saleIdInput.value = '';
+      saleIdInput.style.display = 'none';
+      serviceBillIdInput.value = '';
+      serviceBillIdInput.style.display = 'none';
+
+      if (transactionType === 'Service') {
+        paymentForm.action = "{% url 'receive_payment_service' %}";
+        serviceBillIdInput.value = serviceBillId;
+        serviceBillIdInput.style.display = '';
+      } else {
+        paymentForm.action = "{% url 'receive-payment' %}";
+        saleIdInput.value = saleId;
+        saleIdInput.style.display = '';
+      }
     });
 
     amountReceivedInput.addEventListener('input', function () {
       let received = parseFloat(this.value);
-      let balanceText = balanceDueInput.value.replace('₹', '');
-      let balance = parseFloat(balanceText);
-
+      let balance = parseFloat(balanceDueInput.value);
       if (isNaN(received) || received < 0) {
         received = 0;
       }
@@ -208,12 +248,52 @@
         received = balance;
         this.value = balance.toFixed(2);
       }
-
       const remaining =  balance - received;
-      remainingBalanceInput.value = `₹${remaining.toFixed(2)}`;
+      remainingBalanceInput.value = remaining.toFixed(2);
+    });
+
+    // Filtering Logic
+    const filterName = document.getElementById('filterName');
+    const filterDateStart = document.getElementById('filterDateStart');
+    const filterDateEnd = document.getElementById('filterDateEnd');
+    const clearFilters = document.getElementById('clearFilters');
+    const table = document.getElementById('transactionsTable');
+    const rows = table.querySelectorAll('tbody tr');
+
+    function filterTable() {
+      const nameVal = filterName.value.trim().toLowerCase();
+      const dateStartVal = filterDateStart.value;
+      const dateEndVal = filterDateEnd.value;
+      rows.forEach(row => {
+        const nameCell = row.querySelector('.name-cell');
+        const dateCell = row.querySelector('.date-cell');
+        const typeCell = row.querySelector('td:first-child');
+        let show = true;
+        if (nameVal && (nameCell || typeCell)) {
+          const nameText = nameCell ? nameCell.textContent.toLowerCase() : '';
+          const typeText = typeCell ? typeCell.textContent.toLowerCase() : '';
+          show = nameText.includes(nameVal) || typeText.includes(nameVal);
+        }
+        if (show && (dateStartVal || dateEndVal) && dateCell) {
+          const rowDate = dateCell.textContent.trim();
+          // rowDate is in YYYY-MM-DD format
+          if (dateStartVal && rowDate < dateStartVal) show = false;
+          if (dateEndVal && rowDate > dateEndVal) show = false;
+        }
+        row.style.display = show ? '' : 'none';
+      });
+    }
+
+    filterName.addEventListener('input', filterTable);
+    filterDateStart.addEventListener('input', filterTable);
+    filterDateEnd.addEventListener('input', filterTable);
+    clearFilters.addEventListener('click', function() {
+      filterName.value = '';
+      filterDateStart.value = '';
+      filterDateEnd.value = '';
+      filterTable();
     });
   });
-
 </script>
 {% endblock %}
 

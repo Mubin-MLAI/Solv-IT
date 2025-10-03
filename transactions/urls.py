@@ -36,7 +36,9 @@ from .views import (
     vendor_create,
     ServiceCreateView,
     ServiceBillCreateView,
-    ServiceBillInvoiceView)
+    ServiceBillInvoiceView,
+    service_balance_api,
+    receive_payment_service)
 
 urlpatterns = [
     # Purchase URLs
@@ -45,7 +47,7 @@ urlpatterns = [
     path('new-purchase/', PurchasedCreateView.as_view(), name='purchase-create'),
     path('receive-payment/', receive_payment, name='receive-payment'),
     path('receive-payment-purchase/', receive_payment_purchase, name='receive-payment-purchase'),
-    path('cashbankListView/', cashbankListView.as_view(), name='cashbanklist'),
+    path('cashbanklist/', cashbankListView.as_view(), name='cashbanklist'),
     path('purchases/', PurchaseListView.as_view(), name='purchaseslist'),
     path('purchase/<int:pk>/', PurchaseDetailView.as_view(), name='purchase-detail'),
     path('purchase/<int:pk>/delete/', PurchaseDeleteView.as_view(), name='purchase-delete'),
@@ -69,6 +71,8 @@ urlpatterns = [
     # path('service-bill/',ServiceBillCreateView.as_view(), name='service-bill-create'),
     path('servicebill/create/', ServiceBillCreateView.as_view(), name='servicebill_create'),
     path('servicebill/<int:pk>/invoice/', ServiceBillInvoiceView.as_view(), name='servicebill_invoice'),
+    path('service-balance-api/', service_balance_api, name='service_balance_api'),
+    path('receive-payment-service/', receive_payment_service, name='receive_payment_service'),
 ]
 
 

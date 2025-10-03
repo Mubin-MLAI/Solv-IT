@@ -784,11 +784,13 @@ class ServiceBillItem(models.Model):
     item_name = models.CharField(max_length=255, null=True, blank=True)
     description = models.TextField(blank=True, null=True)
     qty = models.PositiveIntegerField(default=1, null=True, blank=True)
-    rate = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
     amount = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
     tax_percent = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
     tax_amt = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
-    total = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    amount_change = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        default=0.0)
 
     PAYMENT_CHOICES = [
         ('Cash', 'Cash'),

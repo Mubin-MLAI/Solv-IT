@@ -157,11 +157,11 @@
                         <td>₹ {{ record.grand_total|default:"-" }}</td>
                         <td>
                             {% if record.type_label  == 'Sale' %}₹ {{ record.amount_paid }}
-                            {% else %} NA {{ record.amount_paid }}{% endif %}
+                            {% else %} {{ record.amount_paid }}{% endif %}
                         </td>
                         <td>
                             {% if record.type_label  == 'Sale' %}₹ {{ record.amount_change }}
-                            {% else %} NA {{ record.amount_change }}{% endif %}
+                            {% else %} {{ record.amount_change }}{% endif %}
                         </td>
 
                         <!-- Status (Sales only) -->
@@ -175,7 +175,13 @@
                                     <span class="badge bg-warning text-dark">Balance</span>
                                 {% endif %}
                             {% else %}
-                                <span class="badge bg-info text-dark ">Paid</span>
+                                {% if record.status == 'Paid' %}
+                                    <span class="badge bg-success">Paid</span>
+                                {% elif record.status == 'Unpaid' %}
+                                    <span class="badge bg-danger">Unpaid</span>
+                                {% elif record.status == 'Balance' %}
+                                    <span class="badge bg-warning text-dark">Balance</span>
+                                {% endif %}
                             {% endif %}
                         </td>
 
