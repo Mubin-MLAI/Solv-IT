@@ -139,7 +139,7 @@ class catogaryForm(forms.ModelForm):
     """
     class Meta:
         model = catogaryitem
-        fields = ['category', 'name', 'serial_no', 'quantity', 'unit_price']  # Added category field
+        fields = ['category', 'name', 'serial_no', 'quantity', 'unit_price', 'purchase_lot_code']  # Added category field
 
         # Widgets for custom form styling
         widgets = {
@@ -154,7 +154,7 @@ class catogaryForm(forms.ModelForm):
             }),
             'serial_no': forms.TextInput(attrs={
                 'class': 'form-control',
-                'placeholder': 'Enter Serial Number',
+                'placeholder': 'Enter Serial Number or Leave Blank for SN : Solv-IT',
                 'aria-label': 'Serial Number'
             }),
             'quantity': forms.NumberInput(attrs={
@@ -167,6 +167,12 @@ class catogaryForm(forms.ModelForm):
                 'placeholder': 'Enter Unit Price',
                 'aria-label': 'Unit Price'
             }),
+
+            'purchase_lot_code': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Enter Purchase Code / Vendor Name',
+                'aria-label': 'Purchase Code / Vendor Name'
+            }),
         }
 
         # Custom field labels
@@ -176,6 +182,7 @@ class catogaryForm(forms.ModelForm):
             'serial_no': 'Serial Number',
             'quantity': 'Quantity',
             'unit_price': 'Unit Price',
+            'purchase_lot_code': 'Purchase Code / Vendor Name'
         }
 
     # Optionally, if you want to add extra validation for the category field

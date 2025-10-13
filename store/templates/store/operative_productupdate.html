@@ -8,12 +8,12 @@ Update Product
 {% block content %}
 <br>
 <div class="container">
-    <div class="row">
-        <div class="col-sm">
+    <div class="row align-items-stretch">
+        <div class="col-sm mt-5 form-control">
             <div class="text-center">IN - Solv-IT Raw Parts</div>
-            <div class="col-lg-12 col-md-5">
-                <div class="card shadow-sm border-dark" style="background-color: #a9a5b2;">
-                    <div class="card-body">
+            <div class="col-lg-12 col-md-5 h-100">
+                <div class="card shadow-sm border-dark form-control h-100 d-flex flex-column" style="background-color: #a9a5b2;">
+                    <div class="card-body flex-fill">
                         <form method="POST" enctype="multipart/form-data">
                             {% csrf_token %}
                             <div class="row mb-3">
@@ -180,8 +180,10 @@ Update Product
                                         value="{{ form.price.value }}" readonly>
                                     <div class="text-danger">{{ form.price.errors }}</div>
                                 </div>
+                            </div>
 
-                                <div class="col-md-4">
+                            <div class="row mb-3">
+                                <div class="col-md-6">
                                     <label for="{{ form.purchased_code.id_for_label }}" class="form-label" placeholder="Enter Purchase / LOT Code">
                                         Purchase / LOT Code
                                     </label>
@@ -191,9 +193,9 @@ Update Product
                                 </div>
                             </div>
 
-                            <!-- SMPS Status
+                            <!-- SMPS Status -->
                             <div class="col-md-6 col-lg-8">
-                                <label for="smps_status" class="form-label">SMPS Status</label>
+                                <label for="smps_status" class="form-label">SMPS / Adapter Status</label>
                                 <select id="smps_status1" name="smps_status" class="form-control" onchange="toggleReplacementDescription1()">
                                     <option value="available" {% if form.smps_status.value == 'available' %}selected{% endif %}>Available</option>
                                     <option value="not_available" {% if form.smps_status.value == 'not_available' %}selected{% endif %}>Not Available</option>
@@ -204,8 +206,7 @@ Update Product
 
 
 
-
-                            Motherboard Status
+                            <!-- Motherboard Status -->
                             <div class="col-md-6 col-lg-8" id="motherboard_status_div">
                                 <label for="motherboard_status" class="form-label">Motherboard Status</label>
                                 <select id="motherboard_status1" name="motherboard_status" class="form-control" onchange="toggleMotherboardReplacementDescription1()">
@@ -214,44 +215,24 @@ Update Product
                                     <option value="replacement" {% if form.motherboard_status.value == 'replacement'%}selected{% endif %}>Replacement</option>
                                 </select>
                                 <div class="text-danger">{{ form.motherboard_status.errors }}</div>
-                            </div> -->
+                            </div>
+                
+                            <br>
+                            <div class="form-group text-center">
+                                <button class="btn btn-success btn-lg form-control" name="button1"  type="submit">
+                                    <i class="fas fa-check"></i> Submit
+                                </button>
+                            </div>
+                        </form>
                     </div>
-
-
-                    <!-- <div class="row mb-3">
-                        SMPS Replacement Description
-                        <div class="col-md-6 col-lg-8" id="smps_replacement_description_div1" style="display: none;">
-                            <label for="smps_replacement_description" class="form-label">SMPS Replacement
-                                Description</label>
-                            <input type="text" id="smps_replacement_description" name="smps_replacement_description"
-                                class="form-control" value="{{ form.smps_replacement_description.value }}">
-                        </div>
-
-                        Motherboard Replacement Description
-                        <div class="col-md-6 col-lg-8" id="motherboard_replacement_description_div1"
-                            style="display: none;">
-                            <label for="motherboard_replacement_description" class="form-label">Motherboard
-                                Replacement Description</label>
-                            <input type="text" id="motherboard_replacement_description"
-                                name="motherboard_replacement_description" class="form-control"
-                                value="{{ form.motherboard_replacement_description.value }}">
-                        </div>
-                    </div> -->
-
-                    <div class="form-group text-center">
-                        <button class="btn btn-success btn-lg" name="button1" type="submit">
-                            <i class="fas fa-check"></i> Submit
-                        </button>
-                    </div>
-                    </form>
                 </div>
             </div>
         </div>
-        <div class="col-sm">
+        <div class="col-sm mt-5 form-control">
             <div class="text-center">Current Details</div>
-            <div class="col-lg-12 col-md-5">
-                <div class="card shadow-sm border-dark" style="background-color: #a9a5b2;">
-                    <div class="card-body">
+            <div class="col-lg-12 col-md-5 h-100">
+                <div class="card shadow-sm border-dark form-control h-100 d-flex flex-column" style="background-color: #a9a5b2;">
+                    <div class="card-body flex-fill">
                         <form method="POST" enctype="multipart/form-data">
                             {% csrf_token %}
                             <div class="row mb-3">
@@ -381,8 +362,10 @@ Update Product
                                         value="{{ form.price.value }}" readonly>
                                     <div class="text-danger">{{ form.price.errors }}</div>
                                 </div>
+                            </div>
 
-                                <div class="col-md-4">
+                            <div class="row mb-3">
+                                <div class="col-md-6">
                                     <label for="{{ form.purchased_code.id_for_label }}" class="form-label" placeholder="Enter Purchase / LOT Code">
                                         Purchase / LOT Code
                                     </label>
@@ -390,6 +373,30 @@ Update Product
                                         value="{{ form.purchased_code.value }}" readonly>
                                     <div class="text-danger">{{ form.purchased_code.errors }}</div>
                                 </div>
+                            </div>
+
+                            <!-- SMPS Status -->
+                            <div class="col-md-6 col-lg-8">
+                                <label for="smps_status" class="form-label">SMPS / Adapter Status</label>
+                                <select id="smps_status1" name="smps_status" class="form-control" onchange="toggleReplacementDescription1()">
+                                    <option value="available" {% if form.smps_status.value == 'available' %}selected{% endif %}>Available</option>
+                                    <option value="not_available" {% if form.smps_status.value == 'not_available' %}selected{% endif %}>Not Available</option>
+                                    <option value="replacement" {% if form.smps_status.value == 'replacement' %}selected{% endif %}>Replacement</option>
+                                </select>
+                                <div class="text-danger">{{ form.smps_status.errors }}</div>
+                            </div>
+
+
+
+                            <!-- Motherboard Status -->
+                            <div class="col-md-6 col-lg-8" id="motherboard_status_div">
+                                <label for="motherboard_status" class="form-label">Motherboard Status</label>
+                                <select id="motherboard_status1" name="motherboard_status" class="form-control" onchange="toggleMotherboardReplacementDescription1()">
+                                    <option value="available" {% if form.motherboard_status.value == 'available'%}selected{% endif %}>Available</option>
+                                    <option value="not_available" {% if form.motherboard_status.value == 'not_available'%}selected{% endif %}>Not Available</option>
+                                    <option value="replacement" {% if form.motherboard_status.value == 'replacement'%}selected{% endif %}>Replacement</option>
+                                </select>
+                                <div class="text-danger">{{ form.motherboard_status.errors }}</div>
                             </div>
 
 
@@ -448,11 +455,11 @@ Update Product
                 </div>
             </div>
         </div>
-        <div class="col-sm">
+        <div class="col-sm mt-5 form-control">
             <div class="text-center">OUT - Remove Installed Parts</div>
-            <div class="col-lg-12 col-md-5">
-                <div class="card shadow-sm border-dark" style="background-color: #a9a5b2;">
-                    <div class="card-body">
+            <div class="col-lg-12 col-md-5 h-100">
+                <div class="card shadow-sm border-dark form-control h-100 d-flex flex-column" style="background-color: #a9a5b2;">
+                    <div class="card-body flex-fill">
                         <form method="POST" enctype="multipart/form-data">
                             {% csrf_token %}
                             <div class="row mb-3">
@@ -575,8 +582,10 @@ Update Product
                                         value="{{ form.price.value }}" readonly>
                                     <div class="text-danger">{{ form.price.errors }}</div>
                                 </div>
+                            </div>
 
-                                <div class="col-md-4">
+                            <div class="row mb-3">
+                                <div class="col-md-6">
                                     <label for="{{ form.purchased_code.id_for_label }}" class="form-label" placeholder="Enter Purchase / LOT Code">
                                         Purchase / LOT Code
                                     </label>
@@ -584,6 +593,30 @@ Update Product
                                         value="{{ form.purchased_code.value }}" readonly>
                                     <div class="text-danger">{{ form.purchased_code.errors }}</div>
                                 </div>
+                            </div>
+
+                            <!-- SMPS Status -->
+                            <div class="col-md-6 col-lg-8">
+                                <label for="smps_status" class="form-label">SMPS / Adapter Status</label>
+                                <select id="smps_status1" name="smps_status" class="form-control" onchange="toggleReplacementDescription1()">
+                                    <option value="available" {% if form.smps_status.value == 'available' %}selected{% endif %}>Available</option>
+                                    <option value="not_available" {% if form.smps_status.value == 'not_available' %}selected{% endif %}>Not Available</option>
+                                    <option value="replacement" {% if form.smps_status.value == 'replacement' %}selected{% endif %}>Replacement</option>
+                                </select>
+                                <div class="text-danger">{{ form.smps_status.errors }}</div>
+                            </div>
+
+
+
+                            <!-- Motherboard Status -->
+                            <div class="col-md-6 col-lg-8" id="motherboard_status_div">
+                                <label for="motherboard_status" class="form-label">Motherboard Status</label>
+                                <select id="motherboard_status1" name="motherboard_status" class="form-control" onchange="toggleMotherboardReplacementDescription1()">
+                                    <option value="available" {% if form.motherboard_status.value == 'available'%}selected{% endif %}>Available</option>
+                                    <option value="not_available" {% if form.motherboard_status.value == 'not_available'%}selected{% endif %}>Not Available</option>
+                                    <option value="replacement" {% if form.motherboard_status.value == 'replacement'%}selected{% endif %}>Replacement</option>
+                                </select>
+                                <div class="text-danger">{{ form.motherboard_status.errors }}</div>
                             </div>
 
                             <!-- <div class="row mb-3">
@@ -632,8 +665,9 @@ Update Product
                                         value="{{ form.motherboard_replacement_description.value }}">
                                 </div>
                             </div> -->
+                            <br>
                             <div class="form-group text-center">
-                                <button class="btn btn-success btn-lg" name="button3"  type="submit">
+                                <button class="btn btn-success btn-lg form-control" name="button3"  type="submit">
                                     <i class="fas fa-check"></i> Submit
                                 </button>
                             </div>
@@ -751,20 +785,20 @@ Update Product
     }
 
     function toggleMotherboardReplacementDescription1() {
-        var motherboardStatus = document.getElementById("motherboard_status2").value;
-        var toggleMotherboardReplacementDescriptionDiv = document.getElementById("motherboard_replacement_description_div2");
+        var motherboardStatus = document.getElementById("motherboard_status1").value;
+        var toggleMotherboardReplacementDescriptionDiv = document.getElementById("motherboard_replacement_description_div1");
         toggleMotherboardReplacementDescriptionDiv.style.display = motherboardStatus === "replacement" ? "block" : "none";
     }
 
     function toggleReplacementDescription2() {
-        var smpsStatus = document.getElementById("smps_status").value;
-        var replacementDescriptionDiv = document.getElementById("smps_replacement_description_div");
+        var smpsStatus = document.getElementById("smps_status2").value;
+        var replacementDescriptionDiv = document.getElementById("smps_replacement_description_div2");
         replacementDescriptionDiv.style.display = smpsStatus === "replacement" ? "block" : "none";
     }
 
     function toggleMotherboardReplacementDescription2() {
-        var motherboardStatus = document.getElementById("motherboard_status").value;
-        var toggleMotherboardReplacementDescriptionDiv = document.getElementById("motherboard_replacement_description_div");
+        var motherboardStatus = document.getElementById("motherboard_status2").value;
+        var toggleMotherboardReplacementDescriptionDiv = document.getElementById("motherboard_replacement_description_div2");
         toggleMotherboardReplacementDescriptionDiv.style.display = motherboardStatus === "replacement" ? "block" : "none";
     }
 

@@ -14,6 +14,10 @@
             <a class="btn btn-success btn-sm rounded-pill shadow-sm" href="{% url 'category-create' %}">
                 <i class="fa-solid fa-plus"></i> Add Item Entry
             </a>
+
+            <a class="btn btn-success btn-sm rounded-pill shadow-sm" href="{% querystring '_export'='xlsx' %}">
+                <i class="fa-solid fa-download"></i> Export to Excel
+            </a>
         </div>
     </div>
 

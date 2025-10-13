@@ -223,7 +223,7 @@ Add Product
 
                         <div class="col-md-4">
                             <label for="customer_searchbox" class="form-label">Customer Name</label>
-                            <input type="text" id="customer_searchbox" class="form-control" placeholder="Type to search customer..." autocomplete="off">
+                            <input type="text" id="customer_searchbox" class="form-control" placeholder="Type Customer Name / Phone ... " autocomplete="off">
                             <div id="customer_suggestions" class="form-label" style="z-index: 1000;"></div>
                             <input type="hidden" name="customer_id" id="customer_id">  <!-- Hidden field to submit ID -->
                         </div>
@@ -516,7 +516,6 @@ document.addEventListener('DOMContentLoaded', function () {
     searchSuggestions('searchbox3', 'suggestions3');
 </script>
 
-
 <script>
     function customerSearchSuggestions() {
         const searchBox = document.getElementById('customer_searchbox');
@@ -531,15 +530,15 @@ document.addEventListener('DOMContentLoaded', function () {
                     .then(response => response.json())
                     .then(data => {
                         suggestionsBox.innerHTML = '';
-                        if (data.suggestions.length > 0) {
-                            data.suggestions.forEach(suggestion => {
+                        if (data.results && data.results.length > 0) {
+                            data.results.forEach(suggestion => {
                                 const item = document.createElement('a');
                                 item.href = 'javascript:void(0);';
                                 item.classList.add('list-group-item', 'list-group-item-action');
-                                item.textContent = suggestion.name;
+                                item.textContent = suggestion.text;
 
                                 item.addEventListener('click', function () {
-                                    searchBox.value = suggestion.name;
+                                    searchBox.value = suggestion.text;
                                     hiddenField.value = suggestion.id;
                                     suggestionsBox.innerHTML = '';
                                 });
@@ -581,10 +580,6 @@ document.addEventListener('DOMContentLoaded', function () {
             
             // Add CSRF token
             const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
-            
-            // Get the person type value
-            const personType = document.getElementById('person_type').value;
-            formData.append('person_type', personType);
             
             fetch("{% url 'create_customer_ajax' %}", {
                 method: 'POST',

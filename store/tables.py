@@ -54,9 +54,9 @@ class ItemTable(tables.Table):
         model = Item
         template_name = "django_tables2/semantic.html"
         fields = (
-            'id', 'name', 'serialno', 'make_and_models',
+            'id', 'name', 'serialno', 'make_and_models','quantity',
             'processor','processor_qty', 'ram','ram_qty','hdd','hdd_qty','ssd','ssd_qty','price',
-            'smps_status', 'motherboard_status'
+            'smps_status', 'motherboard_status','purchased_code','note'
         )
         order_by_field = 'id'
 
@@ -70,11 +70,12 @@ class CategoryItemTable(tables.Table):
     serial_no = tables.Column(verbose_name='Serial Number')
     quantity = tables.Column(verbose_name='Quantity')
     unit_price = tables.Column(verbose_name='Unit Price')
+    purchase_lot_code = tables.Column(verbose_name='Product Code / Vendor Name')
 
     class Meta:
         model = catogaryitem  # Change model to CategoryItem
         template_name = "django_tables2/semantic.html"  # You can use any template you like
-        fields = ('category', 'name', 'serial_no', 'quantity', 'unit_price')  # The fields to be displayed in the table
+        fields = ('category', 'name', 'serial_no', 'quantity', 'unit_price', 'purchase_lot_code')  # The fields to be displayed in the table
         order_by_field = 'id'  # Default ordering can be set to ID or any other field as needed
 
 

@@ -37,7 +37,8 @@ from .views import (
     create_processor,
     get_category_items,
     operativedashboard,
-    upload_category_items
+    upload_category_items,
+    upload_category_only
     
 )
 
@@ -123,11 +124,16 @@ urlpatterns = [
         name='get_items'
     ),
 
+    path(
+        'categories/',
+        views.CatogaryItemListView.as_view(),
+        name='category-list'
+    ),
     # Category URLs
     path(
         'categories/ram/',
         CategoryListView.as_view(),
-        name='category-list'
+        name='category-list-ram'
     ),
     path(
         'categories/hdd/',
@@ -145,7 +151,7 @@ urlpatterns = [
         name='category-detail-hdd'
     ),
     path(
-        'categories/create/ram',
+        'categories/create/',
         CategoryCreateView.as_view(),
         name='category-create'
     ),
@@ -181,6 +187,7 @@ urlpatterns = [
     path('get-category-items/', get_category_items, name='get-category-items'),
     path('operative-dashboard/', operativedashboard, name='operative-dashboard'),
     path('upload-category-items/', upload_category_items, name='upload_category_items'),
+    path('upload-category-only/', upload_category_only, name='upload_category_only'),
     path('search-suggestions-purchase/', search_suggestions_purchase, name='search-suggestions-purchase'),
     path('customers/', customer_search, name='customer_search'),
     path('customer_create11/', customer_create, name='customer_create11'),

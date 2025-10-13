@@ -136,10 +136,10 @@ class catogaryitem(models.Model):
         choices=CATEGORY_CHOICES,  # Using Category.choices
     )
     name = models.CharField(max_length=100)
-    serial_no = models.CharField(max_length=100)
+    serial_no = models.CharField(max_length=100, default='Solv-IT')
     quantity = models.IntegerField(default=1, null=True, blank=True)
-    unit_price = models.DecimalField(max_digits=10, decimal_places=2)
-    purchase_lot_code = models.CharField(max_length=100, null=True, blank=True)
+    unit_price = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    purchase_lot_code = models.CharField(max_length=100, null=True, blank=True, default=None)
 
     created_by = models.ForeignKey(
         User, on_delete=models.SET_NULL, null=True, blank=True, related_name='category_items_created'

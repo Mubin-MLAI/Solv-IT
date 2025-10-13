@@ -1,4 +1,5 @@
 {% include "store/sidebar.html" %}
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 
@@ -6,42 +7,56 @@
   <meta charset="UTF-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  {% load static %}
-  <!-- Bootstrap CSS -->
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-  <link rel="stylesheet" type="text/css" href="https://unpkg.com/@webpixels/css@1.1.5/dist/index.css">
-  <link rel="stylesheet" href="{% static 'css/style.css' %}" type="text/css">
-  {% block stylesheets %}{% endblock stylesheets %}
-  <title>Solv-IT: {% block title %} {% endblock title %}</title>
 
-  <!-- Favicon -->
+  <!-- Bootstrap & Icons -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" type="text/css" href="https://unpkg.com/@webpixels/css@1.1.5/dist/index.css">
+
+  <!-- Custom CSS -->
+  <link rel="stylesheet" href="{% static 'css/style.css' %}" type="text/css">
+
+  <title>Solv-IT | {% block title %}{% endblock title %}</title>
   <link rel="icon" href="{% static 'images/logo/favicon.png' %}" type="image/png">
 
-</head>
-
-<body>
-  
   <style>
+    .wrapper {
+      display: flex;
+      min-height: 100vh;
+    }
+
+    .sidebar {
+      width: 220px;
+      background-color: #fff;
+    }
+
+    body.dark-mode .sidebar {
+      background-color: #1e1e1e !important;
+    }
+
+    .content-area {
+      flex-grow: 1;
+      display: flex;
+      flex-direction: column;
+    }
+
+    body.dark-mode {
+      background-color: #121212;
+      color: #e0e0e0;
+    }
+
+    .navbar-dark-mode {
+      background-color: #1e1e1e !important;
+    }
+
     .paginator {
       display: flex;
       justify-content: center;
     }
 
-    /* Ensure dropdown is fully visible */
-    .dropdown-menu {
-      min-width: 200px;
-      z-index: 1050;
-    }
-
-    /* Improve navbar on mobile */
     @media (max-width: 767px) {
-      .navbar {
-        padding: 10px;
-      }
-
       .navbar-collapse {
         background-color: black !important;
-        padding: 10px;
       }
 
       .dropdown-menu {
@@ -49,44 +64,46 @@
       }
     }
   </style>
-  
 
-  <!-- <section id="wrapper"> -->
-  <nav class="navbar navbar-expand-md bg-success">
-    <div class="container-fluid mx-2">
-      <div class="navbar-header">
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#toggle-navbar"
-          aria-controls="toggle-navbar" aria-expanded="false" aria-label="Toggle navigation">
-          <i class="fa fa-bars text-white"></i>
-        </button>
-        <a class="navbar-brand" style="font-size: 20px;" href="{% url 'dashboard' %}">Solv-<span
-            class="text-warning">IT</span></a>
-      </div>
-      <div class="collapse navbar-collapse" id="toggle-navbar">
-        <ul class="navbar-nav ms-auto">
-          {% comment %} <li class="nav-item">
-            <a class="nav-link" href="#"><i class="fa fa-bell"></i><span>98</span></a>
-          </li> {% endcomment %}
-          {% comment %} <li class="nav-item">
-            <a class="nav-link" href="#">
-              <i data-show="show-side-navigation1" class="fa fa-bars show-side-btn"></i>
+  {% block stylesheets %}{% endblock stylesheets %}
+</head>
+
+<body>
+
+  <div class="wrapper">
+    <!-- Sidebar -->
+    {% include "store/sidebar.html" %}
+
+    <!-- Main content -->
+    <div class="content-area">
+      <!-- Navbar -->
+      <nav class="navbar navbar-expand-md bg-success">
+        <div class="container-fluid mx-2">
+          <div class="navbar-header">
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#toggle-navbar"
+              aria-controls="toggle-navbar" aria-expanded="false" aria-label="Toggle navigation">
+              <i class="fa fa-bars text-white"></i>
+            </button>
+            <a class="navbar-brand" style="font-size: 20px;" href="{% url 'dashboard' %}">
+              Solv-<span class="text-warning">IT</span>
             </a>
-          </li> {% endcomment %}
-        </ul>
-      </div>
+          </div>
+          <div class="collapse navbar-collapse" id="toggle-navbar">
+            <ul class="navbar-nav ms-auto">
+              <!-- Notifications or Profile (future) -->
+            </ul>
+          </div>
+        </div>
+      </nav>
+
+      <!-- Main Page Content -->
+      {% block content %}{% endblock content %}
     </div>
-  </nav>
-  {% block content%}
-
-  {% endblock content%}
-  <!-- </section> -->
   </div>
-  <!-- Bootstrap core JavaScript-->
-  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
 
-  <!-- Core plugin JavaScript-->
-  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+  <!-- Scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
   {% block javascripts %}{% endblock javascripts %}
 </body>

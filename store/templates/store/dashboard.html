@@ -1,129 +1,179 @@
 {% extends "store/base.html" %}
 {% load static %}
+
 {% block title %}Dashboard{% endblock title %}
 
 {% block content %}
-<br>
-<!-- Dashboard -->
-<div class="d-flex flex-column flex-lg-row h-lg-full bg-surface-secondary">
-    {% load static %}
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@2.9.4/dist/Chart.min.js"></script>
-    <!-- Main content -->
-    <div class="h-screen flex-grow-1 overflow-y-lg-auto">
-        <!-- Main -->
-        <main class="py-6 bg-surface-secondary">
-            <div class="container-fluid">
-                <!-- Card stats -->
-                <div class="row g-6 mb-6">
-                    <style>
-                        a {
-                            text-decoration: none;
-                        }
-                    </style>
-                    <div class="col-xl-3 col-sm-6 col-12" id="products">
-                        <a href="{% url 'productslist' %}">
-                            <div class="card shadow border-0">
-                                <div class="card-body">
-                                    <div class="row">
-                                        <div class="col">
-                                            <span class="h6 font-semibold text-muted text-sm d-block mb-2">Products</span>
-                                            <span class="h3 font-bold mb-0">{{total_items}}</span>
-                                        </div>
-                                        <div class="col-auto">
-                                            <div class="icon icon-shape bg-tertiary text-white text-lg rounded-circle">
-                                                <i class="fa fa-clipboard-list"></i>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="mt-2 mb-0 text-sm">
-                                        <span class="badge badge-pill bg-soft-success text-success me-2">
-                                            <i class="fa fa-arrow-up me-1"></i>13%
-                                        </span>
-                                        <span class="text-nowrap text-xs text-muted">Since last month</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </a>
-                    </div>
-                    <div class="col-xl-3 col-sm-6 col-12" id="profiles">
-                        <a href="{% url 'profile_list' %}">
-                            <div class="card shadow border-0">
-                                <div class="card-body">
-                                    <div class="row">
-                                        <div class="col">
-                                            <span class="h6 font-semibold text-muted text-sm d-block mb-2">Staff</span>
-                                            <span class="h3 font-bold mb-0">{{profiles_count}}</span>
-                                        </div>
-                                        <div class="col-auto">
-                                            <div class="icon icon-shape bg-primary text-white text-lg rounded-circle">
-                                                <i class="fa-solid fa fa-users"></i>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="mt-2 mb-0 text-sm">
-                                        <span class="badge badge-pill bg-soft-success text-success me-2">
-                                            <i class="fa fa-arrow-up me-1"></i>30%
-                                        </span>
-                                        <span class="text-nowrap text-xs text-muted">Since last month</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </a>
-                    </div>
-                    <div class="col-xl-3 col-sm-6 col-12" id="deliveries">
-                        <a href="{% url 'deliveries' %}">
-                            <div class="card shadow border-0">
-                                <div class="card-body">
-                                    <div class="row">
-                                        <div class="col">
-                                            <span class="h6 font-semibold text-muted text-sm d-block mb-2">Pending deliveries</span>
-                                            <span class="h3 font-bold mb-0">{{delivery.count}}</span>
-                                        </div>
-                                        <div class="col-auto">
-                                            <div class="icon icon-shape bg-info text-white text-lg rounded-circle">
-                                                <i class="fa fa-truck"></i>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="mt-2 mb-0 text-sm">
-                                        <span class="badge badge-pill bg-soft-danger text-danger me-2">
-                                            <i class="fa fa-arrow-down me-1"></i>-5%
-                                        </span>
-                                        <span class="text-nowrap text-xs text-muted">Since last month</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </a>
-                    </div>
-                    <div class="col-xl-3 col-sm-6 col-12" id="sales">
-                        <a href="{% url 'saleslist' %}">
-                            <div class="card shadow border-0">
-                                <div class="card-body">
-                                    <div class="row">
-                                        <div class="col">
-                                            <span class="h6 font-semibold text-muted text-sm d-block mb-2">Sales</span>
-                                            <span class="h3 font-bold mb-0">{{sales.count}}</span>
-                                        </div>
-                                        <div class="col-auto">
-                                            <div class="icon icon-shape bg-warning text-white text-lg rounded-circle">
-                                                <i class="fa fa-shopping-cart"></i>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="mt-2 mb-0 text-sm">
-                                        <span class="badge badge-pill bg-soft-success text-success me-2">
-                                            <i class="fa fa-arrow-up me-1"></i>10%
-                                        </span>
-                                        <span class="text-nowrap text-xs text-muted">Since last month</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </a>
-                    </div>
-                </div>
-                {% include 'store/charts.html' %}
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@2.9.4/dist/Chart.min.js"></script>
+
+
+<!-- Stat Cards -->
+<div class="container-fluid">
+  <div class="row g-4 mb-5">
+
+    <div class="col-xl-3 col-sm-6">
+      <a href="{% url 'productslist' %}">
+        <div class="card shadow border-0">
+          <div class="card-body d-flex justify-content-between align-items-center">
+            <div>
+              <p class="text-muted mb-1">Inventory Quantity</p>
+              <h3 class="fw-bold">{{ total_items }}</h3>
             </div>
-        </main>
+            <div class="icon icon-shape bg-secondary text-white rounded-circle p-3">
+              <i class="fas fa-clipboard-list"></i>
+            </div>
+          </div>
+        </div>
+      </a>
     </div>
+
+    <div class="col-xl-3 col-sm-6">
+      <a href="{% url 'profile_list' %}">
+        <div class="card shadow border-0">
+          <div class="card-body d-flex justify-content-between align-items-center">
+            <div>
+              <p class="text-muted mb-1">Staff</p>
+              <h3 class="fw-bold">{{ profiles_count }}</h3>
+            </div>
+            <div class="icon icon-shape bg-primary text-white rounded-circle p-3">
+              <i class="fas fa-users"></i>
+            </div>
+          </div>
+        </div>
+      </a>
+    </div>
+
+    <div class="col-xl-3 col-sm-6">
+      <a href="{% url 'customer_list' %}">
+        <div class="card shadow border-0">
+          <div class="card-body d-flex justify-content-between align-items-center">
+            <div>
+              <p class="text-muted mb-1">Customers</p>
+              <h3 class="fw-bold">{{ customers_count }}</h3>
+            </div>
+            <div class="icon icon-shape bg-success text-white rounded-circle p-3">
+              <i class="fas fa-user"></i>
+            </div>
+          </div>
+        </div>
+      </a>
+    </div>
+
+    <div class="col-xl-3 col-sm-6">
+      <a href="{% url 'deliveries' %}">
+        <div class="card shadow border-0">
+          <div class="card-body d-flex justify-content-between align-items-center">
+            <div>
+              <p class="text-muted mb-1">Pending Deliveries</p>
+              <h3 class="fw-bold">{{ delivery.count }}</h3>
+            </div>
+            <div class="icon icon-shape bg-info text-white rounded-circle p-3">
+              <i class="fas fa-truck"></i>
+            </div>
+          </div>
+        </div>
+      </a>
+    </div>
+
+    <div class="col-xl-3 col-sm-6">
+      <a href="{% url 'saleslist' %}">
+        <div class="card shadow border-0">
+          <div class="card-body d-flex justify-content-between align-items-center">
+            <div>
+              <p class="text-muted mb-1">Sales</p>
+              <h3 class="fw-bold">{{ sales.count }}</h3>
+            </div>
+            <div class="icon icon-shape bg-warning text-white rounded-circle p-3">
+              <i class="fas fa-shopping-cart"></i>
+            </div>
+          </div>
+        </div>
+      </a>
+    </div>
+
+  </div>
+
+  <!-- Stock Summary + Chart -->
+  <div class="card shadow border-0 mb-5">
+    <div class="card-body text-center">
+      <h5 class="text-primary fw-bold">Solv-IT Stock by Category</h5>
+      <hr>
+      <div class="row justify-content-center mt-4">
+        <div class="col-md-3 col-sm-6 mb-3">
+          <p>SSDs</p>
+          <a href="/searchitem/?q=ssd" class="h5 text-decoration-underline">{{ stock_summary.ssd }}</a>
+        </div>
+        <div class="col-md-3 col-sm-6 mb-3">
+          <p>Processors</p>
+          <a href="/searchitem/?q=processor" class="h5 text-decoration-underline">{{ stock_summary.processor }}</a>
+        </div>
+        <div class="col-md-3 col-sm-6 mb-3">
+          <p>HDDs</p>
+          <a href="/searchitem/?q=hdd" class="h5 text-decoration-underline">{{ stock_summary.hdd }}</a>
+        </div>
+        <div class="col-md-3 col-sm-6 mb-3">
+          <p>RAMs</p>
+          <a href="/searchitem/?q=ram" class="h5 text-decoration-underline">{{ stock_summary.ram }}</a>
+        </div>
+      </div>
+      <canvas id="stockChart" height="100"></canvas>
+    </div>
+  </div>
 </div>
 {% endblock content %}
+
+{% block javascripts %}
+<script>
+  let stockChartInstance = null;
+
+  function renderStockChart(theme = 'light') {
+    const ctx = document.getElementById('stockChart').getContext('2d');
+    if (stockChartInstance) {
+      stockChartInstance.destroy();
+    }
+    stockChartInstance = new Chart(ctx, {
+      type: 'doughnut',
+      data: {
+        labels: ['SSD', 'Processor', 'HDD', 'RAM'],
+        datasets: [{
+          data: [{{ stock_summary.ssd }}, {{ stock_summary.processor }}, {{ stock_summary.hdd }}, {{ stock_summary.ram }}],
+          backgroundColor: ['#0d6efd', '#28a745', '#ffc107', '#17a2b8']
+        }]
+      },
+      options: {
+        responsive: true,
+        legend: {
+          position: 'bottom',
+          labels: {
+            fontColor: theme === 'dark' ? '#e0e0e0' : '#000'
+          }
+        }
+      }
+    });
+  }
+
+  const toggle = document.getElementById('darkModeToggle');
+  const body = document.body;
+
+  if (localStorage.getItem('theme') === 'dark') {
+    body.classList.add('dark-mode');
+    toggle.checked = true;
+    renderStockChart('dark');
+  } else {
+    renderStockChart('light');
+  }
+
+  toggle.addEventListener('change', function () {
+    if (this.checked) {
+      body.classList.add('dark-mode');
+      localStorage.setItem('theme', 'dark');
+      renderStockChart('dark');
+    } else {
+      body.classList.remove('dark-mode');
+      localStorage.setItem('theme', 'light');
+      renderStockChart('light');
+    }
+  });
+</script>
+{% endblock javascripts %}

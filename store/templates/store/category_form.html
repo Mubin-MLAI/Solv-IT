@@ -7,10 +7,43 @@
 <br>
 
 <div class="container p-4">
+    <!-- Go back -->
+    <div class="mb-4">
+        <a href="{% url 'category-list' %}" class="btn btn-outline-success">
+            <i class="fas fa-arrow-left me-2"></i>
+            Go back
+        </a>
+    </div>
+
     <h2 class="mb-4">
         <i class="{% if form.instance.pk %}fas fa-edit{% else %}fas fa-plus{% endif %}"></i>
         {% if form.instance.pk %}Edit{% else %}Entry{% endif %}
     </h2>
+
+    <!-- Excel Import Form -->
+    <div class="card shadow-sm border-light w-100">
+        <div class="card-body">
+            <h5 class="card-title mb-3">Import Items from Excel</h5>
+            {% if error %}
+                <div class="alert alert-danger">{{ error }}</div>
+            {% endif %}
+            {% if success %}
+                <div class="alert alert-success">{{ success }}</div>
+            {% endif %}
+
+            <form method="POST" enctype="multipart/form-data" action="{% url 'upload_category_only' %}">
+                {% csrf_token %}
+                <div class="row mb-3">
+                    <div class="col-md-4">
+                        {{ form.file.label_tag }}
+                        {{ form.file }}
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-success btn-sm rounded-pill shadow-sm"><i class="fa-solid fa-download"></i> Upload Items </button>
+            </form>
+        </div>
+    </div>
+
     <form method="post" class="border p-4 rounded bg-light">
         {% csrf_token %}
 
@@ -73,6 +106,18 @@
             {% if form.unit_price.errors %}
                 <div class="invalid-feedback">
                     {% for error in form.unit_price.errors %}
+                        <p>{{ error }}</p>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        </div>
+
+        <div class="mb-3">
+            {{ form.purchase_lot_code.label_tag }}
+            {{ form.purchase_lot_code|add_class:"form-control" }}  
+            {% if form.purchase_lot_code.errors %}
+                <div class="invalid-feedback">
+                    {% for error in form.purchase_lot_code.errors %}
                         <p>{{ error }}</p>
                     {% endfor %}
                 </div>

@@ -58,20 +58,6 @@
         style="z-index: 9999; width: 100%; background-color: rgb(254, 254, 253);"></div>
 </div>
 
-<div class="card-body">
-
-    {% if messages %}
-    <ul class="messages">
-        {% for message in messages %}
-        <div class="alert alert-success" role="alert">
-            <li class="message {{ message.tags }}" style="text-align: center; font-size: large;">{{ message }}</li>
-        </div>
-        {% endfor %}
-    </ul>
-    {% endif %}
-
-</div>
-
 
 <!-- Product Table Section -->
 <div class="px-4">
@@ -138,6 +124,20 @@
         </table>
     </div>
     {% endif %}
+</div>
+
+<div class="card-body">
+
+    {% if messages %}
+    <ul class="messages">
+        {% for message in messages %}
+        <div class="alert alert-success" role="alert">
+            <li class="message {{ message.tags }}" style="text-align: center; font-size: large;">{{ message }}</li>
+        </div>
+        {% endfor %}
+    </ul>
+    {% endif %}
+
 </div>
 
 <!-- Pagination Section -->
