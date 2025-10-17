@@ -1,55 +1,112 @@
 {% extends "store/base.html" %}
 {% block title %}Add Expense{% endblock %}
 {% block content %}
+
+<style>
+    /* ✅ Responsive Form Styling */
+    @media (max-width: 768px) {
+        .form-label {
+            font-size: 0.9rem;
+        }
+        .card {
+            padding: 1rem;
+        }
+    }
+</style>
+
 <div class="container py-4">
-    <h4 class="mb-4">Add Expense</h4>
-    <form method="post">
-        {% csrf_token %}
-        <div class="mb-3">
-            <label for="date" class="form-label">Date</label>
-            <input type="date" class="form-control" name="date" id="date" required>
-        </div>
-        <div class="mb-3">
-            <label for="name" class="form-label">Name</label>
-            <input type="text" class="form-control" name="name" id="name" required>
-        </div>
-        <div class="mb-3">
-            <label for="amount" class="form-label">Amount</label>
-            <input type="number" step="0.01" class="form-control" name="amount" id="amount" required>
-        </div>
-        <div class="mb-3">
-            <label for="category" class="form-label">Category</label>
-            <select class="form-select" name="category" id="category" required>
-                <option value="office">Office</option>
-                <option value="travel">Travel</option>
-                <option value="salary">Salary</option>
-                <option value="other">Other</option>
-            </select>
-        </div>
-        <div class="mb-3" id="new-category-div" style="display:none;">
-            <label for="new_category" class="form-label">New Category</label>
-            <input type="text" class="form-control" name="new_category" id="new_category" placeholder="Enter new category">
-        </div>
-        <div class="mb-3">
-            <label for="description" class="form-label">Description</label>
-            <textarea class="form-control" name="description" id="description" rows="3"></textarea>
-        </div>
-        <button type="submit" class="btn btn-success">Add Expense</button>
-    </form>
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-2">
+        <h4 class="mb-0">Add Expense</h4>
+        <a href="{% url 'expense-list' %}" class="btn btn-outline-secondary">
+            <i class="fa fa-arrow-left me-1"></i> Back to Expenses
+        </a>
+    </div>
+
+    <div class="card shadow-sm p-4">
+        <form method="post" novalidate>
+            {% csrf_token %}
+            <div class="row g-3">
+                <!-- Date -->
+                <div class="col-12 col-md-4">
+                    <label for="date" class="form-label">Date</label>
+                    <input type="date" class="form-control" name="date" id="date" required>
+                </div>
+
+                <!-- Name -->
+                <div class="col-12 col-md-8">
+                    <label for="name" class="form-label">Name</label>
+                    <input type="text" class="form-control" name="name" id="name" placeholder="Enter expense name" required>
+                </div>
+
+                <!-- Amount -->
+                <div class="col-12 col-md-4">
+                    <label for="amount" class="form-label">Amount</label>
+                    <div class="input-group">
+                        <span class="input-group-text">₹</span>
+                        <input type="number" step="0.01" class="form-control" name="amount" id="amount" placeholder="0.00" required>
+                    </div>
+                </div>
+
+                <!-- Category -->
+                <div class="col-12 col-md-4">
+                    <label for="category" class="form-label">Category</label>
+                    <select class="form-select" name="category" id="category" required>
+                        <option value="" disabled selected>Select a category</option>
+                        <option value="office">Office</option>
+                        <option value="travel">Travel</option>
+                        <option value="salary">Salary</option>
+                        <option value="other">Other</option>
+                    </select>
+                </div>
+
+                <!-- New Category -->
+                <div class="col-12 col-md-4" id="new-category-div" style="display:none;">
+                    <label for="new_category" class="form-label">New Category</label>
+                    <input type="text" class="form-control" name="new_category" id="new_category" placeholder="Enter new category">
+                </div>
+
+                <!-- Description -->
+                <div class="col-12">
+                    <label for="description" class="form-label">Description</label>
+                    <textarea class="form-control" name="description" id="description" rows="3" placeholder="Optional details"></textarea>
+                </div>
+
+                <!-- Submit -->
+                <div class="col-12 d-flex justify-content-end">
+                    <button type="submit" class="btn btn-success px-4">
+                        <i class="fa fa-check me-1"></i> Add Expense
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
 </div>
+
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        var categorySelect = document.getElementById('category');
-        var newCategoryDiv = document.getElementById('new-category-div');
-        categorySelect.addEventListener('change', function() {
+        // ✅ Auto-fill today's date
+        const dateInput = document.getElementById('date');
+        if (!dateInput.value) {
+            const today = new Date().toISOString().split('T')[0];
+            dateInput.value = today;
+        }
+
+        // ✅ Show / Hide new category field
+        const categorySelect = document.getElementById('category');
+        const newCategoryDiv = document.getElementById('new-category-div');
+        const newCategoryInput = document.getElementById('new_category');
+
+        categorySelect.addEventListener('change', function () {
             if (this.value === 'other') {
                 newCategoryDiv.style.display = 'block';
-                document.getElementById('new_category').required = true;
+                newCategoryInput.required = true;
             } else {
                 newCategoryDiv.style.display = 'none';
-                document.getElementById('new_category').required = false;
+                newCategoryInput.required = false;
+                newCategoryInput.value = '';
             }
         });
     });
 </script>
+
 {% endblock %}

@@ -1,57 +1,128 @@
 {% extends 'store/base.html' %}
 {% load querystring from django_tables2 %}
 {% block title %}Category{% endblock title %}
-{% block content %}
 
+{% block content %}
 <br>
-<!-- Header Section -->
-<div class="my-4">
+
+<style>
+    /* ✅ Table styling */
+    .table th,
+    .table td {
+        text-align: center;
+    }
+
+    /* ✅ Responsive Table (Card Layout on Mobile) */
+    @media (max-width: 767.98px) {
+        .table thead {
+            display: none;
+        }
+
+        .table, .table tbody, .table tr, .table td {
+            display: block;
+            width: 100%;
+        }
+
+        .table tr {
+            margin-bottom: 0.75rem;
+            border: 1px solid #dee2e6;
+            border-radius: .25rem;
+            background: #fff;
+            padding: 0.75rem;
+        }
+
+        .table td {
+            text-align: right;
+            padding-left: 50%;
+            position: relative;
+            border: none;
+            white-space: normal;
+        }
+
+        .table td::before {
+            content: attr(data-label);
+            position: absolute;
+            left: 0;
+            width: 50%;
+            padding-left: .75rem;
+            font-weight: 600;
+            text-align: left;
+            color: #333;
+        }
+
+        /* ✅ Buttons full width on small screens */
+        .table td .btn {
+            width: 100%;
+            margin-top: 5px;
+        }
+
+        /* ✅ Search bar stacked on mobile */
+        #searchform {
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        #searchform input,
+        #searchform button {
+            width: 100%;
+            border-radius: 50px !important;
+        }
+
+        /* ✅ Buttons on top */
+        .d-flex.gap-2 {
+            flex-wrap: wrap;
+            justify-content: flex-start;
+        }
+
+        .d-flex.gap-2 a {
+            flex: 1 1 auto;
+        }
+
+        /* ✅ Pagination wrapping */
+        .pagination {
+            flex-wrap: wrap;
+        }
+    }
+</style>
+
+<!-- ✅ Header Section -->
+<div class="my-4 px-3 px-md-4">
     <div class="row align-items-center">
-        <div class="col-md-6">
-            <h4 class="display-6 mb-0 text-success">Item List</h4>
+        <div class="col-md-6 col-12 mb-2 mb-md-0">
+            <h4 class="display-6 mb-0 text-success text-center text-md-start">Item List</h4>
         </div>
-        <div class="col-md-6 d-flex justify-content-end gap-2">
+        <div class="col-md-6 col-12 d-flex justify-content-center justify-content-md-end gap-2 flex-wrap">
             <a class="btn btn-success btn-sm rounded-pill shadow-sm" href="{% url 'category-create' %}">
                 <i class="fa-solid fa-plus"></i> Add Item Entry
             </a>
-
             <a class="btn btn-success btn-sm rounded-pill shadow-sm" href="{% querystring '_export'='xlsx' %}">
                 <i class="fa-solid fa-download"></i> Export to Excel
             </a>
         </div>
     </div>
 
-    <form class="input-group mt-4" role="search" id="searchform" action="{% url 'catogary_item_search_list_view' %}"
-        method="get" accept-charset="utf-8">
-        <input id="searchbox" name="q" type="text" class="form-control border-2 rounded-pill shadow-sm"
+    <!-- ✅ Search Form -->
+    <form class="input-group mt-4" role="search" id="searchform" 
+          action="{% url 'catogary_item_search_list_view' %}" method="get">
+        <input id="searchbox" name="q" type="text"
+            class="form-control border-2 rounded-pill shadow-sm"
             placeholder="Find products" value="{{ request.GET.q }}" autocomplete="off">
-        <button class="btn btn-outline-success rounded-pill shadow-sm" type="submit">
+        <button class="btn btn-outline-success rounded-pill shadow-sm ms-2" type="submit">
             <i class="fa-solid fa-search"></i>
         </button>
-        <button class="btn btn-outline-secondary rounded-pill shadow-sm" type="button" id="clearSearch">
+        <button class="btn btn-outline-secondary rounded-pill shadow-sm ms-2" type="button" id="clearSearch">
             <i class="fa-solid fa-times"></i>
         </button>
     </form>
 
-    <!-- Search suggestions dropdown
-        <div id="suggestions" class="list-group position-absolute" style="z-index: 9999; width: 100%;"></div> -->
-    <!-- Search suggestions dropdown -->
-    <div id="suggestions" class="list-group position-absolute" style="z-index: 9999; width: 100%; background-color: rgb(252, 253, 254);"></div>
-
+    <!-- ✅ Suggestions Dropdown -->
+    <div id="suggestions" class="list-group position-absolute" 
+         style="z-index: 9999; width: 100%; background-color: rgb(252, 253, 254);"></div>
 </div>
 
-<!-- Table Section -->
-<!-- <div class="container px-3"> -->
-<style>
-    .table th,
-    .table td {
-        text-align: center;
-    }
-</style>
-
+<!-- ✅ Table Section -->
 {% if page_obj.object_list %}
-<!-- Table displaying items if they are found -->
-<div class="table-responsive">
+<div class="table-responsive px-3 px-md-4">
     <table class="table table-sm table-striped table-bordered">
         <thead class="thead-light">
             <tr>
@@ -67,13 +138,13 @@
         <tbody>
             {% for item in page_obj %}
             <tr>
-                <td>{{ item.pk }}</td>
-                <td>{{ item.get_category_display }}</td> <!-- Display Category -->
-                <td>{{ item.name }}</td> <!-- Display Name -->
-                <td>{{ item.serial_no }}</td> <!-- Display Serial Number -->
-                <td>{{ item.quantity }}</td> <!-- Display Quantity -->
-                <td>{{ item.unit_price }}</td> <!-- Display Unit Price -->
-                <td>
+                <td data-label="ID">{{ item.pk }}</td>
+                <td data-label="Category">{{ item.get_category_display }}</td>
+                <td data-label="Name">{{ item.name }}</td>
+                <td data-label="Serial Number">{{ item.serial_no }}</td>
+                <td data-label="Quantity">{{ item.quantity }}</td>
+                <td data-label="Unit Price">{{ item.unit_price }}</td>
+                <td data-label="Action">
                     <a href="{% url 'category-detail' item.pk %}" class="btn btn-outline-primary btn-sm">
                         <i class="fa-solid fa-info-circle me-2"></i> View Details
                     </a>
@@ -84,67 +155,61 @@
     </table>
 </div>
 {% else %}
-
-
-
-<!-- Display this message if no items are found -->
+<!-- ✅ No Item Message -->
 <div class="alert alert-warning text-center">
-    <p>No items found for "{{ request.GET.q }}". You can <a href="{% url 'category-create' %}"
-            class="btn btn-success btn-sm rounded-pill shadow-sm">
-            Add a new item</a>.</p>
+    <p>No items found for "{{ request.GET.q }}". You can
+        <a href="{% url 'category-create' %}" class="btn btn-success btn-sm rounded-pill shadow-sm">
+            Add a new item
+        </a>.
+    </p>
 </div>
 {% endif %}
-<!-- </div> -->
 
-<!-- Pagination Section -->
+<!-- ✅ Pagination -->
 {% if is_paginated %}
 <nav aria-label="Page navigation">
-    <ul class="pagination justify-content-center">
+    <ul class="pagination justify-content-center flex-wrap">
         {% if page_obj.has_previous %}
         <li class="page-item">
-            <a class="page-link" href="?page={{ page_obj.previous_page_number }}" aria-label="Previous">
+            <a class="page-link" href="{% querystring 'page'=page_obj.previous_page_number %}" aria-label="Previous">
                 <span aria-hidden="true">&laquo;</span>
             </a>
         </li>
         {% else %}
         <li class="page-item disabled">
-            <span class="page-link" aria-label="Previous">
-                <span aria-hidden="true">&laquo;</span>
-            </span>
+            <span class="page-link">&laquo;</span>
         </li>
         {% endif %}
 
         {% for i in paginator.page_range %}
         {% if page_obj.number == i %}
         <li class="page-item active" aria-current="page">
-            <span class="page-link">{{ i }} <span class="visually-hidden">(current)</span></span>
+            <span class="page-link">{{ i }}</span>
         </li>
         {% else %}
         <li class="page-item">
-            <a class="page-link" href="?page={{ i }}">{{ i }}</a>
+            <a class="page-link" href="{% querystring 'page'=i %}">{{ i }}</a>
         </li>
         {% endif %}
         {% endfor %}
 
         {% if page_obj.has_next %}
         <li class="page-item">
-            <a class="page-link" href="?page={{ page_obj.next_page_number }}" aria-label="Next">
+            <a class="page-link" href="{% querystring 'page'=page_obj.next_page_number %}" aria-label="Next">
                 <span aria-hidden="true">&raquo;</span>
             </a>
         </li>
         {% else %}
         <li class="page-item disabled">
-            <span class="page-link" aria-label="Next">
-                <span aria-hidden="true">&raquo;</span>
-            </span>
+            <span class="page-link">&raquo;</span>
         </li>
         {% endif %}
     </ul>
 </nav>
 {% endif %}
 
+<!-- ✅ Search Suggestion Script -->
 <script>
-    // JavaScript for search suggestions
     const searchBox = document.getElementById('searchbox');
     const suggestionsBox = document.getElementById('suggestions');
     const searchForm = document.getElementById('searchform');
@@ -152,49 +217,45 @@
 
     searchBox.addEventListener('input', function () {
         const query = searchBox.value;
-        if (query.length >= 2) { // trigger after at least 2 characters
+        if (query.length >= 2) {
             fetch(`/search-suggestions/?q=${query}`)
                 .then(response => response.json())
                 .then(data => {
-                    suggestionsBox.innerHTML = ''; // Clear previous suggestions
+                    suggestionsBox.innerHTML = '';
                     if (data.suggestions.length > 0) {
                         data.suggestions.forEach(suggestion => {
                             const item = document.createElement('a');
-                            item.href = `?q=${suggestion}`; // Link to filtered search results
+                            item.href = `?q=${suggestion}`;
                             item.classList.add('list-group-item', 'list-group-item-action');
                             item.textContent = suggestion;
                             suggestionsBox.appendChild(item);
                         });
                     } else {
                         const noResultsItem = document.createElement('a');
-                        noResultsItem.classList.add('list-group-item', 'list-group-item-action', 'text-danger');
+                        noResultsItem.classList.add('list-group-item', 'text-danger');
                         noResultsItem.textContent = 'No suggestions found! Click here to add item';
-                        noResultsItem.style.cursor = 'pointer'; // Make it look clickable
-                        noResultsItem.addEventListener('click', function () {
-                            window.location.href = "{% url 'category-create' %}"; // Redirect to add item form
+                        noResultsItem.style.cursor = 'pointer';
+                        noResultsItem.addEventListener('click', () => {
+                            window.location.href = "{% url 'category-create' %}";
                         });
                         suggestionsBox.appendChild(noResultsItem);
                     }
                 })
                 .catch(error => console.error('Error fetching suggestions:', error));
         } else {
-            suggestionsBox.innerHTML = ''; // Clear suggestions if input is less than 2 characters
+            suggestionsBox.innerHTML = '';
         }
     });
 
-    // Hide suggestions when clicking outside the input
     document.addEventListener('click', function (event) {
         if (!searchBox.contains(event.target) && !suggestionsBox.contains(event.target)) {
             suggestionsBox.innerHTML = '';
         }
     });
 
-    // Handle the clearing of the search input
     clearButton.addEventListener('click', function () {
-        // Clear the search box and submit the form to show all items
         searchBox.value = '';
-        searchForm.submit(); // Submit the form to refresh the page
+        searchForm.submit();
     });
 </script>
-
 {% endblock %}

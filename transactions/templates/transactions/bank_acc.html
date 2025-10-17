@@ -4,12 +4,80 @@
 {% block title %}Bank Accounts{% endblock title %}
 
 {% block content %}
-
 <div class="container-fluid my-4">
-    <div class="card shadow-sm rounded p-3">
+
+    <style>
+        /* ✅ Responsive Transactions Table */
+        @media (max-width: 991.98px) {
+            .table thead {
+                display: none;
+            }
+
+            .table, .table tbody, .table tr, .table td {
+                display: block;
+                width: 100%;
+            }
+
+            .table tr {
+                margin-bottom: 1rem;
+                border: 1px solid #dee2e6;
+                border-radius: .5rem;
+                background: #fff;
+                padding: .75rem;
+            }
+
+            .table td {
+                text-align: right;
+                padding-left: 50%;
+                position: relative;
+                border: none;
+                white-space: normal;
+            }
+
+            .table td::before {
+                content: attr(data-label);
+                position: absolute;
+                left: 0;
+                width: 50%;
+                padding-left: .75rem;
+                font-weight: 600;
+                text-align: left;
+                color: #333;
+            }
+
+            /* ✅ Filter form stacks vertically */
+            form#filterForm {
+                flex-direction: column;
+            }
+            #filterForm .col-md-3 {
+                width: 100%;
+            }
+            #filterForm input,
+            #filterForm button {
+                width: 100%;
+                margin-bottom: 0.5rem;
+            }
+
+            /* ✅ Sidebar & content stack */
+            .row > .col-md-4,
+            .row > .col-md-8 {
+                width: 100%;
+            }
+
+            /* ✅ Header buttons stack */
+            .col-md-6.d-flex.justify-content-end.gap-2 {
+                flex-wrap: wrap;
+                justify-content: center !important;
+                gap: 0.5rem;
+            }
+        }
+    </style>
+
+    <!-- ✅ Page Header -->
+    <div class="card shadow-sm rounded p-3 mb-3">
         <div class="row align-items-center">
-            <div class="col-md-6">
-                <h4 class="display-10 mb-0 text-success">Account Transaction Details</h4>
+            <div class="col-md-6 col-12 mb-2 mb-md-0 text-center text-md-start">
+                <h4 class="mb-0 text-success">Account Transaction Details</h4>
             </div>
             <div class="col-md-6 d-flex justify-content-end gap-2">
                 <a class="btn btn-success btn-sm rounded-pill shadow-sm" href="{% url 'bank-create' %}">
@@ -21,184 +89,190 @@
             </div>
         </div>
     </div>
+
+    <!-- ✅ Main Content -->
     <div class="row">
-        <!-- Left Sidebar -->
+        <!-- Sidebar -->
         <div class="col-md-4 mb-4">
             <div class="card shadow-sm p-3 h-100">
                 <h5 class="text-success mb-3">Accounts Summary</h5>
+
                 <div class="mb-3 p-2 border rounded d-flex justify-content-between align-items-center bg-light {% if not selected_account_id %}border-success bg-success bg-opacity-10{% endif %}">
                     <div>
                         <a href="{% url 'cashbanklist' %}" class="{% if not selected_account_id %}text-success{% endif %}">
                             <strong>Show All</strong>
                         </a><br>
-                        <small>
-                            View all transactions across accounts
-                        </small>
+                        <small>View all transactions across accounts</small>
                     </div>
                 </div>
-                
+
                 {% for bank in all_bankaccounts %}
-                    <div class="mb-3 p-2 border rounded d-flex justify-content-between align-items-center bg-light {% if selected_account_id == bank.id|stringformat:"s" %}border-success bg-success bg-opacity-10{% endif %}">
-                        <div>
-                            <a href="?account_id={{ bank.id }}" class="{% if selected_account_id == bank.id|stringformat:"s" %}text-success{% endif %}">
-                                <strong>{{ bank.account_name }}</strong>
-                            </a><br>
-                            <small>
-                                {% if bank.opening_balance <= 0 %}
-                                    <span class="text-danger">₹{{ bank.opening_balance }}</span>
-                                {% else %}
-                                    <span class="text-success">₹{{ bank.opening_balance }}</span>
-                                {% endif %}
-                            </small>
-                        </div>
-                        <a href="{% url 'bank-delete' bank.id %}" class="btn btn-sm btn-outline-danger">
-                            <i class="fa fa-trash"></i>
-                        </a>
+                <div class="mb-3 p-2 border rounded d-flex justify-content-between align-items-center bg-light {% if selected_account_id == bank.id|stringformat:"s" %}border-success bg-success bg-opacity-10{% endif %}">
+                    <div>
+                        <a href="?account_id={{ bank.id }}" class="{% if selected_account_id == bank.id|stringformat:"s" %}text-success{% endif %}">
+                            <strong>{{ bank.account_name }}</strong>
+                        </a><br>
+                        <small>
+                            {% if bank.opening_balance <= 0 %}
+                                <span class="text-danger">₹{{ bank.opening_balance }}</span>
+                            {% else %}
+                                <span class="text-success">₹{{ bank.opening_balance }}</span>
+                            {% endif %}
+                        </small>
                     </div>
+                    <a href="{% url 'bank-delete' bank.id %}" class="btn btn-sm btn-outline-danger">
+                        <i class="fa fa-trash"></i>
+                    </a>
+                </div>
                 {% empty %}
-                    <p class="text-muted">No bank accounts found.</p>
+                <p class="text-muted">No bank accounts found.</p>
                 {% endfor %}
-                
-
-
-
             </div>
         </div>
 
+        <!-- Transaction Table -->
         <div class="col-md-8">
             <div class="card shadow-sm p-3">
-        <h5 class="mb-3 text-success">Account Transactions</h5>
-        <!-- Filter Section -->
+                <h5 class="mb-3 text-success">Account Transactions</h5>
+
+                <!-- ✅ Filter Section -->
                 <form id="filterForm" class="row g-2 mb-3">
-                  <div class="col-md-3">
-                    <input type="text" id="filterName" class="form-control" placeholder="Filter by Name/Description/Type">
-                  </div>
-                  <div class="col-md-3">
-                    <input type="date" id="filterDateStart" class="form-control" placeholder="Start Date">
-                  </div>
-                  <div class="col-md-3">
-                    <input type="date" id="filterDateEnd" class="form-control" placeholder="End Date">
-                  </div>
-                  <div class="col-md-3">
-                    <button type="button" id="clearFilters" class="btn btn-outline-secondary">Clear Filters</button>
-                  </div>
+                    <div class="col-md-3">
+                        <input type="text" id="filterName" class="form-control" placeholder="Filter by Name/Description/Type">
+                    </div>
+                    <div class="col-md-3">
+                        <input type="date" id="filterDateStart" class="form-control">
+                    </div>
+                    <div class="col-md-3">
+                        <input type="date" id="filterDateEnd" class="form-control">
+                    </div>
+                    <div class="col-md-3">
+                        <button type="button" id="clearFilters" class="btn btn-outline-secondary w-100">Clear Filters</button>
+                    </div>
                 </form>
-        <div class="table-responsive">
-          <div style="max-height: 500px; overflow-y: auto;">
-            <table class="table table-sm table-bordered table-striped align-middle text-center mb-0" id="transactionsTable">
-            <thead class="table-light">
-              <tr>
-                <th>Type</th>
-                <th>Name</th>
-                <th>Date</th>
-                <th>Amount</th>
-                <th>Balance Due</th>
-                <th>Action</th>
-              </tr>
-            </thead>
-            <tbody>
-              {% for sale in page_obj %}
-              <tr>
-                <td>{{ sale.payment_type }}</td>
-                <td class="name-cell">
-                  {% if sale.transaction_type == "Sale" %}
-                    {{ sale.customer.first_name }} ( Client )
-                  {% elif sale.transaction_type == "Purchase" %}
-                    {{ sale.vendor.name }} ( Vendor ) 
-                  {% elif sale.transaction_type == "Service" %}
-                    {{ sale.item_name|default:sale.description }} ( Service )
-                  {% endif %}
-                </td>
-                <td class="date-cell">
-                  {% if sale.transaction_type == "Service" %}
-                    {{ sale.date_created|date:"Y-m-d" }}
-                  {% else %}
-                    {{ sale.date_added|date:"Y-m-d" }}
-                  {% endif %}
-                </td>
-                <td>₹{{ sale.amount_paid }}</td>
-                <td>
-                  {% if sale.status == "Paid" %}
-                    <span class="text-success">₹0.00</span>
-                  {% elif sale.status == "Unpaid" or sale.status == "Balance" %}
-                    <span class="text-danger">₹{{ sale.amount_change|floatformat:2 }}</span>
-                  {% else %}
-                    <span>-</span>
-                  {% endif %}
-                </td>
-                <td>
-                  {% if sale.status != "Paid" %}
-                    <button type="button" class="btn btn-sm btn-danger open-payment-modal" 
-                    data-bs-toggle="modal" data-bs-target="#paymentModal"
-                    data-transaction-type="{{ sale.transaction_type }}"
-                    data-balance="{{ sale.amount_change|floatformat:2 }}"
-                    data-sale-id="{% if sale.transaction_type == 'Sale' %}{{ sale.id }}{% endif %}"
-                    data-servicebill-id="{% if sale.transaction_type == 'Service' %}{{ sale.id }}{% endif %}"
-                    data-customer-name="{{ sale.customer.first_name }}">
-                    <i class="fa fa-money-bill-wave"></i>
-                    </button>
-                  {% else %}
-                  <button type="button" class="btn btn-sm btn-success open-payment-modal" disabled>
-                    <i class="fa fa-money-bill-wave"></i>
-                  </button>
-                  {% endif %}
-                  </td>                                  
-              </tr>
-              {% empty %}
-              <tr>
-                <td colspan="6" class="text-muted">No transactions found.</td>
-              </tr>
-              {% endfor %}
-            </tbody>
-            </table>
-          </div>
-        </div>
+
+                <!-- ✅ Transactions Table -->
+                <div class="table-responsive" style="max-height: 500px; overflow-y: auto;">
+                    <table class="table table-sm table-bordered table-striped align-middle text-center mb-0" id="transactionsTable">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Type</th>
+                                <th>Name</th>
+                                <th>Date</th>
+                                <th>Amount</th>
+                                <th>Balance Due</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for sale in page_obj %}
+                            <tr>
+                                <td data-label="Type">{{ sale.payment_type }}</td>
+                                <td data-label="Name" class="name-cell">
+                                    {% if sale.transaction_type == "Sale" %}
+                                        {{ sale.customer.first_name }} ( Client )
+                                    {% elif sale.transaction_type == "Purchase" %}
+                                        {{ sale.vendor.name }} ( Vendor )
+                                    {% elif sale.transaction_type == "Service" %}
+                                        {{ sale.item_name|default:sale.description }} ( Service )
+                                    {% endif %}
+                                </td>
+                                <td data-label="Date" class="date-cell">
+                                    {% if sale.transaction_type == "Service" %}
+                                        {{ sale.date_created|date:"Y-m-d" }}
+                                    {% else %}
+                                        {{ sale.date_added|date:"Y-m-d" }}
+                                    {% endif %}
+                                </td>
+                                <td data-label="Amount">₹{{ sale.amount_paid }}</td>
+                                <td data-label="Balance Due">
+                                    {% if sale.status == "Paid" %}
+                                        <span class="text-success">₹0.00</span>
+                                    {% elif sale.status == "Unpaid" or sale.status == "Balance" %}
+                                        <span class="text-danger">₹{{ sale.amount_change|floatformat:2 }}</span>
+                                    {% else %}
+                                        <span>-</span>
+                                    {% endif %}
+                                </td>
+                                <td data-label="Action">
+                                    {% if sale.status != "Paid" %}
+                                        <button type="button" class="btn btn-sm btn-danger open-payment-modal"
+                                            data-bs-toggle="modal" data-bs-target="#paymentModal"
+                                            data-transaction-type="{{ sale.transaction_type }}"
+                                            data-balance="{{ sale.amount_change|floatformat:2 }}"
+                                            data-sale-id="{% if sale.transaction_type == 'Sale' %}{{ sale.id }}{% endif %}"
+                                            data-servicebill-id="{% if sale.transaction_type == 'Service' %}{{ sale.id }}{% endif %}"
+                                            data-customer-name="{{ sale.customer.first_name }}">
+                                            <i class="fa fa-money-bill-wave"></i>
+                                        </button>
+                                    {% else %}
+                                        <button type="button" class="btn btn-sm btn-success open-payment-modal" disabled>
+                                            <i class="fa fa-money-bill-wave"></i>
+                                        </button>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="6" class="text-muted">No transactions found.</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
     </div>
 
-    <!-- Payment Modal -->
-<div class="modal fade" id="paymentModal" tabindex="-1" aria-labelledby="paymentModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-      <form id="paymentForm" method="post">
-        {% csrf_token %}
-        <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title" id="paymentModalLabel">Receive Payment</h5>
-            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-          </div>
-          <div class="modal-body">
-            <input type="hidden" name="sale_id" id="saleIdInput" style="display:none;">
-            <input type="hidden" name="servicebill_id" id="serviceBillIdInput" style="display:none;">
-            <div class="mb-3">
-              <label for="customerName" class="form-label">Customer</label>
-              <input type="text" id="customerName" class="form-control" readonly>
-            </div>
-            <div class="mb-3">
-              <label for="balanceDue" class="form-label">Balance Due</label>
-              <input type="text" id="balanceDue" class="form-control" readonly>
-            </div>
-            <div class="mb-3">
-              <label for="amountReceived" class="form-label">Received</label>
-              <input type="text" step="0.01" min="0" max="9999999" name="amount_received" id="amountReceived" class="form-control" required>
-            </div>
-            <div class="mb-3">
-              <label for="remainingBalance" class="form-label">Remaining Balance</label>
-              <input type="text" id="remainingBalance" class="form-control" readonly>
-            </div>
-          </div>
-          <div class="modal-footer">
-            <button type="submit" class="btn btn-success">Submit Payment</button>
-            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-          </div>
+    <!-- ✅ Payment Modal -->
+    <div class="modal fade" id="paymentModal" tabindex="-1" aria-labelledby="paymentModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <form id="paymentForm" method="post">
+                {% csrf_token %}
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="paymentModalLabel">Receive Payment</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <input type="hidden" name="sale_id" id="saleIdInput" style="display:none;">
+                        <input type="hidden" name="servicebill_id" id="serviceBillIdInput" style="display:none;">
+
+                        <div class="mb-3">
+                            <label for="customerName" class="form-label">Customer</label>
+                            <input type="text" id="customerName" class="form-control" readonly>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="balanceDue" class="form-label">Balance Due</label>
+                            <input type="text" id="balanceDue" class="form-control" readonly>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="amountReceived" class="form-label">Received</label>
+                            <input type="number" step="0.01" min="0" max="9999999" name="amount_received" id="amountReceived" class="form-control" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="remainingBalance" class="form-label">Remaining Balance</label>
+                            <input type="text" id="remainingBalance" class="form-control" readonly>
+                        </div>
+                    </div>
+
+                    <div class="modal-footer">
+                        <button type="submit" class="btn btn-success">Submit Payment</button>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    </div>
+                </div>
+            </form>
         </div>
-      </form>
     </div>
-  </div>  
+
 </div>
+
+<!-- ✅ JS -->
 <script>
-  document.addEventListener('DOMContentLoaded', function () {
-    // Payment Modal Logic
+document.addEventListener('DOMContentLoaded', function () {
     const paymentModal = document.getElementById('paymentModal');
     const balanceDueInput = document.getElementById('balanceDue');
     const amountReceivedInput = document.getElementById('amountReceived');
@@ -209,92 +283,69 @@
     const paymentForm = document.getElementById('paymentForm');
 
     paymentModal.addEventListener('show.bs.modal', function (event) {
-      const button = event.relatedTarget;
-      const transactionType = button.getAttribute('data-transaction-type');
-      const balance = parseFloat(button.getAttribute('data-balance'));
-      const saleId = button.getAttribute('data-sale-id');
-      const serviceBillId = button.getAttribute('data-servicebill-id');
-      const customerName = button.getAttribute('data-customer-name');
+        const button = event.relatedTarget;
+        const transactionType = button.getAttribute('data-transaction-type');
+        const balance = parseFloat(button.getAttribute('data-balance'));
+        const saleId = button.getAttribute('data-sale-id');
+        const serviceBillId = button.getAttribute('data-servicebill-id');
+        const customerName = button.getAttribute('data-customer-name');
 
-      customerNameInput.value = customerName;
-      balanceDueInput.value = balance.toFixed(2);
-      remainingBalanceInput.value = balance.toFixed(2);
-      amountReceivedInput.value = '';
-      amountReceivedInput.setAttribute('max', balance.toFixed(2));
+        customerNameInput.value = customerName;
+        balanceDueInput.value = balance.toFixed(2);
+        remainingBalanceInput.value = balance.toFixed(2);
+        amountReceivedInput.value = '';
+        amountReceivedInput.setAttribute('max', balance.toFixed(2));
 
-      saleIdInput.value = '';
-      saleIdInput.style.display = 'none';
-      serviceBillIdInput.value = '';
-      serviceBillIdInput.style.display = 'none';
-
-      if (transactionType === 'Service') {
-        paymentForm.action = "{% url 'receive_payment_service' %}";
-        serviceBillIdInput.value = serviceBillId;
-        serviceBillIdInput.style.display = '';
-      } else {
-        paymentForm.action = "{% url 'receive-payment' %}";
-        saleIdInput.value = saleId;
-        saleIdInput.style.display = '';
-      }
+        saleIdInput.value = '';
+        serviceBillIdInput.value = '';
+        if (transactionType === 'Service') {
+            paymentForm.action = "{% url 'receive_payment_service' %}";
+            serviceBillIdInput.value = serviceBillId;
+        } else {
+            paymentForm.action = "{% url 'receive-payment' %}";
+            saleIdInput.value = saleId;
+        }
     });
 
     amountReceivedInput.addEventListener('input', function () {
-      let received = parseFloat(this.value);
-      let balance = parseFloat(balanceDueInput.value);
-      if (isNaN(received) || received < 0) {
-        received = 0;
-      }
-      if (received > balance) {
-        received = balance;
-        this.value = balance.toFixed(2);
-      }
-      const remaining =  balance - received;
-      remainingBalanceInput.value = remaining.toFixed(2);
+        let received = parseFloat(this.value) || 0;
+        let balance = parseFloat(balanceDueInput.value);
+        if (received > balance) received = balance;
+        remainingBalanceInput.value = (balance - received).toFixed(2);
     });
 
-    // Filtering Logic
+    // ✅ Table Filtering
     const filterName = document.getElementById('filterName');
     const filterDateStart = document.getElementById('filterDateStart');
     const filterDateEnd = document.getElementById('filterDateEnd');
     const clearFilters = document.getElementById('clearFilters');
-    const table = document.getElementById('transactionsTable');
-    const rows = table.querySelectorAll('tbody tr');
+    const rows = document.querySelectorAll('#transactionsTable tbody tr');
 
     function filterTable() {
-      const nameVal = filterName.value.trim().toLowerCase();
-      const dateStartVal = filterDateStart.value;
-      const dateEndVal = filterDateEnd.value;
-      rows.forEach(row => {
-        const nameCell = row.querySelector('.name-cell');
-        const dateCell = row.querySelector('.date-cell');
-        const typeCell = row.querySelector('td:first-child');
-        let show = true;
-        if (nameVal && (nameCell || typeCell)) {
-          const nameText = nameCell ? nameCell.textContent.toLowerCase() : '';
-          const typeText = typeCell ? typeCell.textContent.toLowerCase() : '';
-          show = nameText.includes(nameVal) || typeText.includes(nameVal);
-        }
-        if (show && (dateStartVal || dateEndVal) && dateCell) {
-          const rowDate = dateCell.textContent.trim();
-          // rowDate is in YYYY-MM-DD format
-          if (dateStartVal && rowDate < dateStartVal) show = false;
-          if (dateEndVal && rowDate > dateEndVal) show = false;
-        }
-        row.style.display = show ? '' : 'none';
-      });
+        const nameVal = filterName.value.trim().toLowerCase();
+        const dateStartVal = filterDateStart.value;
+        const dateEndVal = filterDateEnd.value;
+        rows.forEach(row => {
+            const nameText = row.querySelector('.name-cell')?.textContent.toLowerCase() || '';
+            const typeText = row.querySelector('td:first-child')?.textContent.toLowerCase() || '';
+            const rowDate = row.querySelector('.date-cell')?.textContent.trim();
+            let show = true;
+
+            if (nameVal && !nameText.includes(nameVal) && !typeText.includes(nameVal)) show = false;
+            if (show && dateStartVal && rowDate < dateStartVal) show = false;
+            if (show && dateEndVal && rowDate > dateEndVal) show = false;
+
+            row.style.display = show ? '' : 'none';
+        });
     }
 
-    filterName.addEventListener('input', filterTable);
-    filterDateStart.addEventListener('input', filterTable);
-    filterDateEnd.addEventListener('input', filterTable);
-    clearFilters.addEventListener('click', function() {
-      filterName.value = '';
-      filterDateStart.value = '';
-      filterDateEnd.value = '';
-      filterTable();
+    [filterName, filterDateStart, filterDateEnd].forEach(el => el.addEventListener('input', filterTable));
+    clearFilters.addEventListener('click', () => {
+        filterName.value = '';
+        filterDateStart.value = '';
+        filterDateEnd.value = '';
+        filterTable();
     });
-  });
+});
 </script>
 {% endblock %}
-
-

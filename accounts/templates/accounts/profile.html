@@ -1,59 +1,86 @@
 {% extends 'store/base.html' %}
-{% block title %}Staff Page{% endblock %}
+{% block title %}Staff Profile{% endblock %}
 
 {% block content %}
-<div class="container">
-        <div class="card">
-            <div class="row p-3">
-                <div class="col-md-8">
-                    <table class="table table-borderless">
-                        <thead>
-                            <span class="h4">Profile Information</span class="h4">
-                            <a class="btn btn-outline-success btn-sm float-end" href="{% url 'user-profile-update' %}">Edit profile</a>
-                            <hr>
-                        </thead>
+<div class="container my-4">
+    <div class="card shadow-sm p-3">
+        <div class="row g-4 align-items-center">
+            <!-- Profile Info Section -->
+            <div class="col-12 col-md-8">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <h4 class="mb-0 text-success">Profile Information</h4>
+                    <a class="btn btn-outline-success btn-sm rounded-pill" href="{% url 'user-profile-update' %}">
+                        <i class="fas fa-edit me-1"></i> Edit Profile
+                    </a>
+                </div>
+                <hr class="mt-2 mb-3">
+
+                <div class="table-responsive">
+                    <table class="table table-borderless align-middle mb-0">
                         <tbody>
                             <tr>
-                                <th scope="row">username</th>
+                                <th scope="row" class="text-secondary">Username</th>
                                 <td>{{ user.username }}</td>
                             </tr>
                             <tr>
-                                <th scope="row">Staff role</th>
+                                <th scope="row" class="text-secondary">Staff Role</th>
                                 <td>
-                                    <span class="badge badge-pill bg-soft-success text-success me-2">
-                                    {% if user.profile.role == 'AD' %}
-                                    Admin
-                                    {% elif user.profile.role == 'EX' %}
-                                    Executive
-                                    {% else %}
-                                    Operative
-                                    {% endif %}
+                                    <span class="badge rounded-pill bg-success bg-opacity-10 text-success">
+                                        {% if user.profile.role == 'AD' %}
+                                            Admin
+                                        {% elif user.profile.role == 'EX' %}
+                                            Executive
+                                        {% else %}
+                                            Operative
+                                        {% endif %}
+                                    </span>
                                 </td>
                             </tr>
                             <tr>
-                                <th scope="row">First name</th>
+                                <th scope="row" class="text-secondary">First Name</th>
                                 <td>{{ user.profile.first_name }}</td>
                             </tr>
                             <tr>
-                                <th scope="row">Last name</th>
+                                <th scope="row" class="text-secondary">Last Name</th>
                                 <td>{{ user.profile.last_name }}</td>
                             </tr>
                             <tr>
-                                <th scope="row">Email</th>
+                                <th scope="row" class="text-secondary">Email</th>
                                 <td>{{ user.email }}</td>
                             </tr>
                             <tr>
-                                <th scope="row">Phone</th>
+                                <th scope="row" class="text-secondary">Phone</th>
                                 <td>{{ user.profile.telephone }}</td>
                             </tr>
                         </tbody>
                     </table>
                 </div>
-                <div class="col-md-4">
-                    <img class="rounded-pill img-fluid" src="{{ user.profile.profile_picture.url }}" alt="profile-image">
-                </div>
+            </div>
+
+            <!-- Profile Picture Section -->
+            <div class="col-12 col-md-4 text-center">
+                {% if user.profile.profile_picture %}
+                <img class="rounded-circle img-fluid shadow-sm border"
+                     src="{{ user.profile.profile_picture.url }}"
+                     alt="Profile Image"
+                     style="max-width: 180px; height: auto;">
+                {% else %}
+                <img class="rounded-circle img-fluid shadow-sm border"
+                     src="{% static 'images/default-avatar.png' %}"
+                     alt="Default Profile Image"
+                     style="max-width: 180px; height: auto;">
+                {% endif %}
             </div>
         </div>
+    </div>
 </div>
 
+<style>
+    /* Make table labels stack on small screens */
+    @media (max-width: 576px) {
+        .table th {
+            width: 40%;
+        }
+    }
+</style>
 {% endblock %}

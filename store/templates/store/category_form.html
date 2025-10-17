@@ -20,115 +20,129 @@
         {% if form.instance.pk %}Edit{% else %}Entry{% endif %}
     </h2>
 
+    <div class="row justify-content-center">
     <!-- Excel Import Form -->
-    <div class="card shadow-sm border-light w-100">
-        <div class="card-body">
-            <h5 class="card-title mb-3">Import Items from Excel</h5>
-            {% if error %}
-                <div class="alert alert-danger">{{ error }}</div>
-            {% endif %}
-            {% if success %}
-                <div class="alert alert-success">{{ success }}</div>
-            {% endif %}
+        <div class="card shadow-sm border-light w-100">
+            <div class="card-body">
+                <h5 class="card-title mb-3">Import Items from Excel</h5>
+                {% if error %}
+                    <div class="alert alert-danger">{{ error }}</div>
+                {% endif %}
+                {% if success %}
+                    <div class="alert alert-success">{{ success }}</div>
+                {% endif %}
 
-            <form method="POST" enctype="multipart/form-data" action="{% url 'upload_category_only' %}">
-                {% csrf_token %}
-                <div class="row mb-3">
-                    <div class="col-md-4">
-                        {{ form.file.label_tag }}
-                        {{ form.file }}
+                <form method="POST" enctype="multipart/form-data" action="{% url 'upload_category_only' %}">
+                    {% csrf_token %}
+                    <div class="row mb-3">
+                        <div class="col-md-4">
+                            {{ form.file.label_tag }}
+                            {{ form.file }}
+                        </div>
                     </div>
-                </div>
-                <button type="submit" class="btn btn-success btn-sm rounded-pill shadow-sm"><i class="fa-solid fa-download"></i> Upload Items </button>
-            </form>
+                    <button typse="submit" class="btn btn-success btn-sm rounded-pill shadow-sm"><i class="fa-solid fa-download"></i> Upload Items </button>
+                </form>
+            </div>
+        </div>
+        <div class="card shadow-sm border-light">
+            <div class="card-body">
+                {% if request.user.profile.role != 'OP' %}
+                <form method="POST" enctype="multipart/form-data" action="{% url 'category-create' %}" class="border p-4 rounded bg-light">
+                    {% csrf_token %}
+
+                    <!-- Category (SSD, Processor, HDD, RAM) -->
+                    <div class="mb-3">
+                        {{ form.category.label_tag }}
+                        {{ form.category|add_class:"form-control" }}
+                        {% if form.category.errors %}
+                            <div class="invalid-feedback">
+                                {% for error in form.category.errors %}
+                                    <p>{{ error }}</p>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Name field -->
+                    <div class="mb-3">
+                        {{ form.name.label_tag }}
+                        {{ form.name|add_class:"form-control" }}
+                        {% if form.name.errors %}
+                            <div class="invalid-feedback">
+                                {% for error in form.name.errors %}
+                                    <p>{{ error }}</p>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Serial Number field -->
+                    <div class="mb-3">
+                        {{ form.serial_no.label_tag }}
+                        {{ form.serial_no|add_class:"form-control" }}  
+                        {% if form.serial_no.errors %}
+                            <div class="invalid-feedback">
+                                {% for error in form.serial_no.errors %}
+                                    <p>{{ error }}</p>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Quantity field -->
+                    <div class="mb-3">
+                        {{ form.quantity.label_tag }}
+                        {{ form.quantity|add_class:"form-control" }}  
+                        {% if form.quantity.errors %}
+                            <div class="invalid-feedback">
+                                {% for error in form.quantity.errors %}
+                                    <p>{{ error }}</p>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Unit Price field -->
+                    <div class="mb-3">
+                        {{ form.unit_price.label_tag }}
+                        {{ form.unit_price|add_class:"form-control" }}  
+                        {% if form.unit_price.errors %}
+                            <div class="invalid-feedback">
+                                {% for error in form.unit_price.errors %}
+                                    <p>{{ error }}</p>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="mb-3">
+                        {{ form.purchase_lot_code.label_tag }}
+                        {{ form.purchase_lot_code|add_class:"form-control" }}  
+                        {% if form.purchase_lot_code.errors %}
+                            <div class="invalid-feedback">
+                                {% for error in form.purchase_lot_code.errors %}
+                                    <p>{{ error }}</p>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Submit button -->
+                    <div class="form-group text-center">
+                        <button class="btn btn-success btn-lg" type="submit">
+                            <i class="fas fa-check"></i> Submit
+                        </button>
+                    </div>
+                </form>
+                {% else %}
+                    <div class="alert alert-warning">
+                        You do not have permission to add or edit items.
+                    </div>
+                {% endif %}
+            </div>
         </div>
     </div>
 
-    <form method="post" class="border p-4 rounded bg-light">
-        {% csrf_token %}
-
-        <!-- Category (SSD, Processor, HDD, RAM) -->
-        <div class="mb-3">
-            {{ form.category.label_tag }}
-            {{ form.category|add_class:"form-control" }}
-            {% if form.category.errors %}
-                <div class="invalid-feedback">
-                    {% for error in form.category.errors %}
-                        <p>{{ error }}</p>
-                    {% endfor %}
-                </div>
-            {% endif %}
-        </div>
-
-        <!-- Name field -->
-        <div class="mb-3">
-            {{ form.name.label_tag }}
-            {{ form.name|add_class:"form-control" }}
-            {% if form.name.errors %}
-                <div class="invalid-feedback">
-                    {% for error in form.name.errors %}
-                        <p>{{ error }}</p>
-                    {% endfor %}
-                </div>
-            {% endif %}
-        </div>
-
-        <!-- Serial Number field -->
-        <div class="mb-3">
-            {{ form.serial_no.label_tag }}
-            {{ form.serial_no|add_class:"form-control" }}  
-            {% if form.serial_no.errors %}
-                <div class="invalid-feedback">
-                    {% for error in form.serial_no.errors %}
-                        <p>{{ error }}</p>
-                    {% endfor %}
-                </div>
-            {% endif %}
-        </div>
-
-        <!-- Quantity field -->
-        <div class="mb-3">
-            {{ form.quantity.label_tag }}
-            {{ form.quantity|add_class:"form-control" }}  
-            {% if form.quantity.errors %}
-                <div class="invalid-feedback">
-                    {% for error in form.quantity.errors %}
-                        <p>{{ error }}</p>
-                    {% endfor %}
-                </div>
-            {% endif %}
-        </div>
-
-        <!-- Unit Price field -->
-        <div class="mb-3">
-            {{ form.unit_price.label_tag }}
-            {{ form.unit_price|add_class:"form-control" }}  
-            {% if form.unit_price.errors %}
-                <div class="invalid-feedback">
-                    {% for error in form.unit_price.errors %}
-                        <p>{{ error }}</p>
-                    {% endfor %}
-                </div>
-            {% endif %}
-        </div>
-
-        <div class="mb-3">
-            {{ form.purchase_lot_code.label_tag }}
-            {{ form.purchase_lot_code|add_class:"form-control" }}  
-            {% if form.purchase_lot_code.errors %}
-                <div class="invalid-feedback">
-                    {% for error in form.purchase_lot_code.errors %}
-                        <p>{{ error }}</p>
-                    {% endfor %}
-                </div>
-            {% endif %}
-        </div>
-
-        <!-- Submit button -->
-        <button type="submit" class="btn btn-success" aria-label="Save">
-            <i class="fas fa-save"></i> Save
-        </button>
-    </form>
 
     <a href="{% url 'category-list' %}" class="btn btn-secondary mt-3">
         <i class="fas fa-arrow-left"></i> Back to list

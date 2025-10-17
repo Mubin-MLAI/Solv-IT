@@ -8,6 +8,7 @@
 <br>
 
 <style>
+    /* ✅ Suggestion Dropdown */
     .suggestions {
         position: absolute;
         width: 100%;
@@ -16,21 +17,72 @@
         background: white;
         border: 1px solid #ccc;
         display: none;
-        /* Ensure it's hidden initially */
     }
-
     .suggestions .list-group-item {
         cursor: pointer;
     }
-
     .suggestions .list-group-item:hover {
         background-color: #f8f9fa;
+    }
+
+    /* ✅ Responsive Table */
+    @media (max-width: 991.98px) {
+        .table thead {
+            display: none;
+        }
+        .table, .table tbody, .table tr, .table td {
+            display: block;
+            width: 100%;
+        }
+        .table tr {
+            margin-bottom: 1rem;
+            border: 1px solid #dee2e6;
+            border-radius: .5rem;
+            background: #fff;
+            padding: .75rem;
+        }
+        .table td {
+            text-align: right;
+            padding-left: 50%;
+            position: relative;
+            border: none;
+        }
+        .table td::before {
+            content: attr(data-label);
+            position: absolute;
+            left: 0;
+            width: 50%;
+            padding-left: .75rem;
+            font-weight: 600;
+            text-align: left;
+            color: #333;
+        }
+
+        /* ✅ Search filters stack vertically */
+        #searchform1 .col-md-4,
+        #searchform1 .col-md-3,
+        #searchform1 .col-md-2 {
+            width: 100%;
+        }
+        #searchform1 input,
+        #searchform1 button,
+        #searchform1 a {
+            width: 100%;
+            margin-bottom: .5rem;
+        }
+
+        /* ✅ Header Buttons */
+        .col-md-6.d-flex.justify-content-end.gap-2 {
+            flex-wrap: wrap;
+            justify-content: center !important;
+            gap: .5rem;
+        }
     }
 </style>
 
 <div class="my-4">
     <div class="row align-items-center">
-        <div class="col-md-6">
+        <div class="col-md-6 col-12 mb-2 mb-md-0 text-center text-md-start">
             <h4 class="display-6 mb-0 text-success">Purchase List</h4>
         </div>
         {% if request.user.profile.role != 'OP' %}
@@ -38,9 +90,6 @@
             <a class="btn btn-success btn-sm rounded-pill shadow-sm" href="{% url 'purchase-create' %}">
                 <i class="fa-solid fa-plus"></i> Add Purchase
             </a>
-            <!-- <a class="btn btn-primary btn-sm rounded-pill shadow-sm" href="{% url 'purchase-order-create' %}">
-                <i class="fa-solid fa-plus"></i> Purchase Billing
-            </a> -->
             <a class="btn btn-info btn-sm rounded-pill shadow-sm" href="{% querystring '_export'='xlsx' %}">
                 <i class="fa-solid fa-download"></i> Export to Excel
             </a>
@@ -48,30 +97,18 @@
         {% endif %}
     </div>
 
-    <!-- Search Form -->
-    <!-- <form class="input-group mt-3 position-relative" role="search1" id="searchform1"
-        action="{% url 'purchase_item_search_list_view' %}" method="get">
-        <input id="searchbox1" name="q" type="text" class="form-control border-2 rounded-pill shadow-sm"
-            placeholder="Find products">
-        <button class="btn btn-outline-success rounded-pill shadow-sm" type="submit">
-            <i class="fa-solid fa-search"></i>
-        </button>
-        <button class="btn btn-outline-secondary rounded-pill shadow-sm" type="button" id="clearSearch1">
-            <i class="fa-solid fa-times"></i>
-        </button>
-    </form> -->
-    
+    <!-- ✅ Search Form -->
     <form class="row g-2 mt-3" id="searchform1" action="{% url 'purchase_item_search_list_view' %}" method="get">
         <div class="col-md-4">
             <input id="searchbox1" name="q" type="text" class="form-control border-2 rounded-pill shadow-sm"
                 placeholder="Find products">
         </div>
-        <div class="col-md-3">
-            <input type="text" id="customer_searchbox" class="form-control border-2 rounded-pill shadow-sm" placeholder="Type to search customer..." autocomplete="off">
-            <div id="customer_suggestions" class="list-group position-absolute" style="z-index: 1000; min-width: 250px; max-width: 100%; background-color: #fff;"></div>
-            <input type="hidden" name="customer_id" id="customer_id">  <!-- Hidden field to submit ID -->
-        </div>       
-        
+        <div class="col-md-3 position-relative">
+            <input type="text" id="customer_searchbox" class="form-control border-2 rounded-pill shadow-sm"
+                placeholder="Type to search customer..." autocomplete="off">
+            <div id="customer_suggestions" class="list-group position-absolute w-100" style="z-index: 1000;"></div>
+            <input type="hidden" name="customer_id" id="customer_id">
+        </div>
         <div class="col-md-3">
             <input name="purchased_code" id="purchased_code" type="text" class="form-control border-2 rounded-pill shadow-sm"
                 placeholder="Purchase / LOT Code" value="{{ request.GET.purchased_code }}">
@@ -85,69 +122,64 @@
             </a>
         </div>
     </form>
-    <div id="suggestions1" class="list-group position-absolute"
-        style="z-index: 9999; width: 100%; background-color: rgb(254, 254, 253);"></div>
 </div>
 
-<!-- Product Table Section -->
+<!-- ✅ Purchase Table -->
 <div class="px-4">
     {% if Itempurchased %}
     <div class="table-responsive">
         <table class="table table-bordered table-striped table-hover table-sm">
             <thead class="thead-light">
                 <tr>
-                    <th scope="col">ID</th>
-                    <th scope="col">Name</th>
-                    <th scope="col">Vendor Name</th>
-                    <th scope="col">Purchase / LOT Code</th>
-                    <th scope="col">Purchase Date</th> 
-                    <th scope="col">Price</th>
-                    <th scope="col">Serial No</th>
-                    <th scope="col">Make & Models</th>
-                    <th scope="col">Processor</th>
-                    <th scope="col">RAM</th>
-                    <th scope="col">HDD</th>
-                    <th scope="col">SSD</th>
-                    <th scope="col">SMPS</th>
-                    <th scope="col">Motherboard</th> 
-
-
+                    <th>ID</th>
+                    <th>Name</th>
+                    <th>Vendor Name</th>
+                    <th>Purchase / LOT Code</th>
+                    <th>Purchase Date</th>
+                    <th>Price</th>
+                    <th>Serial No</th>
+                    <th>Make & Models</th>
+                    <th>Processor</th>
+                    <th>RAM</th>
+                    <th>HDD</th>
+                    <th>SSD</th>
+                    <th>SMPS</th>
+                    <th>Motherboard</th>
                 </tr>
             </thead>
             <tbody>
                 {% for item1 in Itempurchased %}
                 <tr>
-                    <th scope="row">{{ forloop.counter|add:page_obj.start_index|add:"-1" }}</th>
-                    <td>{{ item1.name }}</td>
-                    <td><b>{{ item1.customer }}</b></td>
-                    <td><b>{{ item1.purchased_code }}</b></td>
-                    <td>{{ item1.created_date|date:"d/m/Y"}}</td>
-                    <td>{{ item1.price }}</td>
-                    <td>{{ item1.serialno }}</td>
-                    <td>{{ item1.make_and_models }}</td>
-                    <td>
+                    <td data-label="ID">{{ forloop.counter|add:page_obj.start_index|add:"-1" }}</td>
+                    <td data-label="Name">{{ item1.name }}</td>
+                    <td data-label="Vendor Name"><b>{{ item1.customer }}</b></td>
+                    <td data-label="LOT Code"><b>{{ item1.purchased_code }}</b></td>
+                    <td data-label="Date">{{ item1.created_date|date:"d/m/Y"}}</td>
+                    <td data-label="Price">{{ item1.price }}</td>
+                    <td data-label="Serial No">{{ item1.serialno }}</td>
+                    <td data-label="Make & Models">{{ item1.make_and_models }}</td>
+                    <td data-label="Processor">
                         {% for p in item1.processors %}
                             <li>{{ p }}<br></li>
                         {% endfor %}
                     </td>
-                    <td>
+                    <td data-label="RAM">
                         {% for p in item1.rams %}
                             <li>{{ p }}<br></li>
                         {% endfor %}
                     </td>
-                    <td>
+                    <td data-label="HDD">
                         {% for p in item1.hdds %}
                             <li>{{ p }}<br></li>
                         {% endfor %}
                     </td>
-                    <td>
+                    <td data-label="SSD">
                         {% for p in item1.ssds %}
                             <li>{{ p }}<br></li>
                         {% endfor %}
                     </td>
-                    <td>{{ item1.smps_status }}</td>
-                    <td>{{ item1.motherboard_status }}</td>
-    
+                    <td data-label="SMPS">{{ item1.smps_status }}</td>
+                    <td data-label="Motherboard">{{ item1.motherboard_status }}</td>
                 </tr>
                 {% endfor %}
             </tbody>
@@ -156,210 +188,142 @@
     {% else %}
     {% if request.user.profile.role != 'OP' %}
     <div class="alert alert-warning text-center">
-        <p>No purchase found for "{{ request.GET.q }}". You can <a href="{% url 'purchase-create' %}"
-                class="btn btn-success btn-sm rounded-pill shadow-sm">Add a new purchase</a>.</p>
+        <p>No purchase found for "{{ request.GET.q }}". You can 
+        <a href="{% url 'purchase-create' %}" class="btn btn-success btn-sm rounded-pill shadow-sm">Add a new purchase</a>.</p>
     </div>
     {% endif %}
     {% endif %}
 </div>
 
+<!-- ✅ Pagination -->
 {% if is_paginated and paginator.count > 10 %}
 <nav aria-label="Page navigation">
     <ul class="pagination justify-content-center">
-
-        {# Previous Page Link #}
         {% if page_obj.has_previous %}
-            <li class="page-item">
-                <a class="page-link" href="{% if request.GET.q %}?q={{ request.GET.q }}&page={{ page_obj.previous_page_number }}{% else %}?page={{ page_obj.previous_page_number }}{% endif %}" aria-label="Previous">
-                    <span aria-hidden="true">&laquo;</span>
-                </a>
-                <a class="page-link"
-                href="?q={{ request.GET.q }}&vendor={{ request.GET.vendor }}&code={{ request.GET.code }}&page={{ i }}">
-                    {{ i }}
-                </a>
-
-            </li>
+        <li class="page-item">
+            <a class="page-link" href="?q={{ request.GET.q }}&vendor={{ request.GET.vendor }}&code={{ request.GET.code }}&page={{ page_obj.previous_page_number }}">
+                &laquo;
+            </a>
+        </li>
         {% else %}
-            <li class="page-item disabled">
-                <span class="page-link" aria-label="Previous">
-                    <span aria-hidden="true">&laquo;</span>
-                </span>
-            </li>
+        <li class="page-item disabled"><span class="page-link">&laquo;</span></li>
         {% endif %}
 
-        {# Page Numbers #}
         {% for i in paginator.page_range %}
             {% if page_obj.number == i %}
-                <li class="page-item active" aria-current="page">
-                    <span class="page-link">{{ i }} <span class="visually-hidden">(current)</span></span>
-                </li>
+                <li class="page-item active"><span class="page-link">{{ i }}</span></li>
             {% else %}
-                <li class="page-item">
-                    <a class="page-link" href="?q={{ request.GET.q }}&vendor={{ request.GET.vendor }}&code={{ request.GET.code }}&page={{ i }}">{{ i }}</a>
-                </li>
+                <li class="page-item"><a class="page-link" href="?q={{ request.GET.q }}&vendor={{ request.GET.vendor }}&code={{ request.GET.code }}&page={{ i }}">{{ i }}</a></li>
             {% endif %}
         {% endfor %}
 
-        {# Next Page Link #}
         {% if page_obj.has_next %}
-            <li class="page-item">
-                <a class="page-link" href="{% if request.GET.q %}?q={{ request.GET.q }}&page={{ page_obj.next_page_number }}{% else %}?page={{ page_obj.next_page_number }}{% endif %}" aria-label="Next">
-                    <span aria-hidden="true">&raquo;</span>
-                </a>
-
-                <a class="page-link"
-                href="?q={{ request.GET.q }}&vendor={{ request.GET.vendor }}&code={{ request.GET.code }}&page={{ i }}">
-                    {{ i }}
-                </a>
-            </li>
+        <li class="page-item">
+            <a class="page-link" href="?q={{ request.GET.q }}&vendor={{ request.GET.vendor }}&code={{ request.GET.code }}&page={{ page_obj.next_page_number }}">
+                &raquo;
+            </a>
+        </li>
         {% else %}
-            <li class="page-item disabled">
-                <span class="page-link" aria-label="Next">
-                    <span aria-hidden="true">&raquo;</span>
-                </span>
-            </li>
+        <li class="page-item disabled"><span class="page-link">&raquo;</span></li>
         {% endif %}
-
     </ul>
 </nav>
 {% endif %}
 
-
-
-<!-- Customer Create Modal -->
+<!-- ✅ Customer Create Modal -->
 <div class="modal fade" id="customerModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog">
         <form id="createCustomerForm">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title">Create New Customer</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
-                    <input type="text" name="first_name" class="form-control" placeholder="Enter First Name"><br>
-                    <input type="text" name="last_name" class="form-control" placeholder="Enter Last Name"><br>
+                    <input type="text" name="first_name" class="form-control mb-2" placeholder="Enter First Name">
+                    <input type="text" name="last_name" class="form-control mb-2" placeholder="Enter Last Name">
                     <input type="number" name="phone" class="form-control" placeholder="Enter Phone Number">
-                    <!-- Add other fields as needed -->
                 </div>
                 <div class="modal-footer">
-                    <button type="submit" class="btn btn-primary">Create</button>
+                    <button type="submit" class="btn btn-success">Create</button>
                 </div>
             </div>
         </form>
     </div>
 </div>
 
-
-
 <script>
-    function customerSearchSuggestions() {
-        const searchBox = document.getElementById('customer_searchbox');
-        const suggestionsBox = document.getElementById('customer_suggestions');
-        const hiddenField = document.getElementById('customer_id');
-        const customerModal = new bootstrap.Modal(document.getElementById('customerModal'));
+function customerSearchSuggestions() {
+    const searchBox = document.getElementById('customer_searchbox');
+    const suggestionsBox = document.getElementById('customer_suggestions');
+    const hiddenField = document.getElementById('customer_id');
+    const customerModal = new bootstrap.Modal(document.getElementById('customerModal'));
 
-        searchBox.addEventListener('input', function () {
-            const query = searchBox.value;
-            if (query.length >= 2) {
-                fetch(`/search-customer/?q=${query}`)
-                    .then(response => response.json())
-                    .then(data => {
-                        suggestionsBox.innerHTML = '';
-                        if (data.suggestions.length > 0) {
-                            data.suggestions.forEach(suggestion => {
-                                const item = document.createElement('a');
-                                item.href = 'javascript:void(0);';
-                                item.classList.add('list-group-item', 'list-group-item-action');
-                                item.textContent = suggestion.name;
-
-                                item.addEventListener('click', function () {
-                                    searchBox.value = suggestion.name;
-                                    hiddenField.value = suggestion.id;
-                                    suggestionsBox.innerHTML = '';
-                                });
-
-                                suggestionsBox.appendChild(item);
-                            });
-                        } else {
-                            const noItem = document.createElement('a');
-                            noItem.classList.add('list-group-item', 'list-group-item-action', 'text-danger');
-                            noItem.textContent = 'No customer found. Click to add.';
-                            noItem.style.cursor = 'pointer';
-                            noItem.addEventListener('click', function () {
-                                // Show the modal instead of redirecting
-                                customerModal.show();
-                                // Pre-fill the name if it exists in the search box
-                                const searchValue = searchBox.value.trim();
-                                if (searchValue) {
-                                    const names = searchValue.split(' ');
-                                    document.querySelector('#customerModal input[name="first_name"]').value = names[0] || '';
-                                    document.querySelector('#customerModal input[name="last_name"]').value = names.slice(1).join(' ') || '';
-                                }
-                            });
-                            suggestionsBox.appendChild(noItem);
-                        }
-                    })
-                    .catch(err => {
-                        console.error('Error fetching customer suggestions:', err);
-                    });
-            } else {
-                suggestionsBox.innerHTML = '';
-                hiddenField.value = '';
-            }
-        });
-
-        // Handle customer form submission
-        document.getElementById('createCustomerForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            const formData = new FormData(this);
-            
-            // Add CSRF token
-            const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
-            
-            fetch("{% url 'create_customer_ajax' %}", {
-                method: 'POST',
-                headers: {
-                    'X-CSRFToken': csrfToken
-                },
-                body: formData
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    // Update the customer search box and hidden field with new customer data
-                    searchBox.value = data.customer.full_name;
-                    hiddenField.value = data.customer.id;
-                    
-                    // Close the modal and clear the form
-                    customerModal.hide();
-                    document.getElementById('createCustomerForm').reset();
-                    
-                    // Clear suggestions box
+    searchBox.addEventListener('input', function () {
+        const query = searchBox.value;
+        if (query.length >= 2) {
+            fetch(`/search-customer/?q=${query}`)
+                .then(response => response.json())
+                .then(data => {
                     suggestionsBox.innerHTML = '';
-                    
-                    // Show success message
-                    const alertDiv = document.createElement('div');
-                    alertDiv.className = 'alert alert-success';
-                    alertDiv.textContent = 'Customer created successfully!';
-                    document.querySelector('.card-body').insertBefore(alertDiv, document.querySelector('form'));
-                    
-                    // Remove alert after 3 seconds
-                    setTimeout(() => alertDiv.remove(), 3000);
-                } else {
-                    // Show error message
-                    alert(data.error || 'Error creating customer');
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                alert('Error creating customer');
-            });
-        });
-    }
+                    if (data.suggestions.length > 0) {
+                        data.suggestions.forEach(suggestion => {
+                            const item = document.createElement('a');
+                            item.href = 'javascript:void(0);';
+                            item.classList.add('list-group-item', 'list-group-item-action');
+                            item.textContent = suggestion.name;
+                            item.addEventListener('click', () => {
+                                searchBox.value = suggestion.name;
+                                hiddenField.value = suggestion.id;
+                                suggestionsBox.innerHTML = '';
+                            });
+                            suggestionsBox.appendChild(item);
+                        });
+                    } else {
+                        const noItem = document.createElement('a');
+                        noItem.classList.add('list-group-item', 'list-group-item-action', 'text-danger');
+                        noItem.textContent = 'No customer found. Click to add.';
+                        noItem.addEventListener('click', () => {
+                            customerModal.show();
+                            const names = searchBox.value.trim().split(' ');
+                            document.querySelector('#customerModal input[name="first_name"]').value = names[0] || '';
+                            document.querySelector('#customerModal input[name="last_name"]').value = names.slice(1).join(' ') || '';
+                        });
+                        suggestionsBox.appendChild(noItem);
+                    }
+                });
+        } else {
+            suggestionsBox.innerHTML = '';
+            hiddenField.value = '';
+        }
+    });
 
-// Call it
+    document.getElementById('createCustomerForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        const formData = new FormData(this);
+        const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+
+        fetch("{% url 'create_customer_ajax' %}", {
+            method: 'POST',
+            headers: { 'X-CSRFToken': csrfToken },
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                searchBox.value = data.customer.full_name;
+                hiddenField.value = data.customer.id;
+                customerModal.hide();
+                this.reset();
+                suggestionsBox.innerHTML = '';
+            } else {
+                alert(data.error || 'Error creating customer');
+            }
+        })
+        .catch(() => alert('Error creating customer'));
+    });
+}
 customerSearchSuggestions();
-
 </script>
 
-{% endblock content %}
+{% endblock %}

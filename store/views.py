@@ -232,8 +232,12 @@ class CatogaryItemSearchListView(CatogaryItemListView):
     Attributes:
     - paginate_by: Number of items per page for pagination.
     """
-
+    model = catogaryitem
+    table_class = CategoryItemTable
+    template_name = "store/category_list.html"
+    context_object_name = "catogaryitems"
     paginate_by = 10
+    SingleTableView.table_pagination = False
 
     def get_queryset(self):
         result = super(CatogaryItemSearchListView, self).get_queryset()
@@ -1743,8 +1747,12 @@ def operativedashboard(request):
 
 
 @csrf_exempt
-def create_category_items(spec_string, serial_no, category, quantity,createdby, product_code):
+def create_category_items(spec_string, serial_no, category, quantity,price,createdby,product_code):
     print(f"create_category_items called with serial_no={serial_no}, category={category}, spec_string={spec_string}, quantity={quantity}, createdby={createdby}, product_code={product_code}")
+    spec_string = '' if spec_string is None else spec_string
+    quantity = '' if quantity is None else quantity
+    price = '' if price is None else price
+    
     names = [n.strip() for n in str(spec_string).split(',') if n.strip()]
     quantitys = [n for n in str(quantity).split(',') if n]
     for name, quantity in zip( names, quantitys) :
@@ -1753,7 +1761,7 @@ def create_category_items(spec_string, serial_no, category, quantity,createdby, 
             serial_no=serial_no,
             category=category,
             quantity=quantity,
-            unit_price=0.0,
+            unit_price=price,
             created_by=createdby,
             purchase_lot_code = product_code
         )
@@ -1908,10 +1916,10 @@ def upload_category_items(request):
 
                     # print('12345', row.get('Processor', ''), serial_no, 'processor', row.get('processor_qty', ''), request.user)
                     # Inside your row loop
-                    create_category_items(row.get('Processor', ''), serial_no, 'processor', row.get('Processor_Qty', ''), request.user, purchased_code)
-                    create_category_items(row.get('RAM', ''), serial_no, 'ram', row.get('Ram_Qty', ''), request.user, purchased_code)
-                    create_category_items(row.get('HDD', ''), serial_no, 'hdd', row.get('Hdd_Qty', ''), request.user, purchased_code)
-                    create_category_items(row.get('SSD', ''), serial_no, 'ssd',row.get('Ssd_Qty', ''), request.user, purchased_code)
+                    create_category_items(row.get('Processor', ''), serial_no, 'processor', row.get('Processor_Qty', ''),0.0, request.user, purchased_code)
+                    create_category_items(row.get('RAM', ''), serial_no, 'ram', row.get('Ram_Qty', ''),0.0, request.user, purchased_code)
+                    create_category_items(row.get('HDD', ''), serial_no, 'hdd', row.get('Hdd_Qty', ''),0.0, request.user, purchased_code)
+                    create_category_items(row.get('SSD', ''), serial_no, 'ssd',row.get('Ssd_Qty', ''),0.0, request.user, purchased_code)
 
 
                     return render(request, 'store/productcreate.html', {
@@ -1961,38 +1969,40 @@ def upload_category_only(request):
 
             serial_col = find_col(['serial', 'serialno', 'serial number'])
             name_col = find_col(['name', 'item', 'product'])
-            category_col = find_col(['category', 'cat', 'component', 'type'])
+            category_col = find_col(['Category', 'cat', 'component', 'type'])
             qty_col = find_col(['quantity', 'qty'])
             price_col = find_col(['unit price', 'unit_price', 'price', 'unitprice'])
             vendor_col = find_col(['vendor', 'product code', 'vendor name', 'product code / vendor name'])
-            purchased_col = find_col(['purchased_code', 'purchased code', 'purchase code', 'product code'])
+            purchased_col = find_col(['purchased_code', 'purchased code', 'purchase code', 'product code', 'product code / vendor name'])
 
             for row_idx, row in df.iterrows():
                 serial_no = str(row.get(serial_col, '')).strip() if serial_col else ''
                 row_category = str(row.get(category_col, '')).strip() if category_col else ''
-                comp_name = str(row.get(name_col, '')).strip() if name_col else ''
+                comp_name = str(row.get(d, '')).strip() if name_col else ''
                 qty_val = row.get(qty_col, '') if qty_col else 1
-                unit_price = row.get(price_col, '') if price_col else ''
+                unit_price = 0.0 #row.get(price_col, '') if price_col else ''
                 vendor_name = str(row.get(vendor_col, '')).strip() if vendor_col else ''
                 purchased_code = str(row.get(purchased_col, '')).strip() if purchased_col else ''
 
-                print(f"upload_category_only: row {row_idx} -> serial_no={serial_no}, category={row_category}, name={comp_name}, qty={qty_val}, price={unit_price}, vendor={vendor_name}")
+                print(f"upload_category_only: row {row_idx} -> serial_no={serial_no}, category={row_category}, name={comp_name}, qty={qty_val}, price={unit_price}, purchased_code={purchased_code}")
 
                 # If row has category+name populate a single catogaryitem
                 try:
                     if row_category and comp_name:
-                        create_category_items(comp_name, serial_no, row_category.strip().lower(), str(qty_val), unit_price, request.user, purchased_code)
+                        print(f"upload_category_only: creating single category item for serial {serial_no}, category {row_category}, name {comp_name}, qty {qty_val}, price {unit_price}")
+                        create_category_items(comp_name, serial_no, row_category.strip(), str(qty_val), unit_price, request.user, purchased_code)
                     else:
+                        print(f"upload_category_only: no single category+name found for row {row_idx}, falling back to wide-columns")
                         # Fallback: wide-columns Processor/Ram/Hdd/Ssd
                         proc_spec = str(row.get('Processor', '') or '').strip()
                         ram_spec = str(row.get('Ram', '') or '').strip()
                         hdd_spec = str(row.get('Hdd', '') or '').strip()
                         ssd_spec = str(row.get('Ssd', '') or '').strip()
 
-                        create_category_items(proc_spec, serial_no, 'processor', row.get('processor_qty', ''), unit_price, request.user, purchased_code)
-                        create_category_items(ram_spec, serial_no, 'ram', row.get('ram_qty', ''), unit_price, request.user, purchased_code)
-                        create_category_items(hdd_spec, serial_no, 'hdd', row.get('hdd_qty', ''), unit_price, request.user, purchased_code)
-                        create_category_items(ssd_spec, serial_no, 'ssd', row.get('ssd_qty', ''), unit_price, request.user, purchased_code)
+                    create_category_items(row.get('Processors', ''), serial_no, 'processor', row.get('Processor_Qty', ''),0.0, request.user, purchased_code)
+                    create_category_items(row.get('RAMs', ''), serial_no, 'ram', row.get('Ram_Qty', ''),0.0, request.user, purchased_code)
+                    create_category_items(row.get('HDDs', ''), serial_no, 'hdd', row.get('Hdd_Qty', ''),0.0, request.user, purchased_code)
+                    create_category_items(row.get('SSDs', ''), serial_no, 'ssd',row.get('Ssd_Qty', ''),0.0, request.user, purchased_code)
                 except Exception as e:
                     print(f"upload_category_only: failed to create category items for serial {serial_no} at row {row_idx}: {e}")
                     return render(request, 'store/category_form.html', {
