@@ -262,3 +262,22 @@ class Delivery(models.Model):
     
 
 
+class InventoryItem(models.Model):
+    name = models.CharField(max_length=100)
+    serial_no = models.CharField(max_length=100, unique=True)
+    make_and_model = models.CharField(max_length=100, blank=True, null=True)
+    processor = models.CharField(max_length=100, blank=True, null=True)
+    ram = models.CharField(max_length=100, blank=True, null=True)   # e.g. "8GBX(1), 4GBX(1)"
+    hdd = models.CharField(max_length=100, blank=True, null=True)   # e.g. "500GBX(1)"
+    ssd = models.CharField(max_length=100, blank=True, null=True)   # e.g. "128GBX(1)"
+    smps = models.CharField(max_length=100, blank=True, null=True)  # e.g. "available"
+    motherboard = models.CharField(max_length=100, blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"{self.name} ({self.serial_no})"
+
+    
+
+

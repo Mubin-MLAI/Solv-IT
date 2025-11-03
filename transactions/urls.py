@@ -54,7 +54,9 @@ urlpatterns = [
     path('bank/<int:pk>/delete/', BankDeleteView.as_view(), name='bank-delete'),
     path('new-bank/', BankCreateView.as_view(), name='bank-create'),
     path('search/', PurchaseItemSearchListView.as_view(), name='purchase_item_search_list_view'),
+
     # Sale URLs
+    
     path('sales/', SaleListView.as_view(), name='saleslist'),
     path('sale/<int:pk>/', SaleDetailView.as_view(), name='sale-detail'),
     path('new-sale/', SaleCreateView, name='sale-create'),

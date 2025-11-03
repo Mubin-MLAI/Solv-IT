@@ -133,6 +133,9 @@ class RamForm(forms.ModelForm):
             'unit_price': 'Unit Price',
         }
 
+
+
+
 class catogaryForm(forms.ModelForm):
     """
     A form for creating or updating item details such as SSD, Processor, RAM, or HDD.

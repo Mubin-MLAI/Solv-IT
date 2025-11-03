@@ -526,11 +526,11 @@ class ProductUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
         all_category_in_table = catogaryitem.objects.filter(serial_no__iexact='Solv-IT', quantity__gt=0).distinct()
 
         # Prepare processor-by-generation buckets (1st Generation .. 13th Generation) and Unknown
-        processor_by_generation = {f"{ordinal(i)} Generation": [] for i in range(1, 14)}
+        processor_by_generation = {f"{ordinal(i)} Generation": [] for i in range(1, 20)}
         processor_by_generation['Unknown'] = []
 
         # A separate dict for consolidated results
-        processor_by_generation1 = {f"{ordinal(i)} Generation": [] for i in range(1, 14)}
+        processor_by_generation1 = {f"{ordinal(i)} Generation": [] for i in range(1, 20)}
         processor_by_generation1['Unknown'] = []
 
         # ------------------- Processor: Group by Generation -------------------
@@ -796,6 +796,7 @@ class ProductUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
         context['hdd_options'] = hdds
         context['ssd_options'] = ssds
         context['item'] = item
+        
 
         #-------------------For Move / Remove product to Solv-IT DB--------------------
         # Filter and format
@@ -894,79 +895,6 @@ class ProductUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
                     
                     qty2 = qty
 
-                    # Get available item from stock
-                    # try:
-                    #     available_item = catogaryitem.objects.get(
-                    #         name=clean_name,
-                    #         category=component,
-                    #         serial_no='Solv-IT'
-                    #     )
-                    # except catogaryitem.DoesNotExist:
-                    #     messages.error(self.request, f"No available '{clean_name}' ({component}) in stock.")
-                    #     return reverse_lazy('dashboard')
-
-                    # if available_item.quantity < qty:
-                    #     messages.error(self.request, f"No '{clean_name}' available in {component}.")
-                    #     return reverse_lazy('productslist')
-
-                    # # Deduct from source
-                    # available_item.quantity -= qty
-                    # if available_item.quantity <= 0:
-                    #     available_item.delete()
-                    #     # print("❌ Deleted {} from {} (Qty reached zero).".format(clean_name, serialno))
-                    # else:
-                    #     assigned_item.updated_by = self.request.user
-                    #     available_item.save()
-
-                    # Get all matching items and work with total available quantity
-                    # available_items = catogaryitem.objects.filter(
-                    #     name=clean_name,
-                    #     category=component,
-                    #     serial_no='Solv-IT'
-                    # )
-
-                    # if not available_items.exists():
-                    #     messages.error(self.request, f"No available '{clean_name}' ({component}) in stock.")
-                    #     return reverse_lazy('dashboard')
-
-                    # total_available = sum(item.quantity for item in available_items)
-                    # if total_available < qty:
-                    #     messages.error(self.request, f"Not enough '{clean_name}' available in {component}.")
-                    #     return reverse_lazy('productslist')
-
-                    # # Deduct from items (FIFO approach)
-                    # remaining_to_deduct = qty
-                    # for item in available_items:
-                    #     if remaining_to_deduct <= 0:
-                    #         break
-                            
-                    #     deduct_amount = min(item.quantity, remaining_to_deduct)
-                    #     item.quantity -= deduct_amount
-                    #     remaining_to_deduct -= deduct_amount
-                        
-                    #     if item.quantity <= 0:
-                    #         item.delete()
-                    #     else:
-                    #         item.save()
-                    #     # print("➖ Deducted {} from {} ({}). Remaining: {}".format(qty, serialno, clean_name, available_item.quantity))
-
-
-                    # # Assign to serialno: update if exists, else create new
-                    # assigned_item, created = catogaryitem.objects.get_or_create(
-                    #     name=clean_name,
-                    #     category=component,
-                    #     serial_no=serialno,
-                    #     updated_by = self.request.user,
-                    #     defaults={
-                    #         'quantity': 0,
-                    #         'unit_price': available_item.unit_price,
-                    #         # add other fields if needed
-                    #     }
-                    # )
-
-                    # assigned_item.quantity += qty
-                    # assigned_item.updated_by = self.request.user
-                    # assigned_item.save()
                     # Get all matching items and work with total available quantity
                     available_items = catogaryitem.objects.filter(
                         name=clean_name,
@@ -2024,6 +1952,9 @@ def upload_category_only(request):
         form = ExcelUploadForm()
 
     return render(request, 'store/category_form.html', {'form': form})
+
+
+
 
 
 
