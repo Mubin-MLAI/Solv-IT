@@ -29,7 +29,7 @@ class ItemForm(forms.ModelForm):
         model = Item
         fields = [
             'name', 'serialno', 'make_and_models',
-            'processors', 'rams', 'hdds', 'ssds', 'price', 'purchased_code', 'note',
+            'processors', 'rams', 'hdds', 'ssds', 'price', 'purchased_code','purchased_type', 'note',
             'smps_status', 'motherboard_status', 
             # 'smps_replacement_description', 'motherboard_replacement_description',
         ]
@@ -54,7 +54,7 @@ class ItemForm(forms.ModelForm):
                 'aria-label': 'Purchased Code'
                 
             }),
-            
+            'purchased_type': forms.Select(attrs={'class': 'form-control'}),
             'smps_status': forms.Select(attrs={'class': 'form-control'}),
             'smps_replacement_description': forms.TextInput(attrs={'class': 'form-control'}),
             'motherboard_status': forms.Select(attrs={'class': 'form-control', }),

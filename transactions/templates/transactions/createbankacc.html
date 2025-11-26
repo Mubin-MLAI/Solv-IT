@@ -2,136 +2,139 @@
 {% load static %}
 {% load querystring from django_tables2 %}
 
-{% block title %}
-Add Product
-{% endblock title %}
+{% block title %}Add Bank{% endblock title %}
 
 {% block content %}
-
 <style>
-    .processor-field,
-    .ram-field,
-    .hdd-field,
-    .ssd-field {
-        border: 1px solid #ccc;
-        /* Light gray border */
-        padding: 5px;
-        border-radius: 5px;
-        /* Optional: for rounded corners */
+/* 🌙 DARK MODERN THEME */
+body {
+    background-color: #0d1117;
+    color: #e6edf3;
+}
+
+.card-dark {
+    background-color: #161b22;
+    border: 1px solid #30363d;
+    color: #e6edf3;
+    border-radius: 1rem;
+    transition: all 0.3s ease;
+}
+.card-dark:hover {
+    border-color: #58a6ff;
+    box-shadow: 0 0 10px rgba(88, 166, 255, 0.2);
+}
+
+.form-label {
+    font-weight: 500;
+    color: #9ab6d6;
+}
+
+.form-control {
+    background-color: #0d1117;
+    color: #e6edf3;
+    border: 1px solid #30363d;
+    border-radius: 8px;
+}
+.form-control:focus {
+    border-color: #58a6ff;
+    box-shadow: 0 0 5px rgba(88, 166, 255, 0.3);
+    background-color: #0d1117;
+    color: #fff;
+}
+
+/* 💡 Buttons */
+.btn-modern {
+    border-radius: 50px;
+    transition: all 0.3s ease;
+    font-weight: 500;
+}
+.btn-modern:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 0 10px rgba(88, 166, 255, 0.4);
+}
+
+/* ✨ Section Titles */
+.section-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #00b3ff;
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.section-title i {
+    color: #00ff9d;
+}
+
+label.form-label {
+        color: #bdbdbd;
+        font-weight: 500;
+        text-transform: uppercase;
+        font-size: 0.9rem;
+        margin-bottom: 6px;
     }
 
-    .processor-field input,
-    .ram-field input,
-    .hdd-field input,
-    .ssd-field input {
-        border: none;
-        /* To avoid extra borders on input fields */
+input.form-control::placeholder,
+    textarea.form-control::placeholder {
+        color: #999;
     }
 
-    /* Increase width of individual form controls */
-    .processor-field select,
-    .ram-field select,
-    .hdd-field select,
-    .ssd-field select,
-    .processor-field input,
-    .ram-field input,
-    .hdd-field input,
-    .ssd-field input {
-        width: 100%;
-        /* Full width of the container */
+/* 📱 Responsive */
+@media (max-width: 767.98px) {
+    .card-dark {
+        padding: 1rem !important;
     }
-
-    /* Optionally, add padding for extra spacing */
-    .processor-field input,
-    .ram-field input,
-    .hdd-field input,
-    .ssd-field input {
-        padding: 10px;
-    }
-
-    /* Optional: Set a max-width for responsiveness */
-    .processor-field,
-    .ram-field,
-    .hdd-field,
-    .ssd-field {
-        max-width: 100%;
-    }
+}
 </style>
-<br>
-<div class="container my-5">
-    <div class="row justify-content-center">
-        <!-- Excel Import Form -->
-        <div class="card shadow-sm border-light w-100">
-            <div class="card-body">
-                <h5 class="card-title mb-3">Import Products from Excel</h5>
-                {% if error %}
-                    <div class="alert alert-danger">{{ error }}</div>
-                {% endif %}
-                {% if success %}
-                    <div class="alert alert-success">{{ success }}</div>
-                {% endif %}
 
-                <form method="POST" enctype="multipart/form-data" action="{% url 'upload_category_items' %}">
-                    {% csrf_token %}
-                    <div class="row mb-3">
-                        <div class="col-md-4">
-                            {{ form.file.label_tag }}
-                            {{ form.file }}
-                        </div>
-                    </div>
-                    <button type="submit" class="btn btn-success btn-sm rounded-pill shadow-sm"><i class="fa-solid fa-download"></i> Upload Product </button>
-                </form>
-            </div>
-        </div>
-        <div class="card shadow-sm border-light">
-            <div class="card-body">
+<div class="container py-5">
+
+    <div class="row g-4">
+        <!-- ✅ Manual Product Add Form -->
+        <div class="col-12">
+            <div class="card-dark p-4 shadow-sm">
                 {% if request.user.profile.role != 'OP' %}
+                <div class="section-title">
+                    <i class="fa-solid fa-pen-to-square"></i> Manual Product Entry
+                </div>
+
                 <form method="POST" enctype="multipart/form-data" action="{% url 'bank-create' %}">
                     {% csrf_token %}
-                    <div class="row mb-3">
-                        <!-- Product Name -->
+                    <div class="row g-3">
                         <div class="col-md-4">
-                            <label for="{{ form.account_name.id_for_label }}" class="form-label" placeholder="Enter Account Display Name">
-                                Account Display Name
-                            </label>
+                            <label for="{{ form.account_name.id_for_label }}" class="form-label">Account Display Name</label>
                             {{ form.account_name }}
-                            <div class="text-danger">{{ form.account_name.errors }}</div>
+                            <div class="text-danger small">{{ form.account_name.errors }}</div>
                         </div>
 
-                        <!-- Opeaning Balance -->
                         <div class="col-md-4">
-                            <label for="{{ form.opening_balance.id_for_label }}" class="form-label" placeholder="Enter Opeaning Balance">Opeaning Balance</label>
+                            <label for="{{ form.opening_balance.id_for_label }}" class="form-label">Opening Balance</label>
                             {{ form.opening_balance }}
-                            <div class="text-danger">{{ form.opening_balance.errors }}</div>
+                            <div class="text-danger small">{{ form.opening_balance.errors }}</div>
                         </div>
 
-                        <!-- Make & Models -->
                         <div class="col-md-4">
-                            <label for="{{ form.as_of_date.id_for_label }}" class="form-label" >
-                                As of Date
-                            </label>
+                            <label for="{{ form.as_of_date.id_for_label }}" class="form-label">As of Date</label>
                             {{ form.as_of_date }}
-                            <div class="text-danger">{{ form.as_of_date.errors }}</div>
+                            <div class="text-danger small">{{ form.as_of_date.errors }}</div>
                         </div>
                     </div>
 
-                    <div class="form-group text-center">
-                        <button class="btn btn-success btn-lg" type="submit">
+                    <div class="text-center mt-4">
+                        <button class="btn btn-success btn-lg btn-modern shadow-sm" type="submit">
                             <i class="fas fa-check"></i> Submit
                         </button>
                     </div>
                 </form>
                 {% else %}
-                <h1 style="color: red; text-align: center;"><b>Sorry You Don't have Permission to Add Product</b></h1>
+                <div class="alert alert-danger text-center mt-3 fw-bold">
+                    🚫 Sorry, you don’t have permission to add products.
+                </div>
                 {% endif %}
             </div>
         </div>
     </div>
 </div>
-
-<script>
-
-
-</script>
-
 {% endblock content %}

@@ -4,96 +4,254 @@
 {% block title %}Bank Accounts{% endblock title %}
 
 {% block content %}
-<div class="container-fluid my-4">
+<div class="container-fluid py-4">
 
-    <style>
-        /* ✅ Responsive Transactions Table */
-        @media (max-width: 991.98px) {
-            .table thead {
-                display: none;
-            }
+<style>
+/* 🌌 DARK BLUE THEME */
+body {
+    background-color: #0d1117;
+    color: #dce3f0;
+}
 
-            .table, .table tbody, .table tr, .table td {
-                display: block;
-                width: 100%;
-            }
+/* 🌙 CARD BASE */
+.card-dark {
+    background: rgba(16, 22, 30, 0.95);
+    border: 1px solid #2b3340;
+    border-radius: 1rem;
+    color: #dce3f0;
+    transition: all 0.3s ease;
+}
+.card-dark:hover {
+    border-color: #2196f3;
+    box-shadow: 0 0 14px rgba(33, 150, 243, 0.25);
+}
 
-            .table tr {
-                margin-bottom: 1rem;
-                border: 1px solid #dee2e6;
-                border-radius: .5rem;
-                background: #fff;
-                padding: .75rem;
-            }
+/* 💡 HEADER SECTION */
+.page-header {
+    background: linear-gradient(90deg, #2196f320, #00b3ff20);
+    border: 1px solid #2b3340;
+    border-radius: 1rem;
+    padding: 1rem 1.25rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+}
+.page-header h4 {
+    color: #5bc0ff;
+    font-weight: 600;
+}
+.page-header .btn {
+    border-radius: 50px;
+}
 
-            .table td {
-                text-align: right;
-                padding-left: 50%;
-                position: relative;
-                border: none;
-                white-space: normal;
-            }
+/* 💳 ACCOUNT CARDS */
+.account-card {
+    background: #121826;
+    border: 1px solid #2b3340;
+    border-radius: 0.75rem;
+    transition: all 0.3s ease;
+}
+.account-card:hover {
+    border-color: #2196f3;
+    transform: translateY(-2px);
+    box-shadow: 0 0 10px rgba(33, 150, 243, 0.25);
+}
+.account-card.active {
+    border-color: #5bc0ff;
+    background: rgba(91,192,255,0.1);
+}
+.account-card a {
+    text-decoration: none;
+    color: inherit;
+}
+.account-card small {
+    color: #9aa7bb;
+}
 
-            .table td::before {
-                content: attr(data-label);
-                position: absolute;
-                left: 0;
-                width: 50%;
-                padding-left: .75rem;
-                font-weight: 600;
-                text-align: left;
-                color: #333;
-            }
+/* 🔍 FILTER FORM */
+#filterForm .form-control,
+#filterForm button {
+    background-color: #121826;
+    color: #e6edf3;
+    border: 1px solid #2b3340;
+}
+#filterForm .form-control:focus {
+    border-color: #5bc0ff;
+    box-shadow: 0 0 0 0.25rem rgba(91,192,255,0.2);
+}
 
-            /* ✅ Filter form stacks vertically */
-            form#filterForm {
-                flex-direction: column;
-            }
-            #filterForm .col-md-3 {
-                width: 100%;
-            }
-            #filterForm input,
-            #filterForm button {
-                width: 100%;
-                margin-bottom: 0.5rem;
-            }
+/* 📊 TABLE */
+.table-dark-custom {
+    color: #e6edf3;
+    border-color: #2b3340;
+}
+.table-dark-custom thead {
+    background-color: #121826;
+    position: sticky;
+    top: 0;
+    z-index: 2;
+}
+.table-dark-custom tbody tr:hover {
+    background-color: rgba(33,150,243,0.1);
+}
+.table-dark-custom td, .table-dark-custom th {
+    border-color: #2b3340;
+}
 
-            /* ✅ Sidebar & content stack */
-            .row > .col-md-4,
-            .row > .col-md-8 {
-                width: 100%;
-            }
+/* ✅ BADGES */
+.text-primary { color: #5bc0ff !important; }
+.text-danger { color: #ff6666 !important; }
 
-            /* ✅ Header buttons stack */
-            .col-md-6.d-flex.justify-content-end.gap-2 {
-                flex-wrap: wrap;
-                justify-content: center !important;
-                gap: 0.5rem;
-            }
-        }
-    </style>
+/* 🧾 MODAL */
+.modal-content {
+    background-color: #121826;
+    color: #e6edf3;
+    border: 1px solid #2b3340;
+}
+.modal-header {
+    border-bottom: 1px solid #2b3340;
+}
+.btn-close {
+    filter: invert(1);
+}
 
-    <!-- ✅ Page Header -->
-    <div class="card shadow-sm rounded p-3 mb-3">
-        <div class="row align-items-center">
-            <div class="col-md-6 col-12 mb-2 mb-md-0 text-center text-md-start">
-                <h4 class="mb-0 text-success">Account Transaction Details</h4>
-            </div>
-            <div class="col-md-6 d-flex justify-content-end gap-2">
-                <a class="btn btn-success btn-sm rounded-pill shadow-sm" href="{% url 'bank-create' %}">
-                    <i class="fa-solid fa-plus"></i> Add Bank
+/* 💫 Buttons */
+.hover-glow {
+    transition: all 0.3s ease;
+}
+.hover-glow:hover {
+    box-shadow: 0 0 12px rgba(91,192,255,0.35);
+    transform: translateY(-1px);
+}
+.btn-outline-light:hover {
+    background-color: #2196f3;
+    color: #fff;
+    border-color: #2196f3;
+}
+
+.table-responsive {
+    max-height: 500px;
+    overflow-y: auto;
+    overflow-x: hidden; /* hide horizontal scroll gap */
+    padding-right: 0;
+    margin-right: 0;
+}
+
+.table-dark-custom {
+    width: 100%;
+    margin-right: 0;
+    border-collapse: collapse;
+}
+
+.table-dark-custom td, 
+.table-dark-custom th {
+    white-space: nowrap;
+}
+
+label.form-label {
+        color: #bdbdbd;
+        font-weight: 500;
+        text-transform: uppercase;
+        font-size: 0.9rem;
+        margin-bottom: 6px;
+    }
+
+input.form-control::placeholder,
+    textarea.form-control::placeholder {
+        color: #999;
+    }
+
+/* 📱 Responsive Tables */
+@media (max-width: 991.98px) {
+    .table thead { display: none; }
+    .table, .table tbody, .table tr, .table td { display: block; width: 100%; }
+    .table tr {
+        margin-bottom: 1rem;
+        background-color: #121826;
+        border-radius: .75rem;
+        padding: .75rem;
+    }
+    .table td {
+        text-align: right;
+        padding-left: 50%;
+        position: relative;
+        border: none;
+    }
+    .table td::before {
+        content: attr(data-label);
+        position: absolute;
+        left: 0;
+        width: 50%;
+        padding-left: .75rem;
+        font-weight: 600;
+        color: #9aa7bb;
+        text-align: left;
+    }
+}
+
+/* 🌈 Gradient Text */
+.text-gradient {
+    background: linear-gradient(90deg, #00b3ff, #2196f3);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+</style>
+
+<!-- ✅ HEADER -->
+<div class="page-header mb-4">
+    <h4><i class="fa-solid fa-building-columns me-2 text-primary"></i> Bank Accounts Overview</h4>
+    <div class="d-flex gap-2 flex-wrap">
+        <a href="{% url 'bank-create' %}" class="btn btn-primary btn-sm shadow-sm hover-glow">
+            <i class="fa-solid fa-plus"></i> Add Bank
+        </a>
+        <a href="{% url 'bank-export' %}" class="btn btn-outline-light btn-sm shadow-sm hover-glow">
+            <i class="fa-solid fa-download"></i> Export Excel
+        </a>
+    </div>
+</div>
+
+<div class="row">
+    <!-- ✅ Sidebar -->
+    <div class="col-md-4 mb-4">
+        <div class="card-dark p-3">
+            <h5 class="text-gradient mb-3">Accounts Summary</h5>
+
+            <div class="account-card mb-3 p-3 {% if not selected_account_id %}active{% endif %}">
+                <a href="{% url 'cashbanklist' %}">
+                    <strong>Show All</strong><br>
+                    <small>All accounts overview</small>
                 </a>
-                <a class="btn btn-success btn-sm rounded-pill shadow-sm" href="{% url 'bank-export' %}">
-                    <i class="fa-solid fa-download"></i> Export to Excel
-                </a>
             </div>
+
+            {% for bank in all_bankaccounts %}
+            <div class="account-card mb-3 p-3 {% if selected_account_id == bank.id|stringformat:'s' %}active{% endif %}">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <a href="?account_id={{ bank.id }}" class="{% if selected_account_id == bank.id|stringformat:'s' %}text-info{% endif %}">
+                            <strong>{{ bank.account_name }}</strong><br>
+                            <small>
+                                {% if bank.opening_balance <= 0 %}
+                                    <span class="text-danger">₹{{ bank.opening_balance }}</span>
+                                {% else %}
+                                    <span class="text-primary">₹{{ bank.opening_balance }}</span>
+                                {% endif %}
+                            </small>
+                        </a>
+                    </div>
+                    <a href="{% url 'bank-delete' bank.id %}" class="btn btn-sm btn-outline-danger hover-glow">
+                        <i class="fa fa-trash"></i>
+                    </a>
+                </div>
+            </div>
+            {% empty %}
+            <p class="text-muted">No bank accounts found.</p>
+            {% endfor %}
         </div>
     </div>
 
-    <!-- ✅ Main Content -->
-    <div class="row">
-        <!-- Sidebar -->
-        <div class="col-md-4 mb-4">
+    <!-- Sidebar -->
+        <!-- <div class="col-md-4 mb-4">
             <div class="card shadow-sm p-3 h-100">
                 <h5 class="text-success mb-3">Accounts Summary</h5>
 
@@ -128,147 +286,175 @@
                 <p class="text-muted">No bank accounts found.</p>
                 {% endfor %}
             </div>
-        </div>
+        </div> -->
 
-        <!-- Transaction Table -->
-        <div class="col-md-8">
-            <div class="card shadow-sm p-3">
-                <h5 class="mb-3 text-success">Account Transactions</h5>
 
-                <!-- ✅ Filter Section -->
-                <form id="filterForm" class="row g-2 mb-3">
-                    <div class="col-md-3">
-                        <input type="text" id="filterName" class="form-control" placeholder="Filter by Name/Description/Type">
-                    </div>
-                    <div class="col-md-3">
-                        <input type="date" id="filterDateStart" class="form-control">
-                    </div>
-                    <div class="col-md-3">
-                        <input type="date" id="filterDateEnd" class="form-control">
-                    </div>
-                    <div class="col-md-3">
-                        <button type="button" id="clearFilters" class="btn btn-outline-secondary w-100">Clear Filters</button>
-                    </div>
-                </form>
+    <!-- ✅ Transactions -->
+    <div class="col-md-8">
+        <div class="card-dark p-3">
+            <h5 class="mb-3 text-primary"><i class="fa-solid fa-money-bill-transfer me-2"></i> Account Transactions</h5>
 
-                <!-- ✅ Transactions Table -->
-                <div class="table-responsive" style="max-height: 500px; overflow-y: auto;">
-                    <table class="table table-sm table-bordered table-striped align-middle text-center mb-0" id="transactionsTable">
-                        <thead class="table-light">
-                            <tr>
-                                <th>Type</th>
-                                <th>Name</th>
-                                <th>Date</th>
-                                <th>Amount</th>
-                                <th>Balance Due</th>
-                                <th>Action</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for sale in page_obj %}
-                            <tr>
-                                <td data-label="Type">{{ sale.payment_type }}</td>
-                                <td data-label="Name" class="name-cell">
-                                    {% if sale.transaction_type == "Sale" %}
-                                        {{ sale.customer.first_name }} ( Client )
-                                    {% elif sale.transaction_type == "Purchase" %}
-                                        {{ sale.vendor.name }} ( Vendor )
-                                    {% elif sale.transaction_type == "Service" %}
-                                        {{ sale.item_name|default:sale.description }} ( Service )
-                                    {% endif %}
-                                </td>
-                                <td data-label="Date" class="date-cell">
-                                    {% if sale.transaction_type == "Service" %}
-                                        {{ sale.date_created|date:"Y-m-d" }}
-                                    {% else %}
-                                        {{ sale.date_added|date:"Y-m-d" }}
-                                    {% endif %}
-                                </td>
-                                <td data-label="Amount">₹{{ sale.amount_paid }}</td>
-                                <td data-label="Balance Due">
-                                    {% if sale.status == "Paid" %}
-                                        <span class="text-success">₹0.00</span>
-                                    {% elif sale.status == "Unpaid" or sale.status == "Balance" %}
-                                        <span class="text-danger">₹{{ sale.amount_change|floatformat:2 }}</span>
-                                    {% else %}
-                                        <span>-</span>
-                                    {% endif %}
-                                </td>
-                                <td data-label="Action">
-                                    {% if sale.status != "Paid" %}
-                                        <button type="button" class="btn btn-sm btn-danger open-payment-modal"
-                                            data-bs-toggle="modal" data-bs-target="#paymentModal"
-                                            data-transaction-type="{{ sale.transaction_type }}"
-                                            data-balance="{{ sale.amount_change|floatformat:2 }}"
-                                            data-sale-id="{% if sale.transaction_type == 'Sale' %}{{ sale.id }}{% endif %}"
-                                            data-servicebill-id="{% if sale.transaction_type == 'Service' %}{{ sale.id }}{% endif %}"
-                                            data-customer-name="{{ sale.customer.first_name }}">
-                                            <i class="fa fa-money-bill-wave"></i>
-                                        </button>
-                                    {% else %}
-                                        <button type="button" class="btn btn-sm btn-success open-payment-modal" disabled>
-                                            <i class="fa fa-money-bill-wave"></i>
-                                        </button>
-                                    {% endif %}
-                                </td>
-                            </tr>
-                            {% empty %}
-                            <tr>
-                                <td colspan="6" class="text-muted">No transactions found.</td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
+            <!-- Filters -->
+            <form id="filterForm" class="row g-2 mb-3">
+                <div class="col-md-3"><input type="text" id="filterName" class="form-control" placeholder="Search name/type"></div>
+                <div class="col-md-3"><input type="date" id="filterDateStart" class="form-control"></div>
+                <div class="col-md-3"><input type="date" id="filterDateEnd" class="form-control"></div>
+                <div class="col-md-3"><button type="button" id="clearFilters" class="btn btn-outline-light w-100">Clear</button></div>
+            </form>
+
+            <div class="table-responsive" style="max-height: 500px;">
+                <table class="table-sm table-dark-custom align-middle text-center mb-0" id="transactionsTable">
+                    <thead>
+                        <tr>
+                            <th>Type</th>
+                            <th>Name</th>
+                            <th>Date</th>
+                            <th>Amount</th>
+                            <th>Balance Due</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for sale in page_obj %}
+                        <tr>
+                            <td data-label="Type">{{ sale.payment_type }} - INV{{ sale.id }}</td>
+                            <td data-label="Name" class="name-cell">
+                                {% if sale.transaction_type == "Sale" %}
+                                    {{ sale.customer.first_name }} (Client)
+                                {% elif sale.transaction_type == "Purchase" %}
+                                    {{ sale.vendor.name }} (Vendor)
+                                {% elif sale.transaction_type == "Service" %}
+                                    {{ sale.item_name|default:sale.description }} (Service)
+                                {% endif %}
+                            </td>
+                            <td data-label="Date" class="date-cell">
+                                {% if sale.transaction_type == "Service" %}
+                                    {{ sale.date_created|date:"Y-m-d" }}
+                                {% else %}
+                                    {{ sale.date_added|date:"Y-m-d" }}
+                                {% endif %}
+                            </td>
+                            <td data-label="Amount">₹{{ sale.amount_paid }}</td>
+                            <td data-label="Balance Due">
+                                {% if sale.status == "Paid" %}
+                                    <span class="text-primary">₹0.00</span>
+                                {% elif sale.status == "Unpaid" or sale.status == "Balance" %}
+                                    <span class="text-danger">₹{{ sale.amount_change|floatformat:2 }}</span>
+                                {% else %}
+                                    <span>-</span>
+                                {% endif %}
+                            </td>
+                            <td data-label="Action">
+                                {% if sale.status != "Paid" %}
+                                <button type="button" class="btn btn-sm btn-outline-primary hover-glow open-payment-modal"
+                                    data-bs-toggle="modal" data-bs-target="#paymentModal"
+                                    data-transaction-type="{{ sale.transaction_type }}"
+                                    data-balance="{{ sale.amount_change|floatformat:2 }}"
+                                    data-sale-id="{% if sale.transaction_type == 'Sale' %}{{ sale.id }}{% endif %}"
+                                    data-servicebill-id="{% if sale.transaction_type == 'Service' %}{{ sale.id }}{% endif %}"
+                                    data-customer-name="{{ sale.customer.first_name }}">
+                                    <i class="fa fa-money-bill-wave"></i>
+                                </button>
+                                {% else %}
+                                <button type="button" class="btn btn-sm btn-success" disabled>
+                                    <i class="fa fa-check"></i>
+                                </button>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr><td colspan="6" class="text-muted">No transactions found.</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
             </div>
         </div>
     </div>
-
-    <!-- ✅ Payment Modal -->
-    <div class="modal fade" id="paymentModal" tabindex="-1" aria-labelledby="paymentModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <form id="paymentForm" method="post">
-                {% csrf_token %}
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="paymentModalLabel">Receive Payment</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                    </div>
-                    <div class="modal-body">
-                        <input type="hidden" name="sale_id" id="saleIdInput" style="display:none;">
-                        <input type="hidden" name="servicebill_id" id="serviceBillIdInput" style="display:none;">
-
-                        <div class="mb-3">
-                            <label for="customerName" class="form-label">Customer</label>
-                            <input type="text" id="customerName" class="form-control" readonly>
-                        </div>
-
-                        <div class="mb-3">
-                            <label for="balanceDue" class="form-label">Balance Due</label>
-                            <input type="text" id="balanceDue" class="form-control" readonly>
-                        </div>
-
-                        <div class="mb-3">
-                            <label for="amountReceived" class="form-label">Received</label>
-                            <input type="number" step="0.01" min="0" max="9999999" name="amount_received" id="amountReceived" class="form-control" required>
-                        </div>
-
-                        <div class="mb-3">
-                            <label for="remainingBalance" class="form-label">Remaining Balance</label>
-                            <input type="text" id="remainingBalance" class="form-control" readonly>
-                        </div>
-                    </div>
-
-                    <div class="modal-footer">
-                        <button type="submit" class="btn btn-success">Submit Payment</button>
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                    </div>
-                </div>
-            </form>
-        </div>
-    </div>
-
 </div>
+
+<!-- ✅ Payment Modal -->
+<div class="modal fade" id="paymentModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <form id="paymentForm" method="post">
+      {% csrf_token %}
+      <div class="modal-content modal-dark">
+        <div class="modal-header border-secondary">
+          <h5 class="modal-title text-gradient">
+            <i class="fa-solid fa-money-bill-transfer me-2"></i> Receive Payment
+          </h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
+
+        <div class="modal-body">
+          <input type="hidden" name="sale_id" id="saleIdInput">
+          <input type="hidden" name="servicebill_id" id="serviceBillIdInput">
+
+          <div class="mb-3">
+            <label class="form-label text-light">Customer</label>
+            <input type="text" id="customerName" class="form-control bg-dark text-light border-secondary" readonly>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label text-light">Balance Due</label>
+            <input type="text" id="balanceDue" class="form-control bg-dark text-info border-secondary" readonly>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label text-light">Received</label>
+            <input type="number" step="0.01" min="0" id="amountReceived" name="amount_received"
+                   class="form-control bg-dark text-light border-secondary" required>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label text-light">Remaining Balance</label>
+            <input type="text" id="remainingBalance" class="form-control bg-dark text-warning border-secondary" readonly>
+          </div>
+        </div>
+
+        <div class="modal-footer border-secondary">
+          <button type="submit" class="btn btn-success rounded-pill hover-glow">
+            <i class="fa-solid fa-check"></i> Submit Payment
+          </button>
+          <button type="button" class="btn btn-outline-light rounded-pill" data-bs-dismiss="modal">
+            <i class="fa-solid fa-xmark"></i> Close
+          </button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+
+<style>
+/* 🌙 Dark Modal Theme */
+.modal-dark {
+  background-color: #0d1117;
+  color: #e6edf3;
+  border: 1px solid #30363d;
+  box-shadow: 0 0 15px rgba(88, 166, 255, 0.2);
+  border-radius: 1rem;
+}
+
+/* ✨ Gradient Title */
+.text-gradient {
+  background: linear-gradient(90deg, #00ff9d, #00b3ff);
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* 🪄 Hover Glow */
+.hover-glow:hover {
+  box-shadow: 0 0 10px rgba(88, 166, 255, 0.4);
+  transform: translateY(-1px);
+  transition: all 0.2s ease-in-out;
+}
+
+/* White close button for dark modals */
+.btn-close-white {
+  filter: invert(1);
+}
+</style>
+
 
 <!-- ✅ JS -->
 <script>

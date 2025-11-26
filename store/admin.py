@@ -10,16 +10,9 @@ This module defines the following admin classes:
 """
 
 from django.contrib import admin
-from .models import Ssd, Item, Delivery, Hdd,Ram,Processor, catogaryitem, InventoryItem
-
-
-@admin.register(InventoryItem)
-class InventoryItemAdmin(admin.ModelAdmin):
-    list_display = ('id', 'name', 'serial_no', 'make_and_model', 'processor', 'ram', 'hdd', 'ssd', 'smps', 'motherboard')
-    search_fields = ('name', 'serial_no', 'make_and_model', 'processor')
-
+from .models import Ssd, Item, Delivery, Hdd,Ram,Processor, catogaryitem
 class RamAdmin(admin.ModelAdmin):
-    """
+    """ 
     Admin configuration for the Ram model.
     """
     list_display = ('name','serial_no','quantity','unit_price','slug')

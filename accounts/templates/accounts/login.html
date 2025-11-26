@@ -1,141 +1,175 @@
-{% load crispy_forms_tags %}{% load static %}
-<html>
-  <head>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css"
-      rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC"
-      crossorigin="anonymous" />
-  </head>
-<body>
-  <div class="login-page">
-    <style>
-    .login-page {
-      width: 360px;
-      padding: 8% 0 0;
-      margin: auto;
-    }
-    .form {
-      position: relative;
-      z-index: 1;
-      background: #FFFFFF;
-      max-width: 360px;
-      margin: 0 auto 100px;
-      padding: 45px;
-      text-align: center;
-      box-shadow: 0 0 20px 0 rgba(0, 0, 0, 0.2), 0 5px 5px 0 rgba(0, 0, 0, 0.24);
-    }
-    .form input {
-      outline: 0;
-      background: #bbffbb;
-      width: 100%;
-      border: 0;
-      margin: 0 0 15px;
-      padding: 15px;
-      box-sizing: border-box;
-      font-size: 14px;
-    }
-    .form button {
-      text-transform: uppercase;
-      outline: 0;
-      background: #4CAF50;
-      width: 100%;
-      border: 0;
-      padding: 15px;
-      color: #FFFFFF;
-      font-size: 14px;
-      -webkit-transition: all 0.3 ease;
-      transition: all 0.3 ease;
-      cursor: pointer;
-    }
-    .form button:hover,.form button:active,.form button:focus {
-      background: #43A047;
-    }
-    .form .message {
-      margin: 15px 0 0;
-      color: #b3b3b3;
-      font-size: 12px;
-    }
-    .form .message a {
-      color: #4CAF50;
-      text-decoration: none;
-    }
-    .form .register-form {
-      display: none;
-    }
-    .container {
-      position: relative;
-      z-index: 1;
-      max-width: 300px;
-      margin: 0 auto;
-    }
-    .container:before, .container:after {
-      content: "";
-      display: block;
-      clear: both;
-    }
-    .container .info {
-      margin: 50px auto;
-      text-align: center;
-    }
-    .container .info h1 {
-      margin: 0 0 15px;
-      padding: 0;
-      font-size: 36px;
-      font-weight: 300;
-      color: #1a1a1a;
-    }
-    .container .info span {
-      color: #4d4d4d;
-      font-size: 12px;
-    }
-    .container .info span a {
-      color: #000000;
-      text-decoration: none;
-    }
-    .container .info span .fa {
-      color: #EF3B3A;
-    }
-    body {
-      background: #76b852; /* fallback for old browsers */
-      background: rgb(141,194,111);
-      background: linear-gradient(90deg, rgba(141,194,111,1) 0%, rgba(118,184,82,1) 50%);
-      -webkit-font-smoothing: antialiased;
-      -moz-osx-font-smoothing: grayscale;
-    }
-    
-    
-    </style>
-    <div class="form">
-      <div>
-        <strong class="navbar-brand" style="font-size: 26px;">Solv-<span class="text-warning">IT</span></strong>
-      </div>
-      <div class="text-danger">
-        {% if messages %} {% for message in messages %}
-        <div class="alert alert-{{message.tags}}">
-            {{ message }}
-        </div>
-        {% endfor %} {% endif %}
+{% load crispy_forms_tags %}
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Solv-IT Login</title>
 
-    {% if form.non_field_errors %}
-        <ul>
-            {% for error in form.non_field_errors %}
-                <li>{{ error }}</li>
-            {% endfor %}
-        </ul>
-    {% endif %}
-  </div>
-      <form class="login-form" method="POST">
-        {% csrf_token %}
-        <p>{{ message }}</p>
-        <label>Username</label>
-        <span class="text-danger">{{ form.username.errors }}</span>
-        {{form.username}}
-        <label>Password</label>
-        <span class="text-danger">{{ form.password.errors }}</span>
-        {{form.password}}
-        <button  type="submit" name="button">login</button>
-        <p class="message">Not registered? <a href="{% url 'user-register' %}">Create an account</a></p>
-      </form>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <style>
+        /* ---------------------- GLOBAL DARK THEME ---------------------- */
+        body {
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+
+            /* Dark gradient background */
+            background: linear-gradient(135deg, #0a0a0a, #1d1d1d, #121212);
+
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: "Poppins", sans-serif;
+            color: white;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* ---------------------- WATERMARK ---------------------- */
+        /* body::before {
+            content: "SOLV-IT  SOLV-IT  SOLV-IT  SOLV-IT";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 300%;
+            height: 300%;
+            font-size: 5rem;
+            font-weight: 700;
+            color: rgba(255, 255, 255, 0.03);
+            transform: rotate(-30deg);
+            white-space: nowrap;
+            animation: slide 35s linear infinite;
+            pointer-events: none;
+        } */
+
+        @keyframes slide {
+            0% { transform: rotate(-30deg) translateX(0); }
+            100% { transform: rotate(-30deg) translateX(-50%); }
+        }
+
+        /* ---------------------- LOGIN CARD ---------------------- */
+        .login-card {
+            width: 380px;
+            padding: 2rem;
+            border-radius: 18px;
+
+            background: rgba(30, 30, 30, 0.65);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+
+            box-shadow: 0 0 16px rgba(0, 255, 100, 0.18);
+
+            text-align: center;
+            position: relative;
+            z-index: 10;
+        }
+
+        .brand-title {
+            font-size: 32px;
+            font-weight: 700;
+            color: #00eaff;
+            text-shadow: 0 0 12px rgba(0, 255, 120, 0.4);
+        }
+
+        label {
+            font-weight: 500;
+            margin-top: 10px;
+            float: left;
+        }
+
+        /* ---------------------- INPUTS ---------------------- */
+        .form input {
+            background: rgba(255,255,255,0.08);
+            border: 1px solid rgba(255,255,255,0.15);
+            color: #fff;
+
+            padding: 12px;
+            width: 100%;
+            border-radius: 8px;
+            margin-bottom: 15px;
+        }
+
+        .form input:focus {
+            border-color: #00ff88;
+            box-shadow: 0 0 8px rgba(0,255,120,0.4);
+        }
+
+        /* ---------------------- BUTTON ---------------------- */
+        .login-btn {
+            background: #00ff88;
+            border: none;
+            color: #000;
+            padding: 12px;
+            width: 100%;
+            border-radius: 30px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: 0.3s ease;
+        }
+
+        .login-btn:hover {
+            background: #00d46d;
+            box-shadow: 0 0 15px rgba(0,255,120,0.5);
+            transform: translateY(-2px);
+        }
+
+        .register-link a {
+            color: #00ff88;
+            text-decoration: none;
+        }
+
+        .register-link a:hover {
+            text-decoration: underline;
+        }
+
+    </style>
+</head>
+
+<body>
+
+    <div class="login-card">
+        <div>
+            <strong class="brand-title">Solv-IT</strong>
+        </div>
+
+        <!-- Django messages -->
+        <div class="mt-3">
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="alert alert-{{message.tags}}">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+
+            {% if form.non_field_errors %}
+                <ul>
+                    {% for error in form.non_field_errors %}
+                        <li class="text-danger">{{ error }}</li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+        </div>
+
+        <form class="form" method="POST">
+            {% csrf_token %}
+
+            <label>Username</label>
+            <span class="text-danger">{{ form.username.errors }}</span>
+            {{ form.username }}
+
+            <label>Password</label>
+            <span class="text-danger">{{ form.password.errors }}</span>
+            {{ form.password }}
+
+            <button type="submit" class="login-btn mt-2">Login</button>
+
+            <p class="register-link mt-3">
+                Not registered? <a href="{% url 'user-register' %}">Create an account</a>
+            </p>
+        </form>
     </div>
-  </div>
+
 </body>
 </html>

@@ -2,211 +2,394 @@
 {% block title %}Expenses{% endblock %}
 {% block content %}
 <style>
-    /* ✅ Responsive Table */
-    @media (max-width: 991.98px) {
-        .table thead {
-            display: none;
-        }
-        .table, .table tbody, .table tr, .table td {
-            display: block;
-            width: 100%;
-        }
-        .table tr {
-            margin-bottom: 1rem;
-            border: 1px solid #dee2e6;
-            border-radius: .5rem;
-            background: #fff;
-            padding: .75rem;
-        }
-        .table td {
-            text-align: right;
-            padding-left: 50%;
-            position: relative;
-            border: none;
-        }
-        .table td::before {
-            content: attr(data-label);
-            position: absolute;
-            left: 0;
-            width: 50%;
-            padding-left: .75rem;
-            font-weight: 600;
-            text-align: left;
-            color: #333;
-        }
+/* 🌙 DARK MODERN NEON THEME */
+body {
+    background-color: #0d1117;
+    color: #e6edf3;
+    font-family: "Inter", system-ui, sans-serif;
+}
 
-        /* ✅ Form filters stack */
-        form.row.g-2 .col-12,
-        form.row.g-2 .col-md-auto {
-            width: 100%;
-        }
-        form.row.g-2 input,
-        form.row.g-2 select,
-        form.row.g-2 button,
-        form.row.g-2 a {
-            width: 100%;
-        }
+/* ✅ Headings */
+h4 {
+    color: #e6edf3;
+    font-weight: 600;
+}
 
-        /* ✅ Header buttons */
-        .d-flex.flex-column.flex-md-row.justify-content-between.align-items-md-center {
-            flex-wrap: wrap;
-            gap: .75rem;
-            text-align: center;
-        }
+/* ✅ Neon Buttons */
+.btn-success {
+    background: #238636;
+    border: none;
+    color: #fff;
+    box-shadow: 0 0 6px rgba(35, 134, 54, 0.6);
+    transition: 0.25s ease;
+}
+.btn-success:hover {
+    background: #2ea043;
+    box-shadow: 0 0 12px rgba(46, 160, 67, 0.8);
+}
+.btn-primary {
+    background: #2d7ff9;
+    border: none;
+    color: #fff;
+    box-shadow: 0 0 6px rgba(45, 127, 249, 0.5);
+    transition: 0.25s ease;
+}
+.btn-primary:hover {
+    background: #448efc;
+    box-shadow: 0 0 12px rgba(45, 127, 249, 0.7);
+}
+.btn-outline-secondary {
+    border: 1px solid #30363d;
+    color: #e6edf3;
+    transition: 0.25s ease;
+}
+.btn-outline-secondary:hover {
+    background: #21262d;
+    box-shadow: 0 0 10px rgba(255,255,255,0.1);
+}
+
+/* ✅ Cards with Glow */
+.card {
+    background: #161b22;
+    border: 1px solid #30363d;
+    border-radius: 0.75rem;
+    box-shadow: 0 0 12px rgba(0, 0, 0, 0.45), 0 0 6px rgba(45, 127, 249, 0.05);
+    transition: 0.3s ease;
+}
+.card:hover {
+    box-shadow: 0 0 18px rgba(45, 127, 249, 0.15);
+}
+.card .card-body {
+    color: #e6edf3;
+}
+
+/* ✅ Inputs and Selects */
+.form-control, .form-select {
+    background-color: #0d1117;
+    color: #e6edf3;
+    border: 1px solid #30363d;
+    border-radius: 0.5rem;
+    transition: 0.25s ease;
+}
+.form-control:focus, .form-select:focus {
+    border-color: #2d7ff9;
+    box-shadow: 0 0 6px rgba(45, 127, 249, 0.5);
+    background-color: #0d1117;
+}
+
+/* ✅ Table */
+
+thead th {
+    background-color: #0d1117;
+    color: #00ffc8;
+    text-align: center;
+    padding: 8px;
+}
+
+.table-dark-custom {
+    color: #e6edf3;
+    border-color: #2b3340;
+}
+.table-dark-custom thead {
+    background-color: #121826;
+    position: sticky;
+    top: 0;
+    z-index: 2;
+}
+.table-dark-custom tbody tr:hover {
+    background-color: rgba(33,150,243,0.1);
+}
+.table-dark-custom td, .table-dark-custom th {
+    border-color: #2b3340;
+}
+
+.table-dark-custom {
+    width: 100%;
+    margin-right: 0;
+    border-collapse: collapse;
+}
+
+.table-dark-custom td, 
+.table-dark-custom th {
+    white-space: nowrap;
+}
+/* .table {
+    color: #e6edf3;
+    background-color: #161b22;
+    border-color: #30363d;
+}
+.table thead {
+    background: #1c2128;
+    color: #e6edf3;
+    border-bottom: 2px solid #30363d;
+}
+.table-hover tbody tr:hover {
+    background: #21262d;
+    transition: background 0.25s ease;
+}
+.table-bordered > :not(caption) > * > * {
+    border-color: #30363d;
+} */
+
+/* ✅ Pagination */
+.pagination .page-link {
+    background-color: #161b22;
+    border: 1px solid #30363d;
+    color: #e6edf3;
+    transition: 0.25s ease;
+}
+.pagination .page-link:hover {
+    background-color: #21262d;
+    box-shadow: 0 0 6px rgba(45, 127, 249, 0.5);
+}
+.pagination .active .page-link {
+    background-color: #2d7ff9;
+    border-color: #2d7ff9;
+    box-shadow: 0 0 8px rgba(45, 127, 249, 0.7);
+}
+
+/* ✅ Totals Highlight */
+.text-success {
+    color: #3fb950 !important;
+    text-shadow: 0 0 5px rgba(63, 185, 80, 0.5);
+}
+.text-primary {
+    color: #2d7ff9 !important;
+    text-shadow: 0 0 5px rgba(45, 127, 249, 0.5);
+}
+
+/* 🌙 CARD BASE */
+.card-dark {
+    background: rgba(16, 22, 30, 0.95);
+    border: 1px solid #2b3340;
+    border-radius: 1rem;
+    color: #dce3f0;
+    transition: all 0.3s ease;
+}
+.card-dark:hover {
+    border-color: #2196f3;
+    box-shadow: 0 0 14px rgba(33, 150, 243, 0.25);
+}
+
+
+
+label.form-label {
+        color: #bdbdbd;
+        font-weight: 500;
+        text-transform: uppercase;
+        font-size: 0.9rem;
+        margin-bottom: 6px;
     }
+
+input.form-control::placeholder,
+    textarea.form-control::placeholder {
+        color: #999;
+    }
+
+/* ✅ Responsive Table (Mobile) */
+@media (max-width: 991.98px) {
+    .table thead {
+        display: none;
+    }
+    .table, .table tbody, .table tr, .table td {
+        display: block;
+        width: 100%;
+    }
+    .table tr {
+        margin-bottom: 1rem;
+        border: 1px solid #30363d;
+        border-radius: .5rem;
+        background: #161b22;
+        padding: .75rem;
+        box-shadow: 0 0 6px rgba(0, 0, 0, 0.3);
+    }
+    .table td {
+        text-align: right;
+        padding-left: 50%;
+        position: relative;
+        border: none;
+    }
+    .table td::before {
+        content: attr(data-label);
+        position: absolute;
+        left: 0;
+        width: 50%;
+        padding-left: .75rem;
+        font-weight: 600;
+        text-align: left;
+        color: #8b949e;
+    }
+
+    /* Responsive filters */
+    form.row.g-2 .col-12,
+    form.row.g-2 .col-md-auto {
+        width: 100%;
+    }
+    form.row.g-2 input,
+    form.row.g-2 select,
+    form.row.g-2 button,
+    form.row.g-2 a {
+        width: 100%;
+    }
+
+    .d-flex.flex-column.flex-md-row.justify-content-between.align-items-md-center {
+        flex-wrap: wrap;
+        gap: .75rem;
+        text-align: center;
+    }
+}
 </style>
 
 <div class="container py-4">
+
     <!-- ✅ Header -->
     <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-2">
-        <h4 class="mb-0">Expenses</h4>
-        <a href="{% url 'expense-create' %}" class="btn btn-success">
+        <h4 class="mb-0">💰 Expenses</h4>
+        <a href="{% url 'expense-create' %}" class="btn btn-outline-info">
             <i class="fa fa-plus me-1"></i> Add Expense
         </a>
     </div>
 
     <!-- ✅ Filter Form -->
-    <div class="card shadow-sm p-4">
-        <div class="mb-3">
-            <form method="get" class="row g-2 align-items-end">
-                <div class="col-12 col-md-auto">
-                    <label for="start_date" class="form-label mb-0">From</label>
-                    <input type="date" class="form-control" name="start_date" id="start_date" value="{{ start_date }}">
-                </div>
-                <div class="col-12 col-md-auto">
-                    <label for="end_date" class="form-label mb-0">To</label>
-                    <input type="date" class="form-control" name="end_date" id="end_date" value="{{ end_date }}">
-                </div>
-                <div class="col-12 col-md-auto">
-                    <label for="category" class="form-label mb-0">Category</label>
-                    <select class="form-select" name="category" id="category">
-                        <option value="all" {% if selected_category == 'all' %}selected{% endif %}>All</option>
-                        {% for cat, cat_disp in categories %}
-                            <option value="{{ cat }}" {% if selected_category == cat %}selected{% endif %}>{{ cat_disp }}</option>
-                        {% endfor %}
-                    </select>
-                </div>
-                <div class="col-12 col-md-auto">
-                    <label for="name" class="form-label mb-0">Name</label>
-                    <input type="text" class="form-control" name="name" id="name" value="{{ name }}" placeholder="Expense name">
-                </div>
-                <div class="col-12 col-md-auto d-flex align-items-end gap-2">
-                    <button type="submit" class="btn btn-primary w-100">
-                        <i class="fa fa-filter me-1"></i> Filter
-                    </button>
-                    <a href="{% url 'expense-list' %}" class="btn btn-outline-secondary w-100" title="Clear Filters">
-                        <i class="fa fa-times-circle me-1"></i> Clear
-                    </a>
-                </div>
-            </form>
-        </div>
-
-        <!-- ✅ Totals Section -->
-        <div class="row mb-3">
-            <div class="col-md-3 col-6 mb-2">
-                <div class="card text-center">
-                    <div class="card-body p-2">
-                        <div class="fw-bold">This Month</div>
-                        <div class="text-success">₹ {{ totals.month|floatformat:2 }}</div>
-                    </div>
-                </div>
+    <div class="card-dark p-3 mb-4 ">
+        <form method="get" class="row g-2 align-items-end">
+            <div class="col-12 col-md-auto">
+                <label for="start_date" class="form-label mb-0">From</label>
+                <input type="date" class="form-control" name="start_date" id="start_date" value="{{ start_date }}">
             </div>
-            <div class="col-md-3 col-6 mb-2">
-                <div class="card text-center">
-                    <div class="card-body p-2">
-                        <div class="fw-bold">This Week</div>
-                        <div class="text-success">₹ {{ totals.week|floatformat:2 }}</div>
-                    </div>
-                </div>
+            <div class="col-12 col-md-auto">
+                <label for="end_date" class="form-label mb-0">To</label>
+                <input type="date" class="form-control" name="end_date" id="end_date" value="{{ end_date }}">
             </div>
-            <div class="col-md-3 col-6 mb-2">
-                <div class="card text-center">
-                    <div class="card-body p-2">
-                        <div class="fw-bold">Today</div>
-                        <div class="text-success">₹ {{ totals.day|floatformat:2 }}</div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-3 col-6 mb-2">
-                <div class="card text-center">
-                    <div class="card-body p-2">
-                        <div class="fw-bold">Filtered Total</div>
-                        <div class="text-primary">₹ {{ filtered_total|floatformat:2 }}</div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- ✅ Expense Table -->
-        <div class="card">
-            <div class="table-responsive">
-                <table class="table table-bordered table-hover align-middle text-center table-sm mb-0">
-                    <thead class="table-light">
-                        <tr>
-                            <th>Date</th>
-                            <th>Name</th>
-                            <th>Amount</th>
-                            <th>Category</th>
-                            <th>Description</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for expense in expenses %}
-                        <tr>
-                            <td data-label="Date">{{ expense.date }}</td>
-                            <td data-label="Name">{{ expense.name|default:'—' }}</td>
-                            <td data-label="Amount">₹ {{ expense.amount }}</td>
-                            <td data-label="Category">{{ expense.get_category_display|default:expense.category }}</td>
-                            <td data-label="Description">{{ expense.description|default:'—' }}</td>
-                        </tr>
-                        {% empty %}
-                        <tr>
-                            <td colspan="5" class="text-center text-muted">No expenses found.</td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-
-            <!-- ✅ Pagination -->
-            {% if page_obj.has_other_pages %}
-            <nav aria-label="Expense pagination" class="mt-3">
-                <ul class="pagination justify-content-center flex-wrap">
-                    {% if page_obj.has_previous %}
-                    <li class="page-item">
-                        <a class="page-link" href="?{% if start_date %}start_date={{ start_date }}&{% endif %}{% if end_date %}end_date={{ end_date }}&{% endif %}{% if selected_category %}category={{ selected_category }}&{% endif %}{% if name %}name={{ name }}&{% endif %}page={{ page_obj.previous_page_number }}">
-                            Previous
-                        </a>
-                    </li>
-                    {% else %}
-                    <li class="page-item disabled"><span class="page-link">Previous</span></li>
-                    {% endif %}
-
-                    {% for num in page_obj.paginator.page_range %}
-                        {% if page_obj.number == num %}
-                            <li class="page-item active"><span class="page-link">{{ num }}</span></li>
-                        {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
-                            <li class="page-item">
-                                <a class="page-link" href="?{% if start_date %}start_date={{ start_date }}&{% endif %}{% if end_date %}end_date={{ end_date }}&{% endif %}{% if selected_category %}category={{ selected_category }}&{% endif %}{% if name %}name={{ name }}&{% endif %}page={{ num }}">
-                                    {{ num }}
-                                </a>
-                            </li>
-                        {% endif %}
+            <div class="col-12 col-md-auto">
+                <label for="category" class="form-label mb-0">Category</label>
+                <select class="form-select" name="category" id="category">
+                    <option value="all" {% if selected_category == 'all' %}selected{% endif %}>All</option>
+                    {% for cat, cat_disp in categories %}
+                        <option value="{{ cat }}" {% if selected_category == cat %}selected{% endif %}>{{ cat_disp }}</option>
                     {% endfor %}
+                </select>
+            </div>
+            <div class="col-12 col-md-auto">
+                <label for="name" class="form-label mb-0">Name</label>
+                <input type="text" class="form-control" name="name" id="name" value="{{ name }}" placeholder="Expense name">
+            </div>
+            <div class="col-12 col-md-auto d-flex align-items-end gap-2">
+                <button type="submit" class="btn btn-primary">
+                    <i class="fa fa-filter me-1"></i> Filter
+                </button>
+                <a href="{% url 'expense-list' %}" class="btn btn-outline-secondary" title="Clear Filters">
+                    <i class="fa fa-trash me-1"></i> Clear
+                </a>
+            </div>
+        </form>
+    </div>
 
-                    {% if page_obj.has_next %}
-                    <li class="page-item">
-                        <a class="page-link" href="?{% if start_date %}start_date={{ start_date }}&{% endif %}{% if end_date %}end_date={{ end_date }}&{% endif %}{% if selected_category %}category={{ selected_category }}&{% endif %}{% if name %}name={{ name }}&{% endif %}page={{ page_obj.next_page_number }}">
-                            Next
-                        </a>
-                    </li>
-                    {% else %}
-                    <li class="page-item disabled"><span class="page-link">Next</span></li>
-                    {% endif %}
-                </ul>
-            </nav>
-            {% endif %}
+    <!-- ✅ Totals Section -->
+    <div class="row mb-3">
+        <div class="col-md-3 col-6 mb-2">
+            <div class="card text-center">
+                <div class="card-body p-2">
+                    <div class="fw-bold">This Month</div>
+                    <div class="text-success">₹ {{ totals.month|floatformat:2 }}</div>
+                </div>
+            </div>
         </div>
-    </div>  
+        <div class="col-md-3 col-6 mb-2">
+            <div class="card text-center">
+                <div class="card-body p-2">
+                    <div class="fw-bold">This Week</div>
+                    <div class="text-success">₹ {{ totals.week|floatformat:2 }}</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 col-6 mb-2">
+            <div class="card text-center">
+                <div class="card-body p-2">
+                    <div class="fw-bold">Today</div>
+                    <div class="text-success">₹ {{ totals.day|floatformat:2 }}</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 col-6 mb-2">
+            <div class="card text-center">
+                <div class="card-body p-2">
+                    <div class="fw-bold">Filtered Total</div>
+                    <div class="text-primary">₹ {{ filtered_total|floatformat:2 }}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ✅ Expense Table -->
+    <div class="card">
+        <div class="table-responsive">
+            <table class="table-sm table-dark-custom align-middle text-center mb-0">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Name</th>
+                        <th>Amount</th>
+                        <th>Category</th>
+                        <th>Description</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for expense in expenses %}
+                    <tr>
+                        <td data-label="Date">{{ expense.date }}</td>
+                        <td data-label="Name">{{ expense.name|default:'—' }}</td>
+                        <td data-label="Amount">₹ {{ expense.amount }}</td>
+                        <td data-label="Category">{{ expense.get_category_display|default:expense.category }}</td>
+                        <td data-label="Description">{{ expense.description|default:'—' }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="5" class="text-center text-muted">No expenses found.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- ✅ Pagination -->
+        {% if page_obj.has_other_pages %}
+        <nav aria-label="Expense pagination" class="mt-3">
+            <ul class="pagination justify-content-center flex-wrap">
+                {% if page_obj.has_previous %}
+                <li class="page-item">
+                    <a class="page-link" href="?{% if start_date %}start_date={{ start_date }}&{% endif %}{% if end_date %}end_date={{ end_date }}&{% endif %}{% if selected_category %}category={{ selected_category }}&{% endif %}{% if name %}name={{ name }}&{% endif %}page={{ page_obj.previous_page_number }}">
+                        Previous
+                    </a>
+                </li>
+                {% else %}
+                <li class="page-item disabled"><span class="page-link">Previous</span></li>
+                {% endif %}
+
+                {% for num in page_obj.paginator.page_range %}
+                    {% if page_obj.number == num %}
+                        <li class="page-item active"><span class="page-link">{{ num }}</span></li>
+                    {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                        <li class="page-item">
+                            <a class="page-link" href="?{% if start_date %}start_date={{ start_date }}&{% endif %}{% if end_date %}end_date={{ end_date }}&{% endif %}{% if selected_category %}category={{ selected_category }}&{% endif %}{% if name %}name={{ name }}&{% endif %}page={{ num }}">
+                                {{ num }}
+                            </a>
+                        </li>
+                    {% endif %}
+                {% endfor %}
+
+                {% if page_obj.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="?{% if start_date %}start_date={{ start_date }}&{% endif %}{% if end_date %}end_date={{ end_date }}&{% endif %}{% if selected_category %}category={{ selected_category }}&{% endif %}{% if name %}name={{ name }}&{% endif %}page={{ page_obj.next_page_number }}">
+                        Next
+                    </a>
+                </li>
+                {% else %}
+                <li class="page-item disabled"><span class="page-link">Next</span></li>
+                {% endif %}
+            </ul>
+        </nav>
+        {% endif %}
+    </div>
 </div>
 {% endblock %}

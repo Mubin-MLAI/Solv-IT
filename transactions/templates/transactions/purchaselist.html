@@ -8,24 +8,163 @@
 <br>
 
 <style>
-    /* ✅ Suggestion Dropdown */
+    /* 🌙 Dark Modern Theme */
+    body {
+        background-color: #121212;
+        color: #e0e0e0;
+    }
+
+    h4.display-6 {
+        color: #4ade80;
+        font-weight: 600;
+    }
+
+    /* ✅ Card Section */
+    .card-dark {
+        background: rgba(25, 25, 25, 0.85);
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        backdrop-filter: blur(10px);
+        border-radius: 1rem;
+        padding: 1rem;
+        box-shadow: 0 0 20px rgba(0, 0, 0, 0.4);
+    }
+
+    /* ✅ Buttons */
+    .btn {
+        border-radius: 50px !important;
+        font-weight: 500;
+        transition: 0.2s ease-in-out;
+    }
+    .btn:hover {
+        transform: translateY(-2px);
+        opacity: 0.9;
+    }
+
+    .btn-success {
+        background: linear-gradient(135deg, #22c55e, #15803d);
+        border: none;
+        color: #fff;
+    }
+    .btn-info {
+        background: linear-gradient(135deg, #0ea5e9, #0369a1);
+        border: none;
+        color: #fff;
+    }
+    .btn-outline-success {
+        color: #4ade80;
+        border-color: #4ade80;
+    }
+    .btn-outline-success:hover {
+        background-color: #4ade80;
+        color: #121212;
+    }
+    .btn-outline-secondary {
+        color: #9ca3af;
+        border-color: #9ca3af;
+    }
+    .btn-outline-secondary:hover {
+        background-color: #9ca3af;
+        color: #121212;
+    }
+
+    /* ✅ Input Boxes */
+    input.form-control {
+        background-color: #1e1e1e;
+        border: 1px solid #333;
+        color: #f0f0f0;
+    }
+    input.form-control::placeholder {
+        color: #9ca3af;
+    }
+    input.form-control:focus {
+        border-color: #4ade80;
+        box-shadow: 0 0 5px #4ade80;
+        background-color: #fefcfc;
+    }
+
+    /* ✅ Suggestions */
     .suggestions {
-        position: absolute;
-        width: 100%;
+        background: #1e1e1e;
+        border: 1px solid #333;
+        border-radius: 0.5rem;
         max-height: 200px;
         overflow-y: auto;
-        background: white;
-        border: 1px solid #ccc;
-        display: none;
     }
     .suggestions .list-group-item {
+        background: transparent;
+        color: #e0e0e0;
+        border: none;
         cursor: pointer;
     }
     .suggestions .list-group-item:hover {
-        background-color: #f8f9fa;
+        background-color: rgba(74, 222, 128, 0.15);
     }
 
-    /* ✅ Responsive Table */
+    /* ✅ Table Styling */
+    .table-container {
+    width: 100%;
+    background: #161b22;
+    border-radius: 16px;
+    overflow-x: auto;
+    border: 1px solid #30363d;
+}
+table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 900px;
+}
+thead th {
+    background-color: #22262e;
+    color: #00ffc8;
+    text-align: center;
+    padding: 8px;
+}
+tbody td {
+    text-align: center;
+    border-bottom: 1px solid #30363d;
+    padding: 10px 7px;
+}
+tbody tr:hover {
+    background-color: #1c2128;
+}
+
+    /* ✅ Pagination */
+    .pagination .page-link {
+        background: transparent;
+        color: #4ade80;
+        border: 1px solid #333;
+    }
+    .pagination .page-item.active .page-link {
+        background: #4ade80;
+        color: #121212;
+        border-color: #4ade80;
+    }
+
+    /* ✅ Modal */
+    .modal-content {
+        background-color: #1e1e1e;
+        color: #f0f0f0;
+        border: 1px solid #333;
+        border-radius: 1rem;
+    }
+    .modal-header h5 {
+        color: #4ade80;
+    }
+
+    label.form-label {
+        color: #bdbdbd;
+        font-weight: 500;
+        text-transform: uppercase;
+        font-size: 0.9rem;
+        margin-bottom: 6px;
+    }
+
+input.form-control::placeholder,
+    textarea.form-control::placeholder {
+        color: #999;
+    } 
+
+    /* ✅ Mobile Responsive */
     @media (max-width: 991.98px) {
         .table thead {
             display: none;
@@ -36,9 +175,9 @@
         }
         .table tr {
             margin-bottom: 1rem;
-            border: 1px solid #dee2e6;
+            border: 1px solid rgba(255, 255, 255, 0.08);
             border-radius: .5rem;
-            background: #fff;
+            background: rgba(30, 30, 30, 0.9);
             padding: .75rem;
         }
         .table td {
@@ -55,10 +194,9 @@
             padding-left: .75rem;
             font-weight: 600;
             text-align: left;
-            color: #333;
+            color: #9ca3af;
         }
 
-        /* ✅ Search filters stack vertically */
         #searchform1 .col-md-4,
         #searchform1 .col-md-3,
         #searchform1 .col-md-2 {
@@ -71,7 +209,6 @@
             margin-bottom: .5rem;
         }
 
-        /* ✅ Header Buttons */
         .col-md-6.d-flex.justify-content-end.gap-2 {
             flex-wrap: wrap;
             justify-content: center !important;
@@ -80,60 +217,61 @@
     }
 </style>
 
-<div class="my-4">
+<div class="my-4 card-dark">
     <div class="row align-items-center">
         <div class="col-md-6 col-12 mb-2 mb-md-0 text-center text-md-start">
-            <h4 class="display-6 mb-0 text-success">Purchase List</h4>
+            <h4 class="display-6 mb-0"><i class="fa-solid fa-cart-shopping me-2"></i>Purchase List</h4>
         </div>
         {% if request.user.profile.role != 'OP' %}
         <div class="col-md-6 d-flex justify-content-end gap-2">
-            <a class="btn btn-success btn-sm rounded-pill shadow-sm" href="{% url 'purchase-create' %}">
+            <a class="btn btn-success btn-sm shadow-sm" href="{% url 'purchase-create' %}">
                 <i class="fa-solid fa-plus"></i> Add Purchase
             </a>
-            <a class="btn btn-info btn-sm rounded-pill shadow-sm" href="{% querystring '_export'='xlsx' %}">
+            <a class="btn btn-info btn-sm shadow-sm" href="{% querystring '_export'='xlsx' %}">
                 <i class="fa-solid fa-download"></i> Export to Excel
             </a>
         </div>
         {% endif %}
     </div>
 
-    <!-- ✅ Search Form -->
+    <!-- Search Form -->
     <form class="row g-2 mt-3" id="searchform1" action="{% url 'purchase_item_search_list_view' %}" method="get">
         <div class="col-md-4">
-            <input id="searchbox1" name="q" type="text" class="form-control border-2 rounded-pill shadow-sm"
-                placeholder="Find products">
+            <input id="searchbox1" name="q" type="text" class="form-control"
+                placeholder="Find products by Serial No, Make & Models..." value="{{ request.GET.q }}">
         </div>
         <div class="col-md-3 position-relative">
-            <input type="text" id="customer_searchbox" class="form-control border-2 rounded-pill shadow-sm"
-                placeholder="Type to search customer..." autocomplete="off">
-            <div id="customer_suggestions" class="list-group position-absolute w-100" style="z-index: 1000;"></div>
-            <input type="hidden" name="customer_id" id="customer_id">
+            <input type="text" id="customer_searchbox" name="customer_id" class="form-control"
+                placeholder="Find products by customer name" value="{{ request.GET.customer_id }}" autocomplete="off">
+            <!-- <div id="customer_suggestions" class="list-group position-absolute w-100" style="z-index: 1000;"></div>
+            <input type="hidden" name="customer_id" id="customer_id"> -->
         </div>
         <div class="col-md-3">
-            <input name="purchased_code" id="purchased_code" type="text" class="form-control border-2 rounded-pill shadow-sm"
-                placeholder="Purchase / LOT Code" value="{{ request.GET.purchased_code }}">
+            <input name="purchased_code" id="purchased_code" type="text" class="form-control"
+                placeholder="Find products by Purchase / LOT Code" value="{{ request.GET.purchased_code }}">
         </div>
         <div class="col-md-2 d-flex gap-2">
-            <button class="btn btn-outline-success rounded-pill shadow-sm w-100" type="submit">
+            <button class="btn btn-outline-success shadow-sm w-100" type="submit">
                 <i class="fa-solid fa-search"></i>
             </button>
-            <a href="{% url 'purchase_item_search_list_view' %}" class="btn btn-outline-secondary rounded-pill shadow-sm">
+            <a href="{% url 'purchase_item_search_list_view' %}" class="btn btn-outline-secondary shadow-sm">
                 <i class="fa-solid fa-times"></i>
             </a>
         </div>
     </form>
 </div>
 
-<!-- ✅ Purchase Table -->
+<!-- Table -->
 <div class="px-4">
     {% if Itempurchased %}
-    <div class="table-responsive">
-        <table class="table table-bordered table-striped table-hover table-sm">
-            <thead class="thead-light">
+    <div class="table-responsive card-dark mt-3">
+        <table class="table-container table-bordered table-hover table-sm">
+            <thead>
                 <tr>
                     <th>ID</th>
-                    <th>Name</th>
-                    <th>Vendor Name</th>
+                    <th>Item Name</th>
+                    <th>Purchaser Name</th>
+                    <th>Purchase Type</th>
                     <th>Purchase / LOT Code</th>
                     <th>Purchase Date</th>
                     <th>Price</th>
@@ -152,32 +290,17 @@
                 <tr>
                     <td data-label="ID">{{ forloop.counter|add:page_obj.start_index|add:"-1" }}</td>
                     <td data-label="Name">{{ item1.name }}</td>
-                    <td data-label="Vendor Name"><b>{{ item1.customer }}</b></td>
+                    <td data-label="purchaser Name"><b>{{ item1.customer }}</b></td>
+                    <td data-label="Purchase Type"><b>{{ item1.purchased_type }}</b></td>
                     <td data-label="LOT Code"><b>{{ item1.purchased_code }}</b></td>
                     <td data-label="Date">{{ item1.created_date|date:"d/m/Y"}}</td>
                     <td data-label="Price">{{ item1.price }}</td>
                     <td data-label="Serial No">{{ item1.serialno }}</td>
                     <td data-label="Make & Models">{{ item1.make_and_models }}</td>
-                    <td data-label="Processor">
-                        {% for p in item1.processors %}
-                            <li>{{ p }}<br></li>
-                        {% endfor %}
-                    </td>
-                    <td data-label="RAM">
-                        {% for p in item1.rams %}
-                            <li>{{ p }}<br></li>
-                        {% endfor %}
-                    </td>
-                    <td data-label="HDD">
-                        {% for p in item1.hdds %}
-                            <li>{{ p }}<br></li>
-                        {% endfor %}
-                    </td>
-                    <td data-label="SSD">
-                        {% for p in item1.ssds %}
-                            <li>{{ p }}<br></li>
-                        {% endfor %}
-                    </td>
+                    <td data-label="Processor">{% for p in item1.processors %}<li>{{ p }}</li>{% endfor %}</td>
+                    <td data-label="RAM">{% for p in item1.rams %}<li>{{ p }}</li>{% endfor %}</td>
+                    <td data-label="HDD">{% for p in item1.hdds %}<li>{{ p }}</li>{% endfor %}</td>
+                    <td data-label="SSD">{% for p in item1.ssds %}<li>{{ p }}</li>{% endfor %}</td>
                     <td data-label="SMPS">{{ item1.smps_status }}</td>
                     <td data-label="Motherboard">{{ item1.motherboard_status }}</td>
                 </tr>
@@ -187,15 +310,15 @@
     </div>
     {% else %}
     {% if request.user.profile.role != 'OP' %}
-    <div class="alert alert-warning text-center">
+    <div class="alert alert-warning text-center card-dark mt-3">
         <p>No purchase found for "{{ request.GET.q }}". You can 
-        <a href="{% url 'purchase-create' %}" class="btn btn-success btn-sm rounded-pill shadow-sm">Add a new purchase</a>.</p>
+        <a href="{% url 'purchase-create' %}" class="btn btn-success btn-sm">Add a new purchase</a>.</p>
     </div>
     {% endif %}
     {% endif %}
 </div>
 
-<!-- ✅ Pagination -->
+<!-- Pagination (unchanged) -->
 {% if is_paginated and paginator.count > 10 %}
 <nav aria-label="Page navigation">
     <ul class="pagination justify-content-center">
@@ -208,7 +331,6 @@
         {% else %}
         <li class="page-item disabled"><span class="page-link">&laquo;</span></li>
         {% endif %}
-
         {% for i in paginator.page_range %}
             {% if page_obj.number == i %}
                 <li class="page-item active"><span class="page-link">{{ i }}</span></li>
@@ -216,7 +338,6 @@
                 <li class="page-item"><a class="page-link" href="?q={{ request.GET.q }}&vendor={{ request.GET.vendor }}&code={{ request.GET.code }}&page={{ i }}">{{ i }}</a></li>
             {% endif %}
         {% endfor %}
-
         {% if page_obj.has_next %}
         <li class="page-item">
             <a class="page-link" href="?q={{ request.GET.q }}&vendor={{ request.GET.vendor }}&code={{ request.GET.code }}&page={{ page_obj.next_page_number }}">
@@ -325,5 +446,7 @@ function customerSearchSuggestions() {
 }
 customerSearchSuggestions();
 </script>
+
+{{ block.super }}
 
 {% endblock %}

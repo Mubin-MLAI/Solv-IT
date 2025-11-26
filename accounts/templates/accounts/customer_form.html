@@ -1,63 +1,131 @@
-<!-- customer_form.html -->
 {% extends 'store/base.html' %}
+{% block title %}Customer Update{% endblock %}
 {% block content %}
-  <div class="container m-5">
-    <h1 class="mb-4">{% if form.instance.pk %}Edit{% else %}Create{% endif %} Customer</h1>
+
+<style>
+    body {
+        background-color: #121212 !important;
+        color: #e0e0e0 !important;
+    }
+
+    .customer-card {
+        background: #1e1e1e;
+        padding: 35px;
+        border-radius: 14px;
+        max-width: 800px;
+        margin: auto;
+        margin-top: 50px;
+        box-shadow: 0 0 20px rgba(0,0,0,0.6);
+        animation: fadeIn 0.4s ease-in-out;
+    }
+
+    h1 {
+        color: #00e676;
+        font-weight: 700;
+        text-align: center;
+        margin-bottom: 25px;
+    }
+
+    .form-control,
+    select,
+    textarea {
+        background: #2a2a2a !important;
+        border: 1px solid #3c3c3c !important;
+        color: #e0e0e0 !important;
+        border-radius: 8px;
+        padding: 10px;
+    }
+
+    .form-control:focus,
+    select:focus,
+    textarea:focus {
+        border-color: #00e676 !important;
+        box-shadow: 0 0 8px rgba(0, 230, 118, 0.5);
+        background: #2f2f2f !important;
+    }
+
+    label {
+        margin-bottom: 5px;
+        font-weight: 500;
+    }
+
+    .btn-modern {
+        background: linear-gradient(90deg, #00e676, #00c853);
+        border: none;
+        padding: 10px 30px;
+        font-size: 18px;
+        border-radius: 50px;
+        color: black;
+        font-weight: bold;
+        transition: 0.3s;
+    }
+
+    .btn-modern:hover {
+        transform: scale(1.05);
+        background: linear-gradient(90deg, #00c853, #1de9b6);
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+</style>
+
+<div class="customer-card">
+
+    <h1>{% if form.instance.pk %}Edit Customer{% else %}Create Customer{% endif %}</h1>
+
     <form method="post">
-      {% csrf_token %}
-      <div class="row mb-3">
-        <div class="col-md-6">
-          <div class="form-group">
-            {{ form.person_type.label_tag }}
-            {{ form.person_type }}
-          </div>
+        {% csrf_token %}
+
+        <div class="row mb-3">
+            <div class="col-md-6">
+                <label>{{ form.person_type.label }}</label>
+                {{ form.person_type }}
+            </div>
+
+            <div class="col-md-6">
+                <label>{{ form.first_name.label }}</label>
+                {{ form.first_name }}
+            </div>
+
+            <div class="col-md-6 mt-3">
+                <label>{{ form.last_name.label }}</label>
+                {{ form.last_name }}
+            </div>
         </div>
-        <div class="col-md-6">
-          <div class="form-group">
-            {{ form.first_name.label_tag }}
-            {{ form.first_name }}
-          </div>
-        </div>
-        <div class="col-md-6">
-          <div class="form-group">
-            {{ form.last_name.label_tag }}
-            {{ form.last_name }}
-          </div>
-        </div>
-      </div>
-      <div class="row mb-3">
-        <div class="col-md-12">
-          <div class="form-group">
-            {{ form.address.label_tag }}
+
+        <div class="mb-3">
+            <label>{{ form.address.label }}</label>
             {{ form.address }}
-          </div>
         </div>
-      </div>
-      <div class="row mb-3">
-        <div class="col-md-6">
-          <div class="form-group">
-            {{ form.email.label_tag }}
-            {{ form.email }}
-          </div>
+
+        <div class="row mb-3">
+            <div class="col-md-6">
+                <label>{{ form.email.label }}</label>
+                {{ form.email }}
+            </div>
+
+            <div class="col-md-6">
+                <label>{{ form.phone.label }}</label>
+                {{ form.phone }}
+            </div>
         </div>
-        <div class="col-md-6">
-          <div class="form-group">
-            {{ form.phone.label_tag }}
-            {{ form.phone }}
-          </div>
+
+        <div class="row mb-3">
+            <div class="col-md-6">
+                <label>{{ form.gstin.label }}</label>
+                {{ form.gstin }}
+            </div>
         </div>
-      </div>
-      <div class="row mb-3">
-        <div class="col-md-6">
-          <div class="form-group">
-            {{ form.gstin.label_tag }}
-            {{ form.gstin }}
-          </div>
+
+        <div class="text-center mt-4">
+            <button type="submit" class="btn-modern">
+                Save
+            </button>
         </div>
-      </div>
-      <button type="submit" class="btn btn-primary">
-        <i class="fas fa-save"></i> Save
-      </button>
     </form>
-  </div>
+
+</div>
+
 {% endblock %}

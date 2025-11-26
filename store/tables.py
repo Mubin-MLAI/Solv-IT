@@ -11,9 +11,13 @@ class ItemTable(tables.Table):
     hdd_qty = tables.Column(empty_values=(), verbose_name='Hdd_Qty')
     ssd = tables.Column(empty_values=(), verbose_name='SSD')
     ssd_qty = tables.Column(empty_values=(), verbose_name='Ssd_Qty')
+    purchased_code = tables.Column(empty_values=(), verbose_name='Purchased_code')
 
     def get_cat_items(self, record):
         return catogaryitem.objects.filter(serial_no=record.serialno)
+    
+    def get_item_items(self, record):
+        return Item.objects.filter(serialno=record.serialno)
 
     def render_processor(self, record):
         items = self.get_cat_items(record).filter(category='processor')
@@ -46,6 +50,10 @@ class ItemTable(tables.Table):
     def render_ssd_qty(self, record):
         items = self.get_cat_items(record).filter(category='ssd')
         return ", ".join(str(item.quantity) for item in items) if items else "-"
+    
+    def render_purchased_code(self, record):
+        items = self.get_item_items(record)
+        return ", ".join(f"{item.purchased_code}" for item in items) if items else "-"
 
 
 

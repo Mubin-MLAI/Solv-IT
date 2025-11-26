@@ -7,162 +7,242 @@
 
 {% block content %}
 <div class="container my-4">
-    <style>
-        .table th, .table td {
-            text-align: center;
-            vertical-align: middle;
+
+<style>
+    body {
+        background-color: #121212;
+        color: #f5f5f5;
+    }
+
+    .table {
+        background-color: transparent;
+        border-collapse: separate;
+        border-spacing: 0 0.6rem;
+        color: #f5f5f5;
+    }
+
+    .table th {
+        background-color: #1f1f1f;
+        color: #ffffff;
+        border: none;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        padding: 0.9rem;
+    }
+
+    .table td {
+        background-color: #181818;
+        border: none;
+        color: #e0e0e0;
+        padding: 0.8rem;
+        vertical-align: middle;
+        transition: all 0.25s ease;
+    }
+
+    .table tr:hover td {
+        background-color: #262626;
+        color: #fff;
+    }
+
+    .table-responsive {
+        border-radius: 10px;
+        overflow: hidden;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.4);
+    }
+
+    .badge {
+        font-size: 0.75rem;
+        padding: 0.4em 0.7em;
+        border-radius: 0.4rem;
+    }
+
+    .badge.bg-success { background-color: #2e7d32 !important; }
+    .badge.bg-warning { background-color: #fbc02d !important; color: #000; }
+    .badge.bg-danger { background-color: #c62828 !important; }
+
+    .avatar {
+        width: 42px;
+        height: 42px;
+        object-fit: cover;
+        border: 2px solid #333;
+    }
+
+    /* 🔍 Search & Button Bar */
+    .action-bar {
+        background: rgba(255, 255, 255, 0.05);
+        backdrop-filter: blur(8px);
+        border-radius: 12px;
+        padding: 1rem;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    }
+
+    input.form-control-sm {
+        background-color: #1e1e1e;
+        color: #fff;
+        border: 1px solid #444;
+        border-radius: 20px;
+    }
+
+    input.form-control-sm::placeholder {
+        color: #aaa;
+    }
+
+    input.form-control-sm:focus {
+        border-color: #4caf50;
+        box-shadow: 0 0 0 0.2rem rgba(76,175,80,0.3);
+    }
+
+    .btn {
+        border-radius: 50px;
+        font-weight: 500;
+        padding: 0.45rem 0.9rem;
+        transition: all 0.25s ease;
+    }
+
+    .btn-success {
+        background: linear-gradient(135deg, #4caf50, #43a047);
+        border: none;
+        color: #fff;
+    }
+
+    .btn-success:hover {
+        background: linear-gradient(135deg, #43a047, #388e3c);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(67,160,71,0.4);
+    }
+
+    .text-info i { color: #03a9f4; }
+    .text-info i:hover { color: #4fc3f7; }
+    .text-danger i { color: #ef5350; }
+    .text-danger i:hover { color: #ff6f61; }
+
+    /* 📱 Mobile Card View */
+    @media (max-width: 767.98px) {
+        .table thead { display: none; }
+        .table, .table tbody, .table tr, .table td { display: block; width: 100%; }
+        .table tr {
+            margin-bottom: 1rem;
+            background-color: #1b1b1b;
+            border-radius: 0.75rem;
+            padding: 0.8rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.4);
         }
-
-        @media (max-width: 767.98px) {
-            .table thead { display: none; }
-
-            .table, .table tbody, .table tr, .table td {
-                display: block;
-                width: 100%;
-            }
-
-            .table tr {
-                margin-bottom: 1rem;
-                border: 1px solid #dee2e6;
-                border-radius: 0.5rem;
-                padding: 0.75rem;
-                background: #fff;
-                box-shadow: 0 0 5px rgba(0,0,0,0.05);
-            }
-
-            .table td {
-                text-align: left;
-                padding-left: 50%;
-                position: relative;
-            }
-
-            .table td::before {
-                content: attr(data-label);
-                position: absolute;
-                left: 0;
-                width: 45%;
-                padding-left: 1rem;
-                font-weight: 600;
-                white-space: nowrap;
-            }
-
-            .avatar { margin-bottom: 0.5rem; }
+        .table td {
+            text-align: left;
+            padding-left: 50%;
+            position: relative;
         }
-
-        .avatar {
-            width: 40px;
-            height: 40px;
-            object-fit: cover;
+        .table td::before {
+            content: attr(data-label);
+            position: absolute;
+            left: 1rem;
+            width: 45%;
+            font-weight: 600;
+            color: #bbb;
         }
-    </style>
+        .avatar { margin-bottom: 0.5rem; }
+    }
+</style>
 
-    <!-- 🔍 Search & Action Buttons -->
-    <div class="d-flex flex-wrap justify-content-between align-items-center mb-3 gap-2">
-        <div class="flex-grow-1">
-            <input type="text" id="searchInput" class="form-control form-control-sm"
-                   placeholder="Search by username, role or phone...">
-        </div>
-        <div class="d-flex gap-2 mt-2 mt-sm-0">
-            <a class="btn btn-success btn-sm rounded-pill shadow-sm" href="{% url 'profile-create' %}">
-                <i class="fa-solid fa-user-plus me-2"></i> Add Staff
-            </a>
-            <a class="btn btn-success btn-sm rounded-pill shadow-sm" href="{% querystring '_export'='xlsx' %}">
-                <i class="fa-solid fa-download me-2"></i> Export to Excel
-            </a>
-        </div>
+<!-- 🔍 Search & Action Bar -->
+<div class="action-bar d-flex flex-wrap justify-content-between align-items-center mb-4 gap-2">
+    <div class="flex-grow-1">
+        <input type="text" id="searchInput" class="form-control form-control-sm"
+               placeholder="🔍 Search by username, role or phone...">
     </div>
-
-    <!-- 🧾 Staff Table -->
-    <div class="table-responsive">
-        <table class="table table-bordered table-striped table-sm align-middle" id="staffTable">
-            <thead class="table-light">
-                <tr>
-                    <th>Id</th>
-                    <th>Profile Image</th>
-                    <th>Username</th>
-                    <th>Phone Number</th>
-                    <th>Status</th>
-                    <th>Role</th>
-                    {% if user.profile.role == 'AD' or user.profile.role == 'EX' %}
-                    <th>Action</th>
-                    {% endif %}
-                </tr>
-            </thead>
-            <tbody>
-                {% for profile in profiles %}
-                <tr>
-                    <td data-label="ID">{{ profile.id }}</td>
-                    <td data-label="Profile Image">
-                        {% if profile.profile_picture %}
-                        <img alt="Profile Image" src="{{ profile.profile_picture.url }}" class="avatar rounded-circle border shadow-sm">
-                        {% else %}
-                        <img alt="Default Avatar" src="{% static 'images/default-avatar.png' %}" class="avatar rounded-circle border shadow-sm">
-                        {% endif %}
-                    </td>
-                    <td data-label="Username">{{ profile.user.username }}</td>
-                    <td data-label="Phone Number">{{ profile.telephone }}</td>
-                    <td data-label="Status">
-                        {% if profile.status == 'A' %}
-                        <span class="badge bg-success">Active</span>
-                        {% elif profile.status == 'OL' %}
-                        <span class="badge bg-warning text-dark">On Leave</span>
-                        {% else %}
-                        <span class="badge bg-danger">Inactive</span>
-                        {% endif %}
-                    </td>
-                    <td data-label="Role">
-                        {% if profile.role == 'AD' %}
-                            Admin
-                        {% elif profile.role == 'EX' %}
-                            Executive
-                        {% else %}
-                            Operative
-                        {% endif %}
-                    </td>
-                    {% if user.profile.role == 'AD' or user.profile.role == 'EX' %}
-                    <td data-label="Action">
-                        <a class="text-info me-3" href="{% url 'profile-update' profile.id %}" title="Edit">
-                            <i class="fa-solid fa-pen"></i>
-                        </a>
-                        {% if user.profile.role == 'AD' %}
-                        <a class="text-danger" href="{% url 'profile-delete' profile.id %}" title="Delete">
-                            <i class="fa-solid fa-trash"></i>
-                        </a>
-                        {% endif %}
-                    </td>
-                    {% endif %}
-                </tr>
-                {% empty %}
-                <tr>
-                    <td colspan="7" class="text-center text-muted py-3">No staff profiles found.</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+    <div class="d-flex gap-2 mt-2 mt-sm-0">
+        <a class="btn btn-outline-info btn-sm" href="{% url 'profile-create' %}">
+            <i class="fa-solid fa-user-plus me-2"></i> Add Staff
+        </a>
+        <a class="btn btn-outline-light btn-sm" href="{% querystring '_export'='xlsx' %}">
+            <i class="fa-solid fa-download me-2"></i> Export Excel
+        </a>
     </div>
 </div>
 
-<!-- 🧠 Live Search Script -->
+<!-- 🧾 Staff Table -->
+<div class="table-responsive">
+    <table class="table table-hover align-middle" id="staffTable">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Profile</th>
+                <th>Username</th>
+                <th>Phone</th>
+                <th>Status</th>
+                <th>Role</th>
+                {% if user.profile.role == 'AD' or user.profile.role == 'EX' %}
+                <th>Action</th>
+                {% endif %}
+            </tr>
+        </thead>
+        <tbody>
+            {% for profile in profiles %}
+            <tr>
+                <td data-label="ID">{{ profile.id }}</td>
+                <td data-label="Profile">
+                    {% if profile.profile_picture %}
+                    <img src="{{ profile.profile_picture.url }}" class="avatar rounded-circle shadow-sm" alt="Profile">
+                    {% else %}
+                    <img src="{% static 'images/default-avatar.png' %}" class="avatar rounded-circle shadow-sm" alt="Avatar">
+                    {% endif %}
+                </td>
+                <td data-label="Username">{{ profile.user.username }}</td>
+                <td data-label="Phone">{{ profile.telephone }}</td>
+                <td data-label="Status">
+                    {% if profile.status == 'A' %}
+                        <span class="badge bg-success">Active</span>
+                    {% elif profile.status == 'OL' %}
+                        <span class="badge bg-warning">On Leave</span>
+                    {% else %}
+                        <span class="badge bg-danger">Inactive</span>
+                    {% endif %}
+                </td>
+                <td data-label="Role">
+                    {% if profile.role == 'AD' %} Admin
+                    {% elif profile.role == 'EX' %} Executive
+                    {% else %} Operative {% endif %}
+                </td>
+                {% if user.profile.role == 'AD' or user.profile.role == 'EX' %}
+                <td data-label="Action">
+                    <a class="text-info me-3" href="{% url 'profile-update' profile.id %}" title="Edit">
+                        <i class="fa-solid fa-pen"></i>
+                    </a>
+                    {% if user.profile.role == 'AD' %}
+                    <a class="text-danger" href="{% url 'profile-delete' profile.id %}" title="Delete">
+                        <i class="fa-solid fa-trash"></i>
+                    </a>
+                    {% endif %}
+                </td>
+                {% endif %}
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="7" class="text-center text-muted py-3">No staff profiles found.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+</div>
+
+<!-- 🧠 Live Search -->
 <script>
-    document.addEventListener("DOMContentLoaded", function () {
-        const searchInput = document.getElementById("searchInput");
-        const tableRows = document.querySelectorAll("#staffTable tbody tr");
+document.addEventListener("DOMContentLoaded", function () {
+    const searchInput = document.getElementById("searchInput");
+    const tableRows = document.querySelectorAll("#staffTable tbody tr");
 
-        searchInput.addEventListener("keyup", function () {
-            const term = this.value.toLowerCase();
-
-            tableRows.forEach(row => {
-                const username = row.cells[2].innerText.toLowerCase();
-                const phone = row.cells[3].innerText.toLowerCase();
-                const role = row.cells[5].innerText.toLowerCase();
-
-                if (username.includes(term) || phone.includes(term) || role.includes(term)) {
-                    row.style.display = "";
-                } else {
-                    row.style.display = "none";
-                }
-            });
+    searchInput.addEventListener("keyup", function () {
+        const term = this.value.toLowerCase();
+        tableRows.forEach(row => {
+            const username = row.cells[2]?.innerText.toLowerCase() || "";
+            const phone = row.cells[3]?.innerText.toLowerCase() || "";
+            const role = row.cells[5]?.innerText.toLowerCase() || "";
+            row.style.display = (username.includes(term) || phone.includes(term) || role.includes(term))
+                ? "" : "none";
         });
     });
+});
 </script>
 {% endblock %}

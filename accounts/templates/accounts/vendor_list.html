@@ -2,15 +2,149 @@
 {% load static %}
 
 {% block content %}
+
+<style>
+    body {
+        background-color: #121212 !important;
+        color: #e0e0e0 !important;
+    }
+
+    /* Header Card */
+    .header-card {
+        background: #1e1e1e;
+        border-radius: 14px;
+        padding: 20px 25px;
+        box-shadow: 0 0 20px rgba(0,0,0,0.6);
+        margin-bottom: 25px;
+        animation: fadeIn 0.4s ease;
+    }
+
+    h4 {
+        color: #00e676 !important;
+        font-weight: 700;
+    }
+
+    .btn-add {
+        background: linear-gradient(90deg, #00e676, #00c853);
+        border: none;
+        color: black;
+        padding: 8px 18px;
+        border-radius: 50px;
+        font-weight: 600;
+        transition: 0.3s ease;
+    }
+    .btn-add:hover {
+        transform: scale(1.05);
+        background: linear-gradient(90deg, #00c853, #1de9b6);
+    }
+
+    /* Table */
+    .table {
+        background: #1c1c1c;
+        border-radius: 12px;
+        overflow: hidden;
+        color: #dcdcdc;
+    }
+
+    .table thead {
+        background: #222;
+        color: #00e676;
+        font-weight: 600;
+    }
+
+    .table-bordered td, 
+    .table-bordered th {
+        border-color: #333 !important;
+    }
+
+    .table-striped tbody tr:nth-of-type(odd) {
+        background: #181818;
+    }
+
+    .btn-outline-warning {
+        border-color: #ffca28 !important;
+        color: #ffca28 !important;
+    }
+    .btn-outline-warning:hover {
+        background: #ffca28 !important;
+        color: black !important;
+    }
+
+    .btn-outline-danger {
+        border-color: #ff5252 !important;
+        color: #ff5252 !important;
+    }
+    .btn-outline-danger:hover {
+        background: #ff5252 !important;
+        color: white !important;
+    }
+
+    /* Pagination */
+    .pagination .page-link {
+        background: #1e1e1e;
+        color: #e0e0e0;
+        border-color: #333;
+    }
+    .pagination .page-item.active .page-link {
+        background: #00e676 !important;
+        color: black !important;
+        border-color: #00e676 !important;
+    }
+    .pagination .page-link:hover {
+        background: #00e676;
+        color: black;
+        border-color: #00e676;
+    }
+
+    /* Mobile responsive behavior */
+    @media (max-width: 767.98px) {
+        .table thead {
+            display: none;
+        }
+        .table, .table tbody, .table tr, .table td {
+            display: block;
+            width: 100%;
+        }
+        .table tr {
+            margin-bottom: 1rem;
+            border: 1px solid #333;
+            border-radius: 10px;
+            padding: 0.8rem;
+            background: #1a1a1a;
+        }
+        .table td {
+            text-align: left;
+            padding-left: 50%;
+            position: relative;
+            border: none;
+        }
+        .table td::before {
+            content: attr(data-label);
+            position: absolute;
+            left: 0;
+            width: 45%;
+            padding-left: 1rem;
+            font-weight: 600;
+            color: #00e676;
+        }
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(15px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+</style>
+
 <!-- Header Section -->
 <div class="container my-4">
-    <div class="card shadow-sm rounded p-3">
+    <div class="header-card">
         <div class="row align-items-center">
             <div class="col-12 col-md-6 mb-2 mb-md-0">
-                <h4 class="display-6 mb-0 text-success">Vendors</h4>
+                <h4 class="display-6 mb-0">Vendors</h4>
             </div>
+
             <div class="col-12 col-md-6 d-flex justify-content-md-end justify-content-start">
-                <a class="btn btn-success btn-sm rounded-pill shadow-sm" href="{% url 'vendor-create' %}">
+                <a class="btn-add shadow-sm" href="{% url 'vendor-create' %}">
                     <i class="fa-solid fa-plus me-1"></i> Add Vendor
                 </a>
             </div>
@@ -20,54 +154,9 @@
 
 <!-- Table Section -->
 <div class="container px-3">
-    <style>
-        .table th, .table td {
-            text-align: center;
-            vertical-align: middle;
-        }
-
-        /* Responsive table on smaller screens */
-        @media (max-width: 767.98px) {
-            .table thead {
-                display: none;
-            }
-
-            .table, 
-            .table tbody, 
-            .table tr, 
-            .table td {
-                display: block;
-                width: 100%;
-            }
-
-            .table tr {
-                margin-bottom: 1rem;
-                border: 1px solid #dee2e6;
-                border-radius: 0.5rem;
-                padding: 0.5rem;
-            }
-
-            .table td {
-                text-align: left;
-                padding-left: 50%;
-                position: relative;
-            }
-
-            .table td::before {
-                content: attr(data-label);
-                position: absolute;
-                left: 0;
-                width: 45%;
-                padding-left: 1rem;
-                font-weight: 600;
-                white-space: nowrap;
-            }
-        }
-    </style>
-
     <div class="table-responsive">
         <table class="table table-bordered table-striped align-middle">
-            <thead class="thead-light">
+            <thead>
                 <tr>
                     <th>Name</th>
                     <th>Phone Number</th>
@@ -82,11 +171,11 @@
                     <td data-label="Phone Number">{{ vendor.phone_number }}</td>
                     <td data-label="Address">{{ vendor.address }}</td>
                     <td data-label="Actions">
-                        <a href="{% url 'vendor-update' vendor.pk %}" class="btn btn-outline-warning btn-sm mb-1 mb-md-0">
-                            <i class="fas fa-edit me-1"></i>Edit
+                        <a href="{% url 'vendor-update' vendor.pk %}" class="btn btn-outline-warning btn-sm me-1">
+                            <i class="fas fa-edit"></i> Edit
                         </a>
                         <a href="{% url 'vendor-delete' vendor.pk %}" class="btn btn-outline-danger btn-sm">
-                            <i class="fas fa-trash-alt me-1"></i>Delete
+                            <i class="fas fa-trash-alt"></i> Delete
                         </a>
                     </td>
                 </tr>
@@ -99,78 +188,58 @@
         </table>
     </div>
 
-    <!-- Pagination controls -->
+    <!-- Pagination -->
     {% if vendors.paginator.num_pages > 1 %}
-    <nav aria-label="Page navigation example">
+    <nav>
         <ul class="pagination justify-content-center flex-wrap">
 
-            <!-- First Page -->
+            <!-- First -->
             {% if vendors.has_previous %}
             <li class="page-item">
-                <a class="page-link" href="?page=1" aria-label="First">
-                    <span aria-hidden="true">&laquo;&laquo;</span>
-                </a>
+                <a class="page-link" href="?page=1">&laquo;&laquo;</a>
             </li>
             {% else %}
-            <li class="page-item disabled">
-                <span class="page-link">&laquo;&laquo;</span>
-            </li>
+            <li class="page-item disabled"><span class="page-link">&laquo;&laquo;</span></li>
             {% endif %}
 
-            <!-- Previous Page -->
+            <!-- Previous -->
             {% if vendors.has_previous %}
             <li class="page-item">
-                <a class="page-link" href="?page={{ vendors.previous_page_number }}" aria-label="Previous">
-                    <span aria-hidden="true">&laquo;</span>
-                </a>
+                <a class="page-link" href="?page={{ vendors.previous_page_number }}">&laquo;</a>
             </li>
             {% else %}
-            <li class="page-item disabled">
-                <span class="page-link">&laquo;</span>
-            </li>
+            <li class="page-item disabled"><span class="page-link">&laquo;</span></li>
             {% endif %}
 
-            <!-- Page Numbers -->
+            <!-- Pages -->
             {% for num in vendors.paginator.page_range %}
                 {% if vendors.number == num %}
-                <li class="page-item active">
-                    <span class="page-link">{{ num }}</span>
-                </li>
+                <li class="page-item active"><span class="page-link">{{ num }}</span></li>
                 {% else %}
-                <li class="page-item">
-                    <a class="page-link" href="?page={{ num }}">{{ num }}</a>
-                </li>
+                <li class="page-item"><a class="page-link" href="?page={{ num }}">{{ num }}</a></li>
                 {% endif %}
             {% endfor %}
 
-            <!-- Next Page -->
+            <!-- Next -->
             {% if vendors.has_next %}
             <li class="page-item">
-                <a class="page-link" href="?page={{ vendors.next_page_number }}" aria-label="Next">
-                    <span aria-hidden="true">&raquo;</span>
-                </a>
+                <a class="page-link" href="?page={{ vendors.next_page_number }}">&raquo;</a>
             </li>
             {% else %}
-            <li class="page-item disabled">
-                <span class="page-link">&raquo;</span>
-            </li>
+            <li class="page-item disabled"><span class="page-link">&raquo;</span></li>
             {% endif %}
 
-            <!-- Last Page -->
+            <!-- Last -->
             {% if vendors.has_next %}
             <li class="page-item">
-                <a class="page-link" href="?page={{ vendors.paginator.num_pages }}" aria-label="Last">
-                    <span aria-hidden="true">&raquo;&raquo;</span>
-                </a>
+                <a class="page-link" href="?page={{ vendors.paginator.num_pages }}">&raquo;&raquo;</a>
             </li>
             {% else %}
-            <li class="page-item disabled">
-                <span class="page-link">&raquo;&raquo;</span>
-            </li>
+            <li class="page-item disabled"><span class="page-link">&raquo;&raquo;</span></li>
             {% endif %}
-
         </ul>
     </nav>
     {% endif %}
 </div>
+
 {% endblock %}

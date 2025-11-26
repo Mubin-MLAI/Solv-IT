@@ -4,88 +4,73 @@
 {% block title %}Dashboard{% endblock title %}
 
 {% block content %}
-<!-- Chart.js -->
-<script src="https://cdn.jsdelivr.net/npm/chart.js@2.9.4/dist/Chart.min.js"></script>
+<div class="container-fluid py-4">
 
+  <!-- Stat Cards -->
+  <div class="row g-4 mb-4">
 
-<!-- Stat Cards -->
-<div class="container-fluid">
-  <div class="row g-4 mb-5">
-
+    <!-- Inventory -->
     <div class="col-xl-3 col-sm-6">
-      <a href="{% url 'productslist' %}">
-        <div class="card shadow border-0">
+      <a href="{% url 'productslist' %}" class="text-decoration-none">
+        <div class="card stat-card glass-card gradient-blue text-white">
           <div class="card-body d-flex justify-content-between align-items-center">
             <div>
-              <p class="text-muted mb-1">Inventory Quantity</p>
-              <h3 class="fw-bold">{{ total_items }}</h3>
+              <p class="mb-1 opacity-75">Inventory Quantity</p>
+              <h2 class="fw-bold count" data-target="{{ total_items }}">{{ total_items }}</h2>
             </div>
-            <div class="icon icon-shape bg-secondary text-white rounded-circle p-3">
-              <i class="fas fa-clipboard-list"></i>
+            <div class="icon-container">
+              <i class="fas fa-clipboard-list fa-2x"></i>
             </div>
           </div>
         </div>
       </a>
     </div>
 
+    <!-- Staff -->
     <div class="col-xl-3 col-sm-6">
-      <a href="{% url 'profile_list' %}">
-        <div class="card shadow border-0">
+      <a href="{% url 'profile_list' %}" class="text-decoration-none">
+        <div class="card stat-card glass-card gradient-purple text-white">
           <div class="card-body d-flex justify-content-between align-items-center">
             <div>
-              <p class="text-muted mb-1">Staff</p>
-              <h3 class="fw-bold">{{ profiles_count }}</h3>
+              <p class="mb-1 opacity-75">Staff</p>
+              <h2 class="fw-bold count" data-target="{{ profiles_count }}">{{ profiles_count }}</h2>
             </div>
-            <div class="icon icon-shape bg-primary text-white rounded-circle p-3">
-              <i class="fas fa-users"></i>
+            <div class="icon-container">
+              <i class="fas fa-users fa-2x"></i>
             </div>
           </div>
         </div>
       </a>
     </div>
 
+    <!-- Customers -->
     <div class="col-xl-3 col-sm-6">
-      <a href="{% url 'customer_list' %}">
-        <div class="card shadow border-0">
+      <a href="{% url 'customer_list' %}" class="text-decoration-none">
+        <div class="card stat-card glass-card gradient-green text-white">
           <div class="card-body d-flex justify-content-between align-items-center">
             <div>
-              <p class="text-muted mb-1">Customers</p>
-              <h3 class="fw-bold">{{ customers_count }}</h3>
+              <p class="mb-1 opacity-75">Customers</p>
+              <h2 class="fw-bold count" data-target="{{ customers_count }}">{{ customers_count }}</h2>
             </div>
-            <div class="icon icon-shape bg-success text-white rounded-circle p-3">
-              <i class="fas fa-user"></i>
+            <div class="icon-container">
+              <i class="fas fa-user fa-2x"></i>
             </div>
           </div>
         </div>
       </a>
     </div>
 
+    <!-- Deliveries -->
     <div class="col-xl-3 col-sm-6">
-      <a href="{% url 'deliveries' %}">
-        <div class="card shadow border-0">
+      <a href="{% url 'saleslist' %}" class="text-decoration-none">
+        <div class="card stat-card glass-card gradient-orange text-white">
           <div class="card-body d-flex justify-content-between align-items-center">
             <div>
-              <p class="text-muted mb-1">Pending Deliveries</p>
-              <h3 class="fw-bold">{{ delivery.count }}</h3>
+              <p class="mb-1 opacity-75">Total Invoice</p>
+              <h2 class="fw-bold count" data-target="{{ sales.count }}">{{ sales.count }}</h2>
             </div>
-            <div class="icon icon-shape bg-info text-white rounded-circle p-3">
-              <i class="fas fa-truck"></i>
-            </div>
-          </div>
-        </div>
-      </a>
-    </div>
-
-    <div class="col-xl-3 col-sm-6">
-      <a href="{% url 'saleslist' %}">
-        <div class="card shadow border-0">
-          <div class="card-body d-flex justify-content-between align-items-center">
-            <div>
-              <p class="text-muted mb-1">Sales</p>
-              <h3 class="fw-bold">{{ sales.count }}</h3>
-            </div>
-            <div class="icon icon-shape bg-warning text-white rounded-circle p-3">
-              <i class="fas fa-shopping-cart"></i>
+            <div class="icon-container">
+              <i class="fas fa-file-invoice fa-2x"></i>
             </div>
           </div>
         </div>
@@ -94,85 +79,148 @@
 
   </div>
 
-  <!-- Stock Summary + Chart -->
-  <div class="card shadow border-0 mb-5">
-    <div class="card-body text-center">
-      <h5 class="text-primary fw-bold">Solv-IT Stock by Category</h5>
-      <hr>
-      <div class="row justify-content-center mt-4">
-        <div class="col-md-3 col-sm-6 mb-3">
-          <p>SSDs</p>
-          <a href="/searchitem/?q=ssd" class="h5 text-decoration-underline">{{ stock_summary.ssd }}</a>
-        </div>
-        <div class="col-md-3 col-sm-6 mb-3">
-          <p>Processors</p>
-          <a href="/searchitem/?q=processor" class="h5 text-decoration-underline">{{ stock_summary.processor }}</a>
-        </div>
-        <div class="col-md-3 col-sm-6 mb-3">
-          <p>HDDs</p>
-          <a href="/searchitem/?q=hdd" class="h5 text-decoration-underline">{{ stock_summary.hdd }}</a>
-        </div>
-        <div class="col-md-3 col-sm-6 mb-3">
-          <p>RAMs</p>
-          <a href="/searchitem/?q=ram" class="h5 text-decoration-underline">{{ stock_summary.ram }}</a>
-        </div>
+  <!-- Stock Summary & Chart -->
+  <div class="card glass-panel p-4">
+    <h4 class="mb-4 text-gradient">Stock Summary</h4>
+    <!-- <canvas id="stockChart" height="150"></canvas> -->
+    <hr class="border-secondary my-4">
+    <div class="row justify-content-center mt-4">
+      {% for category, value in stock_summary.items %}
+      <div class="col-md-2 col-6 mb-3">
+        <p class="mb-0 text-uppercase small text-category">{{ category }}</p>
+        <a href="/searchitem/?q={{ category }}" class="h5 fw-bold text-decoration-none text-value">
+          {{ value }}
+        </a>
       </div>
-      <canvas id="stockChart" height="100"></canvas>
+      {% endfor %}
     </div>
-  </div>
+
+
 </div>
+
+<style>
+  /* 🌙 Dark Modern Background */
+
+  /* 🧠 Fix invisible text in stock summary */
+.text-category {
+  color: #b5b5b5; /* Light grey for category labels */
+  letter-spacing: 0.5px;
+  font-weight: 600;
+}
+
+.text-value {
+  color: #f8f9fa !important; /* Bright white for numbers */
+  transition: all 0.3s ease;
+}
+
+.text-value:hover {
+  color: #0dcaf0 !important; /* Neon cyan on hover */
+  text-shadow: 0 0 10px rgba(13,202,240,0.5);
+}
+
+
+  body {
+    background: radial-gradient(circle at top left, #0d1117, #050608);
+    color: #e6edf3;
+  }
+
+  /* 🧊 Glassmorphism Cards */
+  .glass-card {
+    backdrop-filter: blur(15px);
+    background: linear-gradient(135deg, rgba(40, 40, 40, 0.7), rgba(20, 20, 20, 0.4));
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 18px;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  }
+
+  .glass-card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+  }
+
+  .glass-panel {
+    background: rgba(18, 18, 18, 0.65);
+    backdrop-filter: blur(12px);
+    border-radius: 20px;
+    color: #f8f9fa;
+  }
+
+  /* 🌈 Gradients */
+  .gradient-blue { background: linear-gradient(135deg, #007bff, #6610f2); }
+  .gradient-purple { background: linear-gradient(135deg, #6f42c1, #d63384); }
+  .gradient-green { background: linear-gradient(135deg, #28a745, #20c997); }
+  .gradient-orange { background: linear-gradient(135deg, #fd7e14, #ffc107); }
+
+  /* 🔢 Counter Styles */
+  .count { font-size: 2.4rem; font-weight: 700; }
+
+  /* 🧩 Icon Container */
+  .icon-container {
+    background: rgba(255,255,255,0.2);
+    border-radius: 50%;
+    padding: 15px;
+  }
+
+  /* ✨ Text Enhancements */
+  .text-gradient {
+    background: linear-gradient(90deg, #0dcaf0, #20c997, #ffc107);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .hover-link:hover {
+    color: #0dcaf0 !important;
+    text-shadow: 0 0 10px rgba(13,202,240,0.4);
+  }
+
+  hr.border-secondary { opacity: 0.2; }
+</style>
 {% endblock content %}
 
 {% block javascripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-  let stockChartInstance = null;
+  // 🔢 Animated Counters
+  document.querySelectorAll('.count').forEach(el => {
+    const target = +el.getAttribute('data-target');
+    const update = () => {
+      const current = +el.innerText;
+      const increment = target / 40;
+      if (current < target) {
+        el.innerText = Math.ceil(current + increment);
+        setTimeout(update, 25);
+      } else el.innerText = target;
+    };
+    update();
+  });
 
-  function renderStockChart(theme = 'light') {
-    const ctx = document.getElementById('stockChart').getContext('2d');
-    if (stockChartInstance) {
-      stockChartInstance.destroy();
-    }
-    stockChartInstance = new Chart(ctx, {
-      type: 'doughnut',
-      data: {
-        labels: ['SSD', 'Processor', 'HDD', 'RAM'],
-        datasets: [{
-          data: [{{ stock_summary.ssd }}, {{ stock_summary.processor }}, {{ stock_summary.hdd }}, {{ stock_summary.ram }}],
-          backgroundColor: ['#0d6efd', '#28a745', '#ffc107', '#17a2b8']
-        }]
-      },
-      options: {
-        responsive: true,
+  // 📊 Chart.js - Dark Doughnut Chart
+  const ctx = document.getElementById('stockChart').getContext('2d');
+  new Chart(ctx, {
+    type: 'doughnut',
+    data: {
+      labels: ['SSD', 'Processor', 'HDD', 'RAM'],
+      datasets: [{
+        data: [{{ stock_summary.ssd }}, {{ stock_summary.processor }}, {{ stock_summary.hdd }}, {{ stock_summary.ram }}],
+        backgroundColor: ['#0dcaf0', '#198754', '#ffc107', '#6f42c1'],
+        borderWidth: 2,
+        borderColor: '#111',
+        hoverOffset: 10
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: {
         legend: {
           position: 'bottom',
-          labels: {
-            fontColor: theme === 'dark' ? '#e0e0e0' : '#000'
-          }
+          labels: { color: '#f8f9fa' }
+        },
+        tooltip: {
+          backgroundColor: '#212529',
+          titleColor: '#fff',
+          bodyColor: '#ddd'
         }
       }
-    });
-  }
-
-  const toggle = document.getElementById('darkModeToggle');
-  const body = document.body;
-
-  if (localStorage.getItem('theme') === 'dark') {
-    body.classList.add('dark-mode');
-    toggle.checked = true;
-    renderStockChart('dark');
-  } else {
-    renderStockChart('light');
-  }
-
-  toggle.addEventListener('change', function () {
-    if (this.checked) {
-      body.classList.add('dark-mode');
-      localStorage.setItem('theme', 'dark');
-      renderStockChart('dark');
-    } else {
-      body.classList.remove('dark-mode');
-      localStorage.setItem('theme', 'light');
-      renderStockChart('light');
     }
   });
 </script>

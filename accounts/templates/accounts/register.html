@@ -1,144 +1,168 @@
 {% load crispy_forms_tags %}{% load static %}
+<!-- {% block title %}Registration{% endblock title %} -->
 <html>
-  <head>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css"
-      rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC"
-      crossorigin="anonymous" />
-  </head>
-<body>
-  <div class="login-page">
-    <style>
-    .login-page {
-      width: 360px;
-      padding: 8% 0 0;
-      margin: auto;
+<head>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css"
+    rel="stylesheet">
+  <style>
+    body {
+      background: #0d1117;
+      font-family: "Inter", sans-serif;
+      color: #fff;
     }
+    .login-page {
+            width: 380px;
+            /* padding: 2rem; */
+            border-radius: 18px;
+            margin: auto;
+
+            background: rgba(30, 30, 30, 0.65);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+
+            box-shadow: 0 0 16px rgba(0, 255, 100, 0.18);
+
+            text-align: center;
+            /* position: relative;
+            z-index: 10; */
+        }
+    /* .login-page {
+      width: 400px;
+      padding: 5% 0 0;
+      margin: auto;
+    } */
     .form {
-      position: relative;
-      z-index: 1;
-      background: #FFFFFF;
-      max-width: 360px;
-      margin: 0 auto 100px;
-      padding: 45px;
-      text-align: center;
-      box-shadow: 0 0 20px 0 rgba(0, 0, 0, 0.2), 0 5px 5px 0 rgba(0, 0, 0, 0.24);
+      background: #161b22;
+      padding: 40px;
+      border-radius: 12px;
+      box-shadow: 0 4px 30px rgba(0, 0, 0, 0.4);
+      backdrop-filter: blur(8px);
     }
     .form input {
-      outline: 0;
-      background: #bbffbb;
       width: 100%;
-      border: 0;
-      margin: 0 0 15px;
-      padding: 15px;
-      box-sizing: border-box;
+      background: #0d1117;
+      border: 1px solid #30363d;
+      color: #e6edf3;
+      padding: 12px;
+      border-radius: 8px;
+      margin-bottom: 15px;
+      transition: 0.2s;
+    }
+    .form input:focus {
+      border-color: #58a6ff;
+      box-shadow: 0 0 8px rgba(88, 166, 255, 0.4);
+      outline: none;
+    }
+    .form label {
+      text-align: left;
+      width: 100%;
+      display: block;
       font-size: 14px;
+      margin-bottom: 4px;
+      color: #c9d1d9;
     }
     .form button {
-      text-transform: uppercase;
-      outline: 0;
-      background: #4CAF50;
-      width: 100%;
-      border: 0;
-      padding: 15px;
-      color: #FFFFFF;
-      font-size: 14px;
-      -webkit-transition: all 0.3 ease;
-      transition: all 0.3 ease;
-      cursor: pointer;
-    }
-    .form button:hover,.form button:active,.form button:focus {
-      background: #43A047;
-    }
-    .form .message {
-      margin: 15px 0 0;
-      color: #b3b3b3;
-      font-size: 12px;
-    }
-    .form .message a {
-      color: #4CAF50;
-      text-decoration: none;
-    }
-    .form .register-form {
-      display: none;
-    }
-    .container {
-      position: relative;
-      z-index: 1;
-      max-width: 300px;
-      margin: 0 auto;
-    }
-    .container:before, .container:after {
-      content: "";
-      display: block;
-      clear: both;
-    }
-    .container .info {
-      margin: 50px auto;
-      text-align: center;
-    }
-    .container .info h1 {
-      margin: 0 0 15px;
-      padding: 0;
-      font-size: 36px;
-      font-weight: 300;
-      color: #1a1a1a;
-    }
-    .container .info span {
-      color: #4d4d4d;
-      font-size: 12px;
-    }
-    .container .info span a {
-      color: #000000;
-      text-decoration: none;
-    }
-    .container .info span .fa {
-      color: #EF3B3A;
-    }
-    body {
-      background: #76b852; /* fallback for old browsers */
-      background: rgb(141,194,111);
-      background: linear-gradient(90deg, rgba(141,194,111,1) 0%, rgba(118,184,82,1) 50%);
-      -webkit-font-smoothing: antialiased;
-      -moz-osx-font-smoothing: grayscale;
-    }
-    </style>
-    <div class="form">
-      <div>
-        <strong class="navbar-brand" style="font-size: 26px;">Inventory<span class="text-warning">ms</span></strong>
-      </div>
-      <div class="text-danger">
-        {% if messages %} {% for message in messages %}
-        <div class="alert alert-{{message.tags}}">
-            {{ message }}
-        </div>
-        {% endfor %} {% endif %}
+            background: #00ff88;
+            border: none;
+            color: #000;
+            padding: 12px;
+            width: 100%;
+            border-radius: 30px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: 0.3s ease;
+        }
 
-    {% if form.non_field_errors %}
+        .form button:hover {
+            background: #00d46d;
+            box-shadow: 0 0 15px rgba(0,255,120,0.5);
+            transform: translateY(-2px);
+        }
+
+        .register-link a {
+            color: #00ff88;
+            text-decoration: none;
+        }
+
+        .register-link a:hover {
+            text-decoration: underline;
+        }
+    .navbar-brand {
+      color: #fff !important;
+    }
+    .text-warning {
+      color: #f39c12 !important;
+    }
+    .message {
+      color: #9ca3af;
+    }
+    .message a {
+      color: #58a6ff;
+      text-decoration: none;
+      font-weight: 500;
+    }
+    .form .alert {
+      font-size: 14px;
+      padding: 8px;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="login-page">
+    <div class="form">
+
+      <div class="mb-3">
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<strong class="navbar-brand" style="font-size: 28px;">
+          <span class="text-warning" >Registration</span>
+        </strong>
+      </div>
+
+      <div class="text-danger">
+        {% if messages %}
+          {% for message in messages %}
+            <div class="alert alert-{{message.tags}}">
+              {{ message }}
+            </div>
+          {% endfor %}
+        {% endif %}
+
+        {% if form.non_field_errors %}
         <ul>
-            {% for error in form.non_field_errors %}
-                <li>{{ error }}</li>
-            {% endfor %}
+          {% for error in form.non_field_errors %}
+            <li>{{ error }}</li>
+          {% endfor %}
         </ul>
-    {% endif %}
-  </div>
+        {% endif %}
+      </div>
+
       <form class="login-form" method="POST">
         {% csrf_token %}
-        <p>{{ message }}</p>
+
         <label>Username</label>
         <span class="text-danger">{{ form.username.errors }}</span>
-        {{form.username}}
+        {{ form.username }}
+
         <label>Email</label>
         <span class="text-danger">{{ form.email.errors }}</span>
-        {{form.email}}
+        {{ form.email }}
+
         <label>Enter Password</label>
-        <span class="text-danger">{{ form.password.errors }}</span>
-        {{form.password1}}
+        <span class="text-danger">{{ form.password1.errors }}</span>
+        {{ form.password1 }}
+
         <label>Confirm Password</label>
         <span class="text-danger">{{ form.password2.errors }}</span>
-        {{form.password2}}
-        <button  type="submit" name="button">Register</button>
-        <p class="message">Already have an account? <a href="{% url 'user-login' %}">Login</a></p>
+        {{ form.password2 }}
+
+        <button type="submit">Register</button>
+
+        <p class="message mt-3">
+          Already have an account?
+          <a href="{% url 'user-login' %}">Login</a>
+        </p>
       </form>
+
     </div>
   </div>
 </body>

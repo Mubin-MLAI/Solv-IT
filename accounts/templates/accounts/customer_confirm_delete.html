@@ -1,15 +1,83 @@
 {% extends 'store/base.html' %}
+{% block title %}Customer Delete{% endblock %}
 {% block content %}
-  <div class="container mt-5">
-    <h1 class="mb-4">Are you sure you want to delete "{{ object }}"?</h1>
-    <form method="post" class="mb-3">
-      {% csrf_token %}
-      <button type="submit" class="btn btn-danger">
-        <i class="fas fa-trash-alt"></i> Confirm
-      </button>
-      <a href="{% url 'customer_list' %}" class="btn btn-secondary">
-        <i class="fas fa-times"></i> Cancel
-      </a>
+
+<style>
+    body {
+        background-color: #121212 !important;
+        color: #e0e0e0 !important;
+    }
+
+    .delete-card {
+        background: #1e1e1e;
+        padding: 40px;
+        border-radius: 14px;
+        max-width: 650px;
+        margin: auto;
+        margin-top: 80px;
+        text-align: center;
+        box-shadow: 0 0 20px rgba(0,0,0,0.6);
+        animation: fadeIn 0.4s ease;
+    }
+
+    h1 {
+        font-weight: 700;
+        margin-bottom: 25px;
+        color: #ff5252;
+    }
+
+    .btn-delete {
+        background: linear-gradient(90deg, #ff5252, #ff1744);
+        border: none;
+        padding: 10px 35px;
+        border-radius: 50px;
+        color: #fff;
+        font-weight: 600;
+        margin-right: 10px;
+        transition: 0.3s ease;
+    }
+
+    .btn-delete:hover {
+        transform: scale(1.05);
+        background: linear-gradient(90deg, #ff1744, #ff5252);
+    }
+
+    .btn-cancel {
+        background: linear-gradient(90deg, #00e676, #00c853);
+        border: none;
+        padding: 10px 35px;
+        border-radius: 50px;
+        color: black;
+        font-weight: 600;
+        transition: 0.3s ease;
+    }
+
+    .btn-cancel:hover {
+        transform: scale(1.05);
+        background: linear-gradient(90deg, #00c853, #1de9b6);
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+</style>
+
+<div class="delete-card">
+    <h1>Delete Customer</h1>
+
+    <h4>Are you sure you want to delete "<strong>{{ object }}</strong>"?</h4>
+
+    <form method="post" class="mt-4">
+        {% csrf_token %}
+        <button type="submit" class="btn-delete">
+            <i class="fas fa-trash-alt"></i> Confirm
+        </button>
+
+        <a href="{% url 'customer_list' %}" class="btn-cancel">
+            <i class="fas fa-times"></i> Cancel
+        </a>
     </form>
-  </div>
+</div>
+
 {% endblock %}

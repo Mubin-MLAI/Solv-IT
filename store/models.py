@@ -162,9 +162,14 @@ class catogaryitem(models.Model):
 class Item(models.Model):
     STATUS_CHOICES = [
         ('NA', 'NA'),
-        ('available', 'Available'),
-        ('not_available', 'Not Available'),
-        ('replacement', 'Replacement'),
+        ('Available', 'Available'),
+        ('Not_available', 'Not Available'),
+        ('Replacement', 'Replacement'),
+    ]
+
+    Purchase_type = [
+        ('vendor', 'Vendor'),
+        ('customer', 'Customer'),
     ]
 
     slug = AutoSlugField(unique=False, populate_from='name')
@@ -179,7 +184,7 @@ class Item(models.Model):
     quantity = models.IntegerField(default=1, null=True, blank=True)
     price = models.DecimalField(max_digits=10, decimal_places=2, default=0.0)
     purchased_code =  models.CharField(max_length=100,null=True, blank=True)
-    purchased_type =  models.CharField(max_length=100,null=True, blank=True)
+    purchased_type =  models.CharField(max_length=50, choices=Purchase_type, default='NA')
     note = models.TextField(max_length=500, null=True, blank=True, help_text="Additional notes about the item")
 
     created_by = models.ForeignKey(
@@ -259,24 +264,6 @@ class Delivery(models.Model):
             f"Delivery of {self.item} to {self.customer_name} "
             f"at {self.location} on {self.date}"
         )
-    
-
-
-class InventoryItem(models.Model):
-    name = models.CharField(max_length=100)
-    serial_no = models.CharField(max_length=100, unique=True)
-    make_and_model = models.CharField(max_length=100, blank=True, null=True)
-    processor = models.CharField(max_length=100, blank=True, null=True)
-    ram = models.CharField(max_length=100, blank=True, null=True)   # e.g. "8GBX(1), 4GBX(1)"
-    hdd = models.CharField(max_length=100, blank=True, null=True)   # e.g. "500GBX(1)"
-    ssd = models.CharField(max_length=100, blank=True, null=True)   # e.g. "128GBX(1)"
-    smps = models.CharField(max_length=100, blank=True, null=True)  # e.g. "available"
-    motherboard = models.CharField(max_length=100, blank=True, null=True)
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-
-    def __str__(self):
-        return f"{self.name} ({self.serial_no})"
 
     
 

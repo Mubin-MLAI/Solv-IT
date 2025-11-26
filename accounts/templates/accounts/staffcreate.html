@@ -1,28 +1,111 @@
 {% extends "store/base.html" %}
 {% load static %}
 {% load crispy_forms_tags %}
-{% block title %}Create staff{%endblock title%}{% block content %}
-<div class="col container p-5">
-    <div class="row">
-        <div class="col-md-3 col-lg-3"></div>
-          <div class="col-md-6 col-lg-6">
-            <form method="POST" enctype="multipart/form-data">
-                {% csrf_token %}
-                <section class="section-bg" id="plans">
-                    <fieldset class="form-group">
-                        <header class="section-header">
-                            <h1 class="text-success">Create staff profile</h1>
-                            <hr>
-                        </header>
-                        {{ form.media }} {{ form|crispy }}
-                    </fieldset>
-                </section>
-                <div class="form-group mt-4 text-center">
-                    <button class="btn btn-success" type="submit">Submit</button>
-                </div>
-            </form>
+
+{% block title %}Create staff{% endblock title %}
+
+{% block content %}
+
+<style>
+/* ---------- DARK THEME ---------- */
+body {
+    background: #0f0f0f !important;
+}
+
+/* Card container */
+.dark-card {
+    background: rgba(25, 25, 25, 0.85);
+    backdrop-filter: blur(10px);
+    border-radius: 20px;
+    padding: 40px;
+    box-shadow: 0px 0px 25px rgba(0,0,0,0.4);
+    border: 1px solid rgba(255,255,255,0.05);
+}
+
+/* Section header */
+.section-header h1 {
+    color: #4ade80 !important; /* soft green */
+    font-weight: 600;
+    letter-spacing: .5px;
+}
+
+/* Inputs */
+.dark-card input,
+.dark-card select,
+.dark-card textarea {
+    background: #1c1c1c !important;
+    border: 1px solid #333 !important;
+    color: #e2e2e2 !important;
+    border-radius: 12px !important;
+    padding: 10px 14px !important;
+}
+
+.dark-card input:focus,
+.dark-card select:focus,
+.dark-card textarea:focus {
+    border-color: #4ade80 !important;
+    box-shadow: 0px 0px 5px #4ade80 !important;
+}
+
+/* Labels */
+.dark-card label {
+    color: #d1d1d1 !important;
+    font-weight: 500;
+}
+
+/* Submit Button */
+.btn-modern {
+    background: linear-gradient(135deg, #22c55e, #4ade80);
+    border: none;
+    padding: 10px 28px;
+    font-size: 17px;
+    border-radius: 50px;
+    color: #000;
+    font-weight: 600;
+    transition: .3s ease;
+}
+
+.btn-modern:hover {
+    transform: scale(1.05);
+    box-shadow: 0px 0px 15px rgba(34, 197, 94, 0.7);
+}
+
+/* HR */
+.dark-hr {
+    border: none;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, #4ade80, transparent);
+    margin-bottom: 25px;
+}
+</style>
+
+<div class="container py-5">
+    <div class="row justify-content-center">
+
+        <div class="col-md-7">
+            <div class="dark-card">
+                <form method="POST" enctype="multipart/form-data">
+                    {% csrf_token %}
+
+                    <header class="section-header text-center mb-4">
+                        <h1>Create Staff Profile</h1>
+                        <hr class="dark-hr">
+                    </header>
+
+                    {{ form.media }}
+                    {{ form|crispy }}
+
+                    <div class="form-group mt-4 text-center">
+                        <button class="btn-modern" type="submit">
+                            Submit
+                        </button>
+                    </div>
+
+                </form>
+            </div>
         </div>
-        <div class="col-md-3 col-lg-3"></div>
+
     </div>
 </div>
+
 {% endblock content %}

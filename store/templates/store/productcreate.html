@@ -9,62 +9,139 @@ Add Product
 {% block content %}
 
 <style>
-    .processor-field,
-    .ram-field,
-    .hdd-field,
-    .ssd-field {
-        border: 1px solid #ccc;
-        /* Light gray border */
-        padding: 5px;
-        border-radius: 5px;
-        /* Optional: for rounded corners */
-    }
+/* ===========================
+   🌙 DARK MODERN UI THEME
+   =========================== */
 
-    .processor-field input,
-    .ram-field input,
-    .hdd-field input,
-    .ssd-field input {
-        border: none;
-        /* To avoid extra borders on input fields */
-    }
+body {
+    background: #0d0f12 !important;
+    color: #e6e6e6 !important;
+}
 
-    /* Increase width of individual form controls */
-    .processor-field select,
-    .ram-field select,
-    .hdd-field select,
-    .ssd-field select,
-    .processor-field input,
-    .ram-field input,
-    .hdd-field input,
-    .ssd-field input {
-        width: 100%;
-        /* Full width of the container */
-    }
+/* Card styling */
+.card {
+    background: rgba(20, 22, 27, 0.85) !important;
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.05) !important;
+    border-radius: 14px !important;
+    box-shadow: 0 0 25px rgba(0, 0, 0, 0.6);
+}
 
-    /* Optionally, add padding for extra spacing */
-    .processor-field input,
-    .ram-field input,
-    .hdd-field input,
-    .ssd-field input {
-        padding: 10px;
-    }
+/* Titles */
+.card-title {
+    color: #00eaff;
+    font-weight: 600;
+    letter-spacing: .5px;
+}
 
-    /* Optional: Set a max-width for responsiveness */
-    .processor-field,
-    .ram-field,
-    .hdd-field,
-    .ssd-field {
-        max-width: 100%;
-    }
-</style>
-<style>
-    #customer_suggestions {
-        max-height: 200px;
-        overflow-y: auto;
-        background-color: white;
-        border: 1px solid #ccc;
-        border-radius: 4px;
-    }
+/* Labels */
+.form-label {
+    color: #b8c7d8 !important;
+    font-weight: 500;
+}
+
+/* Inputs */
+.form-control, select, textarea {
+    background-color: rgba(255,255,255,0.04) !important;
+    border: 1px solid rgba(255,255,255,0.12) !important;
+    color: #e6e6e6 !important;
+    border-radius: 10px !important;
+    padding: 10px !important;
+}
+
+.form-control:focus, select:focus, textarea:focus {
+    border-color: #00eaff !important;
+    box-shadow: 0 0 8px rgba(0, 234, 255, 0.4) !important;
+    background: rgba(255,255,255,0.07) !important;
+}
+
+/* Buttons */
+.btn-success, .btn-primary {
+    border-radius: 25px !important;
+    padding: 8px 22px !important;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: .5px;
+    box-shadow: 0 0 12px rgba(0, 234, 255, 0.3);
+}
+
+.btn-success {
+    background: linear-gradient(90deg, #00ffbf, #00eaff) !important;
+    border: none !important;
+    color: #000 !important;
+}
+
+.btn-outline-success {
+    border-radius: 25px !important;
+    border-color: #00eaff !important;
+    color: #00eaff !important;
+}
+
+/* Go Back Hover */
+.btn-outline-success:hover {
+    background-color: #00eaff !important;
+    color: #000 !important;
+}
+
+/* Buttons on hover */
+.btn-success:hover, .btn-primary:hover {
+    transform: scale(1.03);
+    box-shadow: 0 0 15px rgba(0, 234, 255, 0.6);
+}
+
+/* Suggestions dropdown */
+#customer_suggestions, 
+#suggestions, #suggestions1, 
+#suggestions2, #suggestions3 {
+    background: rgba(20, 20, 25, 0.95) !important;
+    color: white !important;
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 10px;
+}
+
+.list-group-item {
+    background: transparent !important;
+    color: #d1d1d1 !important;
+    border: none !important;
+    padding: 10px 14px;
+}
+
+.list-group-item:hover {
+    background: rgba(0, 234, 255, 0.15) !important;
+    color: #00eaff !important;
+}
+
+/* Modal */
+.modal-content {
+    background: rgba(18, 20, 25, 0.95) !important;
+    color: #fff !important;
+    border-radius: 14px;
+}
+
+.modal-header .modal-title {
+    color: #00eaff !important;
+}
+
+/* Error text */
+.text-danger {
+    color: #ff6b6b !important;
+}
+
+/* Increase spacing */
+.row {
+    margin-bottom: 10px;
+}
+
+/* Placeholder color */
+::placeholder {
+    color: #9fa8b3 !important;
+}
+
+/* Smooth transitions */
+* {
+    transition: .2s ease-in-out;
+}
+
 </style>
 
 <br>
@@ -91,7 +168,7 @@ Add Product
                 <form method="POST" enctype="multipart/form-data" action="{% url 'upload_category_items' %}">
                     {% csrf_token %}
                     <div class="row mb-3">
-                        <div class="col-md-4">
+                        <div class="col-md-4 form-label">
                             {{ form.file.label_tag }}
                             {{ form.file }}
                         </div>

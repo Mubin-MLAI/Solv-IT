@@ -4,10 +4,143 @@
 {% block title %}Add Category{% endblock title %}
 {% block content %}
 
-<br>
+<style>
+    body {
+        background-color: #121212;
+        color: #eaeaea;
+    }
+
+    .container {
+        margin-top: 30px;
+    }
+
+    .card {
+        background: #1e1e1e;
+        border: none;
+        border-radius: 12px;
+        color: #f1f1f1;
+        box-shadow: 0 0 15px rgba(0, 255, 204, 0.08);
+        transition: all 0.3s ease-in-out;
+    }
+
+    .card:hover {
+        box-shadow: 0 0 25px rgba(0, 255, 204, 0.15);
+    }
+
+    h2, h5 {
+        color: #00ffc8;
+        font-weight: 600;
+    }
+
+    .btn {
+        border: none;
+        border-radius: 50px;
+        font-weight: 500;
+        transition: all 0.3s ease-in-out;
+    }
+
+    .btn-outline-success {
+        border: 1px solid #00ffc8;
+        color: #00ffc8;
+    }
+
+    .btn-outline-success:hover {
+        background: #00ffc8;
+        color: #121212;
+        transform: scale(1.05);
+    }
+
+    .btn-success {
+        background: linear-gradient(45deg, #00e676, #1de9b6);
+        color: #000;
+    }
+
+    .btn-success:hover {
+        background: linear-gradient(45deg, #00ffc8, #00bfa5);
+        transform: scale(1.05);
+    }
+
+    .btn-secondary {
+        background: linear-gradient(45deg, #37474f, #263238);
+        color: #fff;
+    }
+
+    .btn-secondary:hover {
+        background: linear-gradient(45deg, #607d8b, #455a64);
+        transform: scale(1.05);
+    }
+
+    .btn-lg {
+        padding: 10px 25px;
+        font-size: 1rem;
+    }
+
+    label {
+        font-weight: 500;
+        color: #9be7ff;
+    }
+
+    .form-control {
+        background-color: #2a2a2a;
+        color: #f1f1f1;
+        border: 1px solid #333;
+        border-radius: 8px;
+        padding: 10px;
+        transition: all 0.3s;
+    }
+
+    .form-control:focus {
+        border-color: #00ffc8;
+        box-shadow: 0 0 6px rgba(0, 255, 200, 0.4);
+        background-color: #252525;
+        color: #fff;
+    }
+
+    .alert {
+        border-radius: 8px;
+        font-weight: 500;
+    }
+
+    .alert-success {
+        background: rgba(0, 255, 100, 0.15);
+        border: 1px solid #00e676;
+        color: #a5f5c8;
+    }
+
+    .alert-danger {
+        background: rgba(255, 0, 0, 0.15);
+        border: 1px solid #ff5252;
+        color: #ffbdbd;
+    }
+
+    .alert-warning {
+        background: rgba(255, 193, 7, 0.15);
+        border: 1px solid #ffca28;
+        color: #ffecb3;
+    }
+
+    .invalid-feedback p {
+        color: #ff6b6b;
+        font-size: 0.9rem;
+        margin: 0;
+    }
+
+    label.form-label {
+        color: #bdbdbd;
+        font-weight: 500;
+        text-transform: uppercase;
+        font-size: 0.9rem;
+        margin-bottom: 6px;
+    }
+
+input.form-control::placeholder,
+    textarea.form-control::placeholder {
+        color: #999;
+    }
+</style>
 
 <div class="container p-4">
-    <!-- Go back -->
+    <!-- 🔙 Go back -->
     <div class="mb-4">
         <a href="{% url 'category-list' %}" class="btn btn-outline-success">
             <i class="fas fa-arrow-left me-2"></i>
@@ -16,15 +149,16 @@
     </div>
 
     <h2 class="mb-4">
-        <i class="{% if form.instance.pk %}fas fa-edit{% else %}fas fa-plus{% endif %}"></i>
-        {% if form.instance.pk %}Edit{% else %}Entry{% endif %}
+        <i class="{% if form.instance.pk %}fas fa-edit{% else %}fas fa-plus{% endif %} me-2"></i>
+        {% if form.instance.pk %}Edit{% else %}Add Entry{% endif %}
     </h2>
 
-    <div class="row justify-content-center">
-    <!-- Excel Import Form -->
-        <div class="card shadow-sm border-light w-100">
+    <div class="row justify-content-center g-4">
+        <!-- 🧾 Excel Import Form -->
+        <div class="card w-100">
             <div class="card-body">
-                <h5 class="card-title mb-3">Import Items from Excel</h5>
+                <h5 class="card-title mb-3"><i class="fa-solid fa-file-excel me-2"></i> Import Items from Excel</h5>
+
                 {% if error %}
                     <div class="alert alert-danger">{{ error }}</div>
                 {% endif %}
@@ -40,17 +174,20 @@
                             {{ form.file }}
                         </div>
                     </div>
-                    <button typse="submit" class="btn btn-success btn-sm rounded-pill shadow-sm"><i class="fa-solid fa-download"></i> Upload Items </button>
+                    <button type="submit" class="btn btn-success btn-sm rounded-pill shadow-sm">
+                        <i class="fa-solid fa-upload me-2"></i> Upload Items
+                    </button>
                 </form>
             </div>
         </div>
-        <div class="card shadow-sm border-light">
+
+        <!-- 🧩 Category Entry Form -->
+        <div class="card">
             <div class="card-body">
                 {% if request.user.profile.role != 'OP' %}
-                <form method="POST" enctype="multipart/form-data" action="{% url 'category-create' %}" class="border p-4 rounded bg-light">
+                <form method="POST" enctype="multipart/form-data" action="{% url 'category-create' %}" class="p-3 rounded">
                     {% csrf_token %}
 
-                    <!-- Category (SSD, Processor, HDD, RAM) -->
                     <div class="mb-3">
                         {{ form.category.label_tag }}
                         {{ form.category|add_class:"form-control" }}
@@ -63,7 +200,6 @@
                         {% endif %}
                     </div>
 
-                    <!-- Name field -->
                     <div class="mb-3">
                         {{ form.name.label_tag }}
                         {{ form.name|add_class:"form-control" }}
@@ -76,10 +212,9 @@
                         {% endif %}
                     </div>
 
-                    <!-- Serial Number field -->
                     <div class="mb-3">
                         {{ form.serial_no.label_tag }}
-                        {{ form.serial_no|add_class:"form-control" }}  
+                        {{ form.serial_no|add_class:"form-control" }}
                         {% if form.serial_no.errors %}
                             <div class="invalid-feedback">
                                 {% for error in form.serial_no.errors %}
@@ -89,10 +224,9 @@
                         {% endif %}
                     </div>
 
-                    <!-- Quantity field -->
                     <div class="mb-3">
                         {{ form.quantity.label_tag }}
-                        {{ form.quantity|add_class:"form-control" }}  
+                        {{ form.quantity|add_class:"form-control" }}
                         {% if form.quantity.errors %}
                             <div class="invalid-feedback">
                                 {% for error in form.quantity.errors %}
@@ -102,10 +236,9 @@
                         {% endif %}
                     </div>
 
-                    <!-- Unit Price field -->
                     <div class="mb-3">
                         {{ form.unit_price.label_tag }}
-                        {{ form.unit_price|add_class:"form-control" }}  
+                        {{ form.unit_price|add_class:"form-control" }}
                         {% if form.unit_price.errors %}
                             <div class="invalid-feedback">
                                 {% for error in form.unit_price.errors %}
@@ -117,7 +250,7 @@
 
                     <div class="mb-3">
                         {{ form.purchase_lot_code.label_tag }}
-                        {{ form.purchase_lot_code|add_class:"form-control" }}  
+                        {{ form.purchase_lot_code|add_class:"form-control" }}
                         {% if form.purchase_lot_code.errors %}
                             <div class="invalid-feedback">
                                 {% for error in form.purchase_lot_code.errors %}
@@ -127,30 +260,29 @@
                         {% endif %}
                     </div>
 
-                    <!-- Submit button -->
-                    <div class="form-group text-center">
+                    <div class="text-center mt-4">
                         <button class="btn btn-success btn-lg" type="submit">
-                            <i class="fas fa-check"></i> Submit
+                            <i class="fas fa-check me-2"></i> Submit
                         </button>
                     </div>
                 </form>
                 {% else %}
                     <div class="alert alert-warning">
-                        You do not have permission to add or edit items.
+                        <i class="fas fa-exclamation-triangle me-2"></i> You do not have permission to add or edit items.
                     </div>
                 {% endif %}
             </div>
         </div>
     </div>
 
-
-    <a href="{% url 'category-list' %}" class="btn btn-secondary mt-3">
-        <i class="fas fa-arrow-left"></i> Back to list
-    </a>
-    <a href="{% url 'product-create' %}" class="btn btn-secondary mt-3">
-        <i class="fas fa-arrow-left"></i> Back to add product
-    </a>
+    <!-- 🔙 Bottom Navigation -->
+    <div class="d-flex flex-wrap gap-3 mt-4">
+        <a href="{% url 'category-list' %}" class="btn btn-secondary">
+            <i class="fas fa-list me-2"></i> Back to list
+        </a>
+        <a href="{% url 'product-create' %}" class="btn btn-secondary">
+            <i class="fas fa-box-open me-2"></i> Back to add product
+        </a>
+    </div>
 </div>
-
-
 {% endblock %}

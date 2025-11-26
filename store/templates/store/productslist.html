@@ -5,305 +5,333 @@
 {% block title %}Products{% endblock title %}
 
 {% block content %}
-<br>
+<div class="container py-4">
 
 <style>
-    /* ✅ Search Suggestions Box */
-    .suggestions {
-        position: absolute;
+/* 🌙 DARK THEME BASE */
+body {
+    background-color: #0d1117;
+    color: #e6edf3;
+    font-family: 'Inter', sans-serif;
+}
+
+/* 🟢 HEADER */
+h4.display-6 {
+    font-weight: 600;
+    color: #00b3ff;
+    text-shadow: 0 0 8px rgba(0, 179, 255, 0.3);
+}
+.text-gradient {
+    background: linear-gradient(90deg, #00ff9d, #00b3ff);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+/* 🟢 CARD STYLING */
+.card-dark {
+    background-color: rgba(22,27,34,0.9);
+    border: 1px solid #30363d;
+    border-radius: 16px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.3);
+    backdrop-filter: blur(8px);
+    padding: 1.5rem;
+    transition: all 0.3s ease;
+}
+.card-dark:hover {
+    border-color: #58a6ff;
+    box-shadow: 0 0 15px rgba(88,166,255,0.3);
+}
+
+/* 🟢 BUTTONS */
+.btn {
+    border-radius: 25px;
+    transition: all 0.2s ease-in-out;
+    font-weight: 500;
+}
+.btn-outline-info { color: #58a6ff; border-color: #58a6ff; }
+.btn-outline-info:hover { background: #58a6ff; color: #0d1117; }
+.btn-outline-danger { color: #f85149; border-color: #f85149; }
+.btn-outline-danger:hover { background: #f85149; color: #0d1117; }
+.btn-outline-success { color: #3fb950; border-color: #3fb950; }
+.btn-outline-success:hover { background: #3fb950; color: #0d1117; }
+
+/* 🟢 SEARCH INPUT */
+#searchbox1 {
+    background-color: #161b22;
+    border: 1px solid #30363d;
+    color: #e6edf3;
+}
+#searchbox1::placeholder { color: #8b949e; }
+#searchbox1:focus {
+    border-color: #58a6ff;
+    box-shadow: 0 0 5px rgba(88,166,255,0.3);
+}
+
+/* 🟢 TABLE BASE */
+
+.table-container {
+    width: 100%;
+    background: #161b22;
+    border-radius: 16px;
+    overflow-x: auto;
+    border: 1px solid #30363d;
+}
+table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 900px;
+}
+thead th {
+    background-color: #22262e;
+    color: #00ffc8;
+    text-align: center;
+    padding: 8px;
+}
+tbody td {
+    text-align: center;
+    border-bottom: 1px solid #30363d;
+    padding: 10px 7px;
+}
+tbody tr:hover {
+    background-color: #1c2128;
+}
+
+/* 🟢 PAGINATION */
+.pagination {
+    gap: 0.3rem;
+}
+.page-link {
+    background-color: #161b22;
+    border: 1px solid #30363d;
+    color: #e6edf3;
+    border-radius: 8px;
+}
+.page-item.active .page-link {
+    background-color: #238636;
+    border-color: #2ea043;
+}
+
+/* 🟢 RESPONSIVE TABLE CARDS */
+@media (max-width: 768px) {
+    table, thead, tbody, th, td, tr {
+        display: block;
         width: 100%;
-        max-height: 200px;
-        overflow-y: auto;
-        background: white;
-        border: 1px solid #ccc;
-        z-index: 1050;
-        display: none;
     }
-
-    .suggestions .list-group-item {
-        cursor: pointer;
+    thead { display: none; }
+    tbody tr {
+        background: #161b22;
+        margin-bottom: 1rem;
+        border-radius: 12px;
+        border: 1px solid #30363d;
+        padding: 12px;
     }
-
-    .suggestions .list-group-item:hover {
-        background-color: #f8f9fa;
+    tbody td {
+        display: flex;
+        justify-content: space-between;
+        padding: 8px 10px;
+        border: none;
+        border-bottom: 1px solid rgba(255,255,255,0.05);
     }
-
-    /* ✅ Table - Mobile responsiveness */
-    @media (max-width: 768px) {
-        .table thead {
-            display: none; /* Hide table header on small screens */
-        }
-
-        .table,
-        .table tbody,
-        .table tr,
-        .table td {
-            display: block;
-            width: 100%;
-        }
-
-        .table tr {
-            margin-bottom: 1rem;
-            background: #fff;
-            border: 1px solid #dee2e6;
-            border-radius: 5px;
-            padding: 10px;
-        }
-
-        .table td {
-            text-align: right;
-            padding-left: 50%;
-            position: relative;
-            border: none;
-        }
-
-        .table td::before {
-            content: attr(data-label);
-            position: absolute;
-            left: 15px;
-            width: 45%;
-            padding-right: 10px;
-            text-align: left;
-            font-weight: 600;
-            color: #333;
-        }
-
-        /* Search form stacked */
-        #searchform1 {
-            flex-direction: column;
-            gap: 0.5rem;
-        }
-
-        #searchform1 input,
-        #searchform1 button {
-            width: 100%;
-            border-radius: 50px !important;
-        }
-
-        .d-flex.gap-2 {
-            flex-wrap: wrap;
-            justify-content: flex-start;
-        }
-
-        .d-flex.gap-2 a {
-            flex: 1 1 auto;
-        }
-
-        .pagination {
-            flex-wrap: wrap;
-        }
+    tbody td::before {
+        content: attr(data-label);
+        font-weight: 600;
+        color: #8b949e;
     }
+    tbody td:last-child {
+        border-bottom: none;
+    }
+}
+
+/* 🟢 FLEX + WRAP for headers & search bar */
+@media (max-width: 767.98px) {
+    .header-actions {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 10px;
+    }
+    #searchform1 {
+        flex-direction: column;
+        gap: 10px;
+    }
+    #searchform1 button {
+        width: 100%;
+    }
+    .btn-sm {
+        font-size: 0.9rem;
+    }
+}
 </style>
 
-<div class="my-4 px-3 px-md-4">
-    <div class="row align-items-center">
-        <div class="col-md-6 col-12 mb-2 mb-md-0">
-            <h4 class="display-6 mb-0 text-success text-center text-md-start">Products List</h4>
-        </div>
-        {% if request.user.profile.role != 'OP' %}
-        <div class="col-md-6 col-12 d-flex justify-content-center justify-content-md-end gap-2 flex-wrap">
-            <a class="btn btn-success btn-sm rounded-pill shadow-sm" href="{% url 'product-create' %}">
-                <i class="fa-solid fa-plus"></i> Add Item
-            </a>
-            <a class="btn btn-success btn-sm rounded-pill shadow-sm" href="{% querystring '_export'='xlsx' %}">
-                <i class="fa-solid fa-download"></i> Export to Excel
-            </a>
-        </div>
-        {% endif %}
-    </div>
-
-    <!-- ✅ Search Form -->
-    <form class="input-group mt-3 position-relative d-flex flex-wrap" role="search" id="searchform1"
-        action="{% url 'item_search_list_view' %}" method="get">
-        <input id="searchbox1" name="q" type="text" class="form-control border-2 rounded-pill shadow-sm"
-            placeholder="Find products">
-        <button class="btn btn-outline-success rounded-pill shadow-sm ms-2" type="submit">
-            <i class="fa-solid fa-search"></i>
-        </button>
-        <button class="btn btn-outline-secondary rounded-pill shadow-sm ms-2" type="button" id="clearSearch1">
-            <i class="fa-solid fa-times"></i>
-        </button>
-    </form>
-    <div id="suggestions1" class="list-group position-absolute"
-        style="z-index: 9999; width: 100%; background-color: rgb(254, 254, 253);"></div>
-</div>
-
-<!-- ✅ Product Table Section -->
-<div class="px-3 px-md-4">
-    {% if items %}
-    <div class="table-responsive">
-        <table class="table table-bordered table-striped table-hover table-sm">
-            <thead class="thead-light">
-                <tr>
-                    <th scope="col">ID</th>
-                    <th scope="col">Name</th>
-                    <th scope="col">Serial No</th>
-                    <th scope="col">Make & Models</th>
-                    <th scope="col">Processor</th>
-                    <th scope="col">RAM</th>
-                    <th scope="col">HDD</th>
-                    <th scope="col">SSD</th>
-                    <th scope="col">SMPS</th>
-                    <th scope="col">Motherboard</th>
-                    <th scope="col">Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for item in items %}
-                <tr>
-                    <td data-label="ID">{{ forloop.counter|add:page_obj.start_index|add:"-1" }}</td>
-                    <td data-label="Name">{{ item.name }}</td>
-                    <td data-label="Serial No">{{ item.serialno }}</td>
-                    <td data-label="Make & Models">{{ item.make_and_models }}</td>
-                    <td data-label="Processor">
-                        {% for p in item.processors %}
-                        <li>{{ p }}</li>
-                        {% endfor %}
-                    </td>
-                    <td data-label="RAM">
-                        {% for p in item.rams %}
-                        <li>{{ p }}</li>
-                        {% endfor %}
-                    </td>
-                    <td data-label="HDD">
-                        {% for p in item.hdds %}
-                        <li>{{ p }}</li>
-                        {% endfor %}
-                    </td>
-                    <td data-label="SSD">
-                        {% for p in item.ssds %}
-                        <li>{{ p }}</li>
-                        {% endfor %}
-                    </td>
-                    <td data-label="SMPS">{{ item.smps_status }}</td>
-                    <td data-label="Motherboard">{{ item.motherboard_status }}</td>
-                    <td data-label="Actions">
-                        <div class="d-flex gap-2">
-                            <a class="btn btn-outline-info btn-sm" href="{% url 'product-update' item.slug %}">
-                                <i class="fa-solid fa-pen"></i> Edit
-                            </a>
-                            <a class="btn btn-outline-danger btn-sm" href="{% url 'product-delete' item.slug %}">
-                                <i class="fa-solid fa-trash"></i> Delete
-                            </a>
-                            <a class="btn btn-outline-info btn-sm" href="#">
-                                <i class="fa-solid fa-eye"></i> Track
-                            </a>
-                        </div>
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
-    {% else %}
+<!-- 🟢 PAGE HEADER -->
+<div class="d-flex flex-column flex-md-row justify-content-between align-items-center mb-4 header-actions">
+    <h4 class="display-6 text-gradient mb-3 mb-md-0">
+        <i class="fa-solid fa-boxes-stacked me-2 text-success"></i> Products List
+    </h4>
     {% if request.user.profile.role != 'OP' %}
-    <div class="alert alert-warning text-center">
-        <p>No products found for "{{ request.GET.q }}". You can
-            <a href="{% url 'product-create' %}" class="btn btn-success btn-sm rounded-pill shadow-sm">
-                Add a new product
-            </a>.
-        </p>
+    <div class="d-flex flex-wrap gap-2 justify-content-center">
+        <a class="btn btn-outline-info btn-sm" href="{% url 'product-create' %}">
+            <i class="fa-solid fa-plus"></i> Add Item
+        </a>
+        <a class="btn btn-outline-light btn-sm" href="{% querystring '_export'='xlsx' %}">
+            <i class="fa-solid fa-download"></i> Export
+        </a>
     </div>
-    {% endif %}
     {% endif %}
 </div>
 
-<!-- ✅ Pagination -->
+<!-- 🟢 SEARCH -->
+<div class="card-dark p-3 mb-4 rounded-4 shadow-sm border border-dark-subtle">
+    <form class="d-flex flex-wrap gap-2" id="searchform1" action="{% url 'item_search_list_view' %}" method="get">
+        <div class="input-group flex-grow-1">
+            <span class="input-group-text bg-dark text-light border-0 rounded-start-pill">
+                <i class="fa-solid fa-search"></i>
+            </span>
+            <input id="searchbox1" name="q" type="text" class="form-control bg-dark text-light border-0"
+                placeholder="Search products..." style="border-top-right-radius:50px;border-bottom-right-radius:50px;">
+        </div>
+        <button type="submit" class="btn btn-outline-success rounded-pill"><i class="fa-solid fa-magnifying-glass"></i> Search</button>
+        <button type="button" id="clearSearch1" class="btn btn-outline-danger rounded-pill"><i class="fa-solid fa-xmark"></i> Clear</button>
+    </form>
+	<!-- Hidden suggestions -->
+    <div id="suggestions1" class="list-group form-control" style="display:contents !important;"></div>
+</div>
+
+<!-- 🟢 TABLE -->
+{% if items %}
+<div class="table-container table-bordered ">
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Serial No</th>
+                <th>Make & Model</th>
+                <th>Processor</th>
+                <th>RAM</th>
+                <th>HDD</th>
+                <th>SSD</th>
+                <th>SMPS</th>
+                <th>Motherboard</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in items %}
+            <tr>
+                <td data-label="ID">{{ forloop.counter|add:page_obj.start_index|add:"-1" }}</td>
+                <td data-label="Name">{{ item.name }}</td>
+                <td data-label="Serial No">{{ item.serialno }}</td>
+                <td data-label="Make & Model">{{ item.make_and_models }}</td>
+                <td data-label="Processor">{% for p in item.processors %}<li>{{ p }}</li>{% endfor %}</td>
+                <td data-label="RAM">{% for p in item.rams %}<li>{{ p }}</li>{% endfor %}</td>
+                <td data-label="HDD">{% for p in item.hdds %}<li>{{ p }}</li>{% endfor %}</td>
+                <td data-label="SSD">{% for p in item.ssds %}<li>{{ p }}</li>{% endfor %}</td>
+                <td data-label="SMPS">{{ item.smps_status }}</td>
+                <td data-label="Motherboard">{{ item.motherboard_status }}</td>
+                <td data-label="Actions">
+                    <div class="d-flex flex-wrap gap-2 justify-content-center">
+                        <a class="btn btn-outline-info btn-sm" href="{% url 'product-update' item.slug %}"><i class="fa-solid fa-pen"></i></a>
+                        <a class="btn btn-outline-danger btn-sm" href="{% url 'product-delete' item.slug %}"><i class="fa-solid fa-trash"></i></a>
+                        <a class="btn btn-outline-success btn-sm" href="#"><i class="fa-solid fa-eye"></i></a>
+                    </div>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% else %}
+<div class="alert alert-warning text-center mt-3">
+    No products found for "{{ request.GET.q }}".
+    <a href="{% url 'product-create' %}" class="btn btn-success btn-sm rounded-pill">Add new product</a>
+</div>
+{% endif %}
+
+<!-- 🟢 PAGINATION -->
 {% if is_paginated %}
-<nav aria-label="Page navigation">
+<nav aria-label="Page navigation" class="mt-4">
     <ul class="pagination justify-content-center flex-wrap">
         {% if page_obj.has_previous %}
-        <li class="page-item">
-            <a class="page-link"
-                href="{% if request.GET.q %}?q={{ request.GET.q }}&page={{ page_obj.previous_page_number }}{% else %}?page={{ page_obj.previous_page_number }}{% endif %}"
-                aria-label="Previous">
-                <span aria-hidden="true">&laquo;</span>
-            </a>
-        </li>
+        <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}">&laquo;</a></li>
         {% else %}
         <li class="page-item disabled"><span class="page-link">&laquo;</span></li>
         {% endif %}
-
         {% for i in paginator.page_range %}
         {% if page_obj.number == i %}
         <li class="page-item active"><span class="page-link">{{ i }}</span></li>
         {% else %}
-        <li class="page-item">
-            <a class="page-link"
-                href="{% if request.GET.q %}?q={{ request.GET.q }}&page={{ i }}{% else %}?page={{ i }}{% endif %}">
-                {{ i }}
-            </a>
-        </li>
+        <li class="page-item"><a class="page-link" href="?page={{ i }}">{{ i }}</a></li>
         {% endif %}
         {% endfor %}
-
         {% if page_obj.has_next %}
-        <li class="page-item">
-            <a class="page-link"
-                href="{% if request.GET.q %}?q={{ request.GET.q }}&page={{ page_obj.next_page_number }}{% else %}?page={{ page_obj.next_page_number }}{% endif %}"
-                aria-label="Next">
-                <span aria-hidden="true">&raquo;</span>
-            </a>
-        </li>
+        <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}">&raquo;</a></li>
         {% else %}
         <li class="page-item disabled"><span class="page-link">&raquo;</span></li>
         {% endif %}
     </ul>
 </nav>
 {% endif %}
+</div>
 
-<!-- ✅ Search Suggestions Script -->
+<!-- ✅ JS -->
 <script>
-    const searchBox = document.getElementById('searchbox1');
-    const suggestionsBox = document.getElementById('suggestions1');
-    const searchForm = document.getElementById('searchform1');
-    const clearButton = document.getElementById('clearSearch1');
+const searchBox = document.getElementById('searchbox1');
+const suggestionsBox = document.getElementById('suggestions1');
+const searchForm = document.getElementById('searchform1');
+const clearButton = document.getElementById('clearSearch1');
 
-    searchBox.addEventListener('input', function () {
-        const query = searchBox.value;
-        if (query.length >= 2) {
-            fetch(`/search-suggestions-product/?q=${query}`)
-                .then(response => response.json())
-                .then(data => {
-                    suggestionsBox.innerHTML = '';
-                    if (data.suggestions.length > 0) {
-                        data.suggestions.forEach(suggestion => {
-                            const item = document.createElement('a');
-                            item.href = "javascript:void(0);";
-                            item.classList.add('list-group-item', 'list-group-item-action');
-                            item.textContent = suggestion;
-                            item.addEventListener('click', function () {
-                                searchBox.value = suggestion;
-                                suggestionsBox.innerHTML = '';
-                            });
-                            suggestionsBox.appendChild(item);
+searchBox.addEventListener('input', function () {
+    const query = searchBox.value;
+    if (query.length >= 2) {
+        fetch(`/search-suggestions-product/?q=${query}`)
+            .then(response => response.json())
+            .then(data => {
+                suggestionsBox.innerHTML = '';
+                if (data.suggestions.length > 0) {
+                    data.suggestions.forEach(suggestion => {
+                        const item = document.createElement('a');
+                        item.href = "javascript:void(0);";
+                        item.classList.add('list-group-item', 'list-group-item-action');
+                        item.textContent = suggestion;
+                        item.addEventListener('click', function () {
+                            searchBox.value = suggestion;
+                            suggestionsBox.innerHTML = '';
                         });
-                    } else {
-                        const noResultsItem = document.createElement('a');
-                        noResultsItem.classList.add('list-group-item', 'text-danger');
-                        noResultsItem.textContent = 'No suggestions found! Click to add item';
-                        noResultsItem.style.cursor = 'pointer';
-                        noResultsItem.addEventListener('click', function () {
-                            window.location.href = "{% url 'product-create' %}";
-                        });
-                        suggestionsBox.appendChild(noResultsItem);
-                    }
-                });
-        } else {
-            suggestionsBox.innerHTML = '';
-        }
-    });
+                        suggestionsBox.appendChild(item);
+                    });
+                } else {
+                    const noResultsItem = document.createElement('a');
+                    noResultsItem.classList.add('list-group-item', 'text-danger');
+                    noResultsItem.textContent = 'No suggestions found! Click to add item';
+                    noResultsItem.style.cursor = 'pointer';
+                    noResultsItem.addEventListener('click', function () {
+                        window.location.href = "{% url 'product-create' %}";
+                    });
+                    suggestionsBox.appendChild(noResultsItem);
+                }
+            });
+    } else {
+        suggestionsBox.innerHTML = '';
+    }
+});
 
-    document.addEventListener('click', function (e) {
-        if (!searchBox.contains(e.target) && !suggestionsBox.contains(e.target)) {
-            suggestionsBox.innerHTML = '';
-        }
-    });
+document.addEventListener('click', function (e) {
+    if (!searchBox.contains(e.target) && !suggestionsBox.contains(e.target)) {
+        suggestionsBox.innerHTML = '';
+    }
+});
 
-    clearButton.addEventListener('click', function () {
-        searchBox.value = '';
-        searchForm.submit();
-    });
+clearButton.addEventListener('click', function () {
+    searchBox.value = '';
+    searchForm.submit();
+});
 </script>
 
+<!-- 🟢 CLEAR BUTTON SCRIPT -->
+<script>
+document.getElementById("clearSearch1")?.addEventListener("click", () => {
+    document.getElementById("searchbox1").value = "";
+    document.getElementById("searchform1").submit();
+});
+</script>
 {% endblock content %}

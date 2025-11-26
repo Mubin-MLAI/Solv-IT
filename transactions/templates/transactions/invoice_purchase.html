@@ -1,4 +1,5 @@
-{% extends "store/base.html" %} 
+<!-- Updated Modern Dark UI/UX Invoice Template -->
+{% extends "store/base.html" %}
 {% load static %}
 {% block title %}Transaction detail{% endblock %}
 {% block content %}
@@ -6,282 +7,196 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>Invoice</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-  <style>
-    @page {
-      size: A4;
-      margin: 0;
-    }
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" />
 
+  <style>
     body {
       margin: 0;
       padding: 0;
-      font-family: Roboto, sans-serif;
-      background: white;
-      -webkit-print-color-adjust: exact !important;
+      font-family: "Inter", sans-serif;
+      background: #0d1117;
+      color: #e6edf3;
     }
 
     .container {
       width: 210mm;
       min-height: 297mm;
       padding: 20mm;
-      box-sizing: border-box;
-      background: white;
+      background: #161b22;
+      border-radius: 16px;
+      box-shadow: 0 0 25px rgba(0, 0, 0, 0.5);
     }
 
-    .invoice-letter {
-      width: auto;
-      position: relative;
-      min-height: 150px;
-      background-color: #04617B;
-      margin-left: -3rem;
-      margin-right: -3rem;
-      box-shadow: 0 4px 3px rgba(0,0,0,0.4);
+    .invoice-header {
+      background: linear-gradient(135deg, #0077b6, #0096c7);
+      padding: 25px;
+      border-radius: 12px;
+      color: white;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+    }
+
+    .invoice-header h6 {
+      margin: 0;
     }
 
     table.invoice thead th {
-      background-color: rgba(4, 97, 123, 0.2);
-      border-top: none;
+      background-color: rgba(0, 150, 199, 0.2);
+      color: #90e0ef;
+      border: none;
     }
 
-    table.invoice thead tr:first-child th:first-child {
-      border-top-left-radius: 25px;
+    table.invoice tbody tr {
+      background: #1e242c;
+      border-bottom: 1px solid #2c323a;
     }
 
-    table.invoice thead tr:first-child th:last-child {
-      border-top-right-radius: 25px;
+    table.invoice tbody tr:hover {
+      background: #252d36;
     }
 
-    tr.last-row {
-      background-color: rgba(4, 97, 123, 0.2);
+    .summary-table th,
+    .summary-table td {
+      color: #caf0f8;
     }
 
-    tr.last-row th {
-      border-bottom-left-radius: 25px;
-    }
-
-    tr.last-row td {
-      border-bottom-right-radius: 25px;
-    }
-
-    div.to {
-      height: 260px;
-      padding-right: 25px;
-      border-right: 2px solid rgba(4, 97, 123, 0.2);
-    }
-
-    .effect-color {
-      color: rgb(249, 99, 50);
-    }
-
-    .theme-color {
-      color: rgb(198, 89, 99);
-    }
-
-    .footer-signature {
-      margin-top: 3rem;
-      border-top: 1px solid #ccc;
-      padding-top: 1rem;
-    }
-
-    .signature-block {
-      text-align: center;
-      padding-top: 2rem;
+    .total-bg {
+      background: rgba(0, 150, 199, 0.2);
+      color: #90e0ef;
     }
 
     .signature-line {
-      border-top: 1px solid #000;
+      border-top: 1px solid #555;
       width: 200px;
       margin: 0 auto 0.5rem auto;
     }
 
-    @media print {
-      #downloadBtn {
-        display: none;
-      }
-      body {
-        font-size: 12pt;
-      }
+    #downloadBtn {
+      background: #0096c7;
+      border: none;
+      padding: 10px 25px;
+      border-radius: 8px;
+      color: white;
+      font-weight: bold;
+      box-shadow: 0 4px 12px rgba(0, 150, 199, 0.4);
     }
 
-    @media (max-width: 768px) {
-      .container {
-        padding: 10mm;
-        width: 100%;
-      }
-      .invoice-letter {
-        margin-left: -1rem;
-        margin-right: -1rem;
-      }
+    #downloadBtn:hover {
+      background: #0077b6;
     }
   </style>
 </head>
 <body>
 
 <div id="invoice" class="container my-3 px-5 py-5">
-  <!-- HEADER SECTION -->
-  <div class="row">
-    <div class="col text-center logo">
-      <img src="/static/images/logo/solvit1.png" style="max-width: 50%; height: auto;" alt="Solv-IT Logo" />
-    </div>   
+  <!-- HEADER -->
+  <div class="text-center mb-4">
+    <img src="/static/images/logo/solvit1.png" style="max-width: 45%; height: auto;" alt="Solv-IT Logo" />
   </div>
 
-  <!-- LETTER HEADER -->
-  <div class="container-fluid invoice-letter mt-2 text-white">
+  <!-- INVOICE HEADER -->
+  <div class="invoice-header mt-3 mb-5">
     <div class="row">
-      <div class="col-3 pl-5 py-4 letter-title">
-        <h6 style="color: rgb(254, 251, 251);">
-          <b>
-          Invoice No. INV{{ purchase.id }}
-          <br>
-          Date : {{ purchase.date_added|date:"d/m/Y" }}
-          </b>
-        </h6>
+      <div class="col-6">
+        <h6><b>Invoice No:</b> INV{{ purchase.id }}</h6>
+        <h6><b>Date:</b> {{ purchase.date_added|date:"d/m/Y" }}</h6>
       </div>
-      <div class="col-9 pr-5 py-2 letter-content">
-        <h6 style="color: white;">
-          <em><b>Address:</b> Shop No 3&4, Kulsum Heritage, opposite Animal Quarantine and Certification Centre, Sector 12-E, Bonkode, KoparKhairane, Navi Mumbai, Maharashtra - 400709</em>
-        </h6>        
-        <p><em><b>Phone:</b> +91 922-296-6631</em></p>
+      <div class="col-6 text-right">
+        <h6><b>Address:</b> Shop No 3&4, Kulsum Heritage, Opp. Animal Quarantine, Sector 12-E, Navi Mumbai - 400709</h6>
+        <h6><b>Phone:</b> +91 922-296-6631</h6>
       </div>
     </div>
   </div>
 
-  <br><br><br>
-
-  <!-- INVOICE TOTAL -->
-  <div class="row " >
-    <div class="offset-2 col-4">
-      <div class="to text-right">
-        <h5 class="effect-color pt-4">Invoiced to:</h5>
-        <h4 class="theme-color"><strong>{{ purchase.vendor.name }}</strong></h4>
-        <h6>{{ purchase.vendor.address }}</h6>
-        <p>{{ purchase.vendor.phone }}</p>
-        <h5>GSTIN : {{ purchase.vendor.gstin }}</h5>
-      </div>
+  <!-- INVOICE DETAILS -->
+  <div class="row mb-4">
+    <div class="col-6">
+      <h5 class="text-info">Invoiced To:</h5>
+      <h4 class="text-light"><strong>{{ purchase.vendor.name }}</strong></h4>
+      <p>{{ purchase.vendor.address }}</p>
+      <p>{{ purchase.vendor.phone }}</p>
+      <p><b>GSTIN:</b> {{ purchase.vendor.gstin }}</p>
     </div>
-    <div class="col-6 pr-5">
-      <table class="table table-borderless text-right">
-        <tbody>
-          <tr>
-              <th>Subtotal</th>
-              <td>₹{{ purchase.sub_total|floatformat:2 }}</td>
-          </tr>
-          <tr>
-              <th>GST (%)</th>
-              <td>{{ purchase.tax_percentage }}%</td>
-          </tr>
-          <tr>
-              <th>GST Amount</th>
-              <td>₹{{ purchase.tax_amount|floatformat:2 }}</td>
-          </tr>
-          <tr>
-              <th>Shipping</th>
-              <td>₹0.00</td>
-          </tr>
-          <tfoot>
-            <tr class="fw-bold">
-              <th>Total Amount</th>
-              <td>₹{{ purchase.grand_total|floatformat:2 }}</td>
-            </tr>
-            <tr class="table-success fw-bold">
-                <th>Amount Paid</th>
-                <td>₹{{ purchase.amount_paid|floatformat:2 }}</td>
-            </tr>
-            <tr class="{% if purchase.amount_change > 0 %}table-warning{% else %}table-success{% endif %} fw-bold">
-                <th>Balance Due</th>
-                <td>₹{{ purchase.amount_change|floatformat:2 }}</td>
-            </tr>
-          </tfoot>
-        </tbody>
+
+    <div class="col-6">
+      <table class="table table-borderless text-right summary-table">
+        <tr><th>Subtotal</th><td>₹{{ purchase.sub_total|floatformat:2 }}</td></tr>
+        <tr><th>GST (%)</th><td>{{ purchase.tax_percentage }}%</td></tr>
+        <tr><th>GST Amount</th><td>₹{{ purchase.tax_amount|floatformat:2 }}</td></tr>
+        <tr><th>Shipping</th><td>₹0.00</td></tr>
+        <tr class="total-bg"><th>Total Amount</th><td>₹{{ purchase.grand_total|floatformat:2 }}</td></tr>
+        <tr class="text-success"><th>Amount Paid</th><td>₹{{ purchase.amount_paid|floatformat:2 }}</td></tr>
+        <tr class="{% if purchase.amount_change > 0 %}text-warning{% else %}text-success{% endif %}"><th>Balance Due</th><td>₹{{ purchase.amount_change|floatformat:2 }}</td></tr>
       </table>
     </div>
   </div>
 
-  <!-- INVOICE TABLE -->
-  <div class="row table mt-5">
-    <table class="invoice table table-hover">
-      <thead>
-        <tr>
-          <th>NO.</th>
-          <th>Item</th>
-          <th>Qty.</th>
-          <th>Price</th>
-          <th>GST</th>
-          <th>Amount</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for detail in purchase.purchasedetail_set.all %}
-        <tr>
-          <th>{{ forloop.counter }}</th>
-          <td>
-            <strong>{{ detail.item.name }} ({{ detail.item.serialno }})</strong><br>
-            {{ detail.description|safe }}
-          </td>          
-          <td>{{ detail.quantity }}</td>
-          <td>₹{{ detail.price|floatformat:2 }}</td>
-          <td>{{ detail.tax|floatformat:2 }}%</td>
-          <td>₹{{ detail.total|floatformat:2 }}</td>
-        </tr>
-        {% endfor %}
-      </tbody>
-    </table>
-  </div>
+  <!-- ITEMS TABLE -->
+  <table class="invoice table table-dark table-hover">
+    <thead>
+      <tr>
+        <th>No.</th>
+        <th>Item</th>
+        <th>Qty</th>
+        <th>Price</th>
+        <th>GST</th>
+        <th>Amount</th>
+      </tr>
+    </thead>
 
-  <!-- FOOTER SIGNATURE SECTION -->
-  <div class="footer-signature row mt-5" style="padding-top: 40px; padding-bottom: 40px;">
-    <div class="col-6 signature-block">
+    <tbody>
+      {% for detail in purchase.purchasedetail_set.all %}
+      <tr>
+        <td>{{ forloop.counter }}</td>
+        <td><strong>{{ detail.item.name }} ({{ detail.item.serialno }})</strong><br>{{ detail.description|safe }}</td>
+        <td>{{ detail.quantity }}</td>
+        <td>₹{{ detail.price|floatformat:2 }}</td>
+        <td>{{ detail.tax|floatformat:2 }}%</td>
+        <td>₹{{ detail.total|floatformat:2 }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  <!-- SIGNATURE SECTION -->
+  <div class="row mt-5 text-center">
+    <div class="col-6">
       <div class="signature-line"></div>
       <p>Company Signature</p>
     </div>
-    <div class="col-6 signature-block">
+    <div class="col-6">
       <div class="signature-line"></div>
       <p>Client Signature</p>
     </div>
   </div>
 </div>
 
-<!-- Download Button -->
 <div class="text-center my-4">
-  <button id="downloadBtn" class="btn btn-primary">Download PDF</button>
+  <button id="downloadBtn" class="btn">Download PDF</button>
 </div>
 
-<!-- Scripts -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script>
   document.getElementById("downloadBtn").addEventListener("click", function () {
     const { jsPDF } = window.jspdf;
-    const invoice = document.getElementById("invoice");
-
-    html2canvas(invoice, {
+    html2canvas(document.getElementById("invoice"), {
       scale: 3,
-      useCORS: true
-    }).then(canvas => {
+      useCORS: true,
+    }).then((canvas) => {
       const imgData = canvas.toDataURL("image/jpeg");
       const pdf = new jsPDF("p", "mm", "a4");
-
       const pdfWidth = pdf.internal.pageSize.getWidth();
       const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
-
       pdf.addImage(imgData, "JPEG", 0, 0, pdfWidth, pdfHeight);
-      
-      const now = new Date();
-      const pad = (n) => n.toString().padStart(2, '0');
-      const formattedDate = `${pad(now.getDate())}-${pad(now.getMonth() + 1)}-${now.getFullYear()}_${pad(now.getHours())}-${pad(now.getMinutes())}`;
-      const invoiceNo = "INV{{ purchase.id }}";
-      const filename = `${invoiceNo}_${formattedDate}.pdf`;
-
-      pdf.save(filename);
+      pdf.save("INV{{ purchase.id }}.pdf");
     });
   });
 </script>
 
-
 </body>
 </html>
+
 {% endblock %}

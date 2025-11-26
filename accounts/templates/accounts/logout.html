@@ -1,29 +1,95 @@
 {% load crispy_forms_tags %}
 <!DOCTYPE html>
 <html lang="en">
-    <head>
-        <meta charset="UTF-8">
-        <meta http-equiv="X-UA-Compatible" content="IE=edge">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        {% load static %}
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    {% load static %}
 
-        <link rel="stylesheet" href="{% static 'fontawesome/css/all.css' %}" type="text/css">
-        <link rel="stylesheet" type="text/css" href="https://unpkg.com/@webpixels/css@1.1.5/dist/index.css">
-        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
-        <title>IMS: Logout</title>
-    </head>
-    <body>
-       <div class="row my-4">
-            <div class="col-md-6 offset-md-3">
-                <div class="border p-3 bg-white">
-                    <h4>You have logged out</h4>
-                    <hr>
-                    <div class="alert alert-info">
-                        <h1>See you soon!</h1>
-                    </div>
-                    <a class="btn btn-outline-success" href="{% url 'user-login' %}"><i class="fa-solid fa-right-to-bracket"></i> Login</a>
-                </div>
-            </div>
+    <link rel="stylesheet" href="{% static 'fontawesome/css/all.css' %}">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <title>IMS: Logout</title>
+
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            background: #0d0d0d;
+            background: linear-gradient(135deg, #0d0d0d 0%, #1a1a1a 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: "Poppins", sans-serif;
+        }
+
+        .logout-card {
+            width: 380px;
+            padding: 2rem;
+            border-radius: 18px;
+            background: rgba(25, 25, 25, 0.6);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 0 20px rgba(0, 255, 100, 0.1);
+            text-align: center;
+        }
+
+        .logout-title {
+            color: #00eaff;
+            font-weight: 600;
+            font-size: 1.8rem;
+        }
+
+        .icon-box i {
+            font-size: 50px;
+            color: #00ff88;
+            text-shadow: 0 0 18px rgba(0, 255, 100, 0.4);
+        }
+
+        .alert-dark-info {
+            background: rgba(0, 255, 120, 0.15);
+            border: 1px solid rgba(0, 255, 120, 0.2);
+            color: #00eaff;
+            font-weight: 500;
+        }
+
+        .btn-login {
+            background: #00eaff;
+            border: none;
+            color: #000;
+            font-weight: 600;
+            border-radius: 40px;
+            padding: 10px 0;
+            transition: 0.3s ease;
+        }
+
+        .btn-login:hover {
+            background: #00eaff;
+            transform: translateY(-2px);
+            box-shadow: 0 0 12px rgba(0, 255, 120, 0.5);
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="logout-card">
+        <div class="icon-box mb-3">
+            <i class="fa-solid fa-circle-check"></i>
         </div>
-    </body>
+
+        <h3 class="logout-title mb-3">Logged Out</h3>
+
+        <div class="alert alert-dark-info rounded-pill mb-4">
+            See you soon!
+        </div>
+
+        <a href="{% url 'user-login' %}" class="btn btn-login w-100">
+            <i class="fa-solid fa-right-to-bracket"></i> Login Again
+        </a>
+    </div>
+
+</body>
 </html>

@@ -1,6 +1,84 @@
 {% extends 'store/base.html' %}
 
 {% block content %}
+<style>
+    body {
+        background-color: #121212;
+        color: #f1f1f1;
+    }
+
+    .card {
+        background: #1e1e1e;
+        border: none;
+        border-radius: 12px;
+        box-shadow: 0 0 12px rgba(0, 0, 0, 0.5);
+        color: #f1f1f1;
+    }
+
+    .card-title {
+        font-size: 1.5rem;
+        font-weight: 600;
+        color: #00ffc8;
+        display: flex;
+        align-items: center;
+    }
+
+    .card-text strong {
+        color: #9be7ff;
+    }
+
+    .btn {
+        border: none;
+        font-weight: 500;
+        border-radius: 50px;
+        transition: all 0.3s ease-in-out;
+    }
+
+    .btn-warning {
+        background: linear-gradient(45deg, #ffb300, #ff9100);
+        color: #000;
+    }
+
+    .btn-warning:hover {
+        background: linear-gradient(45deg, #ffcc00, #ffa726);
+        transform: scale(1.05);
+    }
+
+    .btn-danger {
+        background: linear-gradient(45deg, #ff5252, #d50000);
+        color: #fff;
+    }
+
+    .btn-danger:hover {
+        background: linear-gradient(45deg, #ff1744, #c51162);
+        transform: scale(1.05);
+    }
+
+    .btn-secondary {
+        background: linear-gradient(45deg, #546e7a, #263238);
+        color: #fff;
+    }
+
+    .btn-secondary:hover {
+        background: linear-gradient(45deg, #78909c, #37474f);
+        transform: scale(1.05);
+    }
+
+    .card-body p {
+        margin-bottom: 0.6rem;
+        color: #e0e0e0;
+    }
+
+    .container {
+        margin-top: 50px;
+    }
+
+    .card:hover {
+        box-shadow: 0 0 20px rgba(0, 255, 200, 0.2);
+        transition: all 0.3s ease-in-out;
+    }
+</style>
+
 <div class="container p-4">
     <div class="row mb-4">
         <div class="col-md-8 offset-md-2">
@@ -13,17 +91,16 @@
                         <strong>Slug:</strong> {{ category.slug }}
                     </p>
                     <p class="card-text">
-                        <strong>Serial Number:</strong> {{ category.serial_no }} <!-- Display Serial Number -->
+                        <strong>Serial Number:</strong> {{ category.serial_no }}
                     </p>
                     <p class="card-text">
-                        <strong>Quantity:</strong> {{ category.quantity }} <!-- Display Quantity -->
+                        <strong>Quantity:</strong> {{ category.quantity }}
                     </p>
                     <p class="card-text">
-                        <strong>Unit Price:</strong> Rs {{ category.unit_price }}
-                        <!-- Display Unit Price (formatted with $) -->
+                        <strong>Unit Price:</strong> ₹{{ category.unit_price }}
                     </p>
 
-                    <div class="d-flex justify-content-between mt-4">
+                    <div class="d-flex justify-content-between mt-4 flex-wrap gap-2">
                         <a href="{% url 'category-update' category.pk %}" class="btn btn-warning">
                             <i class="fas fa-edit me-2"></i> Edit
                         </a>

@@ -6,256 +6,434 @@
 <br>
 
 <style>
-    /* ✅ Table styling */
-    .table th,
-    .table td {
-        text-align: center;
+  /* 🌙 Dark Modern Theme */
+  body {
+    background-color: #12151b;
+    color: #f1f5f9;
+    font-family: "Inter", "Segoe UI", sans-serif;
+  }
+
+  h4 {
+    color: #3b82f6;
+    font-weight: 700;
+    margin-bottom: 0;
+  }
+
+  /* 🔍 Search & Header Section */
+  .header-section {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .search-form {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    width: 100%;
+    max-width: 550px;
+    position: relative;
+  }
+
+  .search-form input {
+    flex: 1;
+    padding: 10px 16px;
+    background-color: #1b1f27;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 10px;
+    color: #f1f5f9;
+    transition: 0.3s ease;
+  }
+
+  .search-form input:focus {
+    border-color: #3b82f6;
+    outline: none;
+    box-shadow: 0 0 6px rgba(59, 130, 246, 0.4);
+  }
+
+  .search-form input::placeholder {
+    color: #94a3b8;
+  }
+
+  .search-form button {
+    background: linear-gradient(90deg, #3b82f6, #2563eb);
+    border: none;
+    color: white;
+    border-radius: 10px;
+    padding: 10px 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: 0.3s ease;
+  }
+
+  .search-form button:hover {
+    background: linear-gradient(90deg, #2563eb, #1d4ed8);
+  }
+
+  /* 🧾 Table Styling */
+  .table-container {
+    background: #1b1e24;
+    border-radius: 14px;
+    box-shadow: 0 0 25px rgba(0, 0, 0, 0.25);
+    overflow: hidden;
+    margin-top: 2rem;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  thead {
+    background-color: #22262e;
+    text-transform: uppercase;
+  }
+
+  th {
+    padding: 14px 20px;
+    color: #00ffc8;
+    font-size: 0.85rem;
+    text-align: center;
+  }
+
+  td {
+    padding: 14px 20px;
+    text-align: center;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  }
+
+  tbody tr:hover {
+    background-color: rgba(60, 65, 75, 0.85);
+    transition: background-color 0.2s ease;
+  }
+
+  /* 🧩 Buttons */
+  .btn-modern {
+    background: none;
+    color: #60a5fa;
+    border: 1px solid #3b82f6;
+    border-radius: 8px;
+    padding: 6px 12px;
+    font-size: 0.85rem;
+    transition: 0.3s ease;
+    text-decoration: none;
+    display: inline-block;
+  }
+
+  .btn-modern:hover {
+    background: #3b82f6;
+    color: white;
+    box-shadow: 0 0 10px rgba(59, 130, 246, 0.5);
+  }
+
+  .btn-add {
+    background: linear-gradient(90deg, #3b82f6, #2563eb);
+    border: none;
+    color: white;
+    font-weight: 600;
+    border-radius: 10px;
+    padding: 8px 16px;
+    transition: 0.3s ease;
+    text-decoration: none;
+  }
+
+  .btn-add:hover {
+    background: linear-gradient(90deg, #2563eb, #1d4ed8);
+    box-shadow: 0 0 10px rgba(37, 99, 235, 0.5);
+  }
+
+  label.form-label {
+        color: #bdbdbd;
+        font-weight: 500;
+        text-transform: uppercase;
+        font-size: 0.9rem;
+        margin-bottom: 6px;
     }
 
-    /* ✅ Responsive Table (Card Layout on Mobile) */
-    @media (max-width: 767.98px) {
-        .table thead {
-            display: none;
-        }
-
-        .table, .table tbody, .table tr, .table td {
-            display: block;
-            width: 100%;
-        }
-
-        .table tr {
-            margin-bottom: 0.75rem;
-            border: 1px solid #dee2e6;
-            border-radius: .25rem;
-            background: #fff;
-            padding: 0.75rem;
-        }
-
-        .table td {
-            text-align: right;
-            padding-left: 50%;
-            position: relative;
-            border: none;
-            white-space: normal;
-        }
-
-        .table td::before {
-            content: attr(data-label);
-            position: absolute;
-            left: 0;
-            width: 50%;
-            padding-left: .75rem;
-            font-weight: 600;
-            text-align: left;
-            color: #333;
-        }
-
-        /* ✅ Buttons full width on small screens */
-        .table td .btn {
-            width: 100%;
-            margin-top: 5px;
-        }
-
-        /* ✅ Search bar stacked on mobile */
-        #searchform {
-            flex-direction: column;
-            gap: 0.5rem;
-        }
-
-        #searchform input,
-        #searchform button {
-            width: 100%;
-            border-radius: 50px !important;
-        }
-
-        /* ✅ Buttons on top */
-        .d-flex.gap-2 {
-            flex-wrap: wrap;
-            justify-content: flex-start;
-        }
-
-        .d-flex.gap-2 a {
-            flex: 1 1 auto;
-        }
-
-        /* ✅ Pagination wrapping */
-        .pagination {
-            flex-wrap: wrap;
-        }
+input.form-control::placeholder,
+    textarea.form-control::placeholder {
+        color: #999;
     }
+
+  /* 📱 Responsive (Card layout for small screens) */
+  @media (max-width: 767.98px) {
+    thead { display: none; }
+
+    table, tbody, tr, td {
+      display: block;
+      width: 100%;
+    }
+
+    tr {
+      background-color: #1b1e24;
+      border-radius: 10px;
+      margin-bottom: 1rem;
+      padding: 1rem;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.25);
+    }
+
+    td {
+      text-align: right;
+      padding-left: 50%;
+      position: relative;
+      border: none;
+      font-size: 0.9rem;
+    }
+
+    td::before {
+      content: attr(data-label);
+      position: absolute;
+      left: 10px;
+      width: 45%;
+      text-align: left;
+      font-weight: 600;
+      color: #94a3b8;
+    }
+
+    .btn-modern {
+      width: 100%;
+      margin-top: 0.5rem;
+    }
+  }
 </style>
 
-<!-- ✅ Header Section -->
-<div class="my-4 px-3 px-md-4">
-    <div class="row align-items-center">
-        <div class="col-md-6 col-12 mb-2 mb-md-0">
-            <h4 class="display-6 mb-0 text-success text-center text-md-start">Item List</h4>
-        </div>
-        <div class="col-md-6 col-12 d-flex justify-content-center justify-content-md-end gap-2 flex-wrap">
-            <a class="btn btn-success btn-sm rounded-pill shadow-sm" href="{% url 'category-create' %}">
-                <i class="fa-solid fa-plus"></i> Add Item Entry
-            </a>
-            <a class="btn btn-success btn-sm rounded-pill shadow-sm" href="{% querystring '_export'='xlsx' %}">
-                <i class="fa-solid fa-download"></i> Export to Excel
-            </a>
-        </div>
-    </div>
+<!-- 🌙 Header -->
+<!-- ✅ Page Header -->
+<div class="header-section d-flex flex-column flex-md-row justify-content-between align-items-center mb-4">
+    <h4 class="display-6 fw-semibold text-gradient mb-3 mb-md-0">
+        <i class="fa-solid fa-layer-group me-2 text-success"></i> Category Inventory
+    </h4>
 
-    <!-- ✅ Search Form -->
-    <form class="input-group mt-4" role="search" id="searchform" 
+    <div class="d-flex flex-wrap gap-2">
+        <a href="{% url 'category-create' %}" class="btn btn-outline-info btn-sm rounded-pill shadow-sm hover-glow">
+            <i class="fa-solid fa-plus"></i> Add Item
+        </a>
+        <a href="{% querystring '_export'='xlsx' %}" class="btn btn-outline-light btn-sm rounded-pill shadow-sm hover-glow">
+            <i class="fa-solid fa-download"></i> Export Excel
+        </a>
+    </div>
+</div>
+
+<!-- 🔍 Search Card -->
+<div class="card-dark p-3 mb-4 rounded-4 shadow-sm border border-dark-subtle">
+    <form id="searchform" class="d-flex flex-wrap gap-2" 
           action="{% url 'catogary_item_search_list_view' %}" method="get">
-        <input id="searchbox" name="q" type="text"
-            class="form-control border-2 rounded-pill shadow-sm"
-            placeholder="Find products" value="{{ request.GET.q }}" autocomplete="off">
-        <button class="btn btn-outline-success rounded-pill shadow-sm ms-2" type="submit">
-            <i class="fa-solid fa-search"></i>
+
+        <div class="input-group flex-grow-1">
+            <span class="input-group-text bg-dark text-light border-0 rounded-start-pill">
+                <i class="fa-solid fa-search"></i>
+            </span>
+            <input id="searchbox" name="q" type="text" value="{{ request.GET.q }}"
+                   placeholder="Search by category or name"
+                   class="form-control bg-dark text-light border-0 shadow-sm"
+                   style="border-top-right-radius: 50px; border-bottom-right-radius: 50px;"
+                   autocomplete="off">
+        </div>
+
+        <button type="submit" class="btn btn-outline-success rounded-pill shadow-sm hover-glow">
+            <i class="fa-solid fa-magnifying-glass"></i> Search
         </button>
-        <button class="btn btn-outline-secondary rounded-pill shadow-sm ms-2" type="button" id="clearSearch">
-            <i class="fa-solid fa-times"></i>
+        <button type="button" id="clearSearch" class="btn btn-outline-danger rounded-pill shadow-sm hover-glow">
+            <i class="fa-solid fa-xmark"></i> Clear
         </button>
     </form>
 
-    <!-- ✅ Suggestions Dropdown -->
-    <div id="suggestions" class="list-group position-absolute" 
-         style="z-index: 9999; width: 100%; background-color: rgb(252, 253, 254);"></div>
+    <!-- Hidden suggestions -->
+    <div id="suggestions" class="list-group form-control" style="display: contents !important;"></div>
 </div>
 
-<!-- ✅ Table Section -->
-{% if page_obj.object_list %}
-<div class="table-responsive px-3 px-md-4">
-    <table class="table table-sm table-striped table-bordered">
-        <thead class="thead-light">
-            <tr>
-                <th>ID</th>
-                <th>Category</th>
-                <th>Name</th>
-                <th>Serial Number</th>
-                <th>Quantity</th>
-                <th>Unit Price</th>
-                <th>Action</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for item in page_obj %}
-            <tr>
-                <td data-label="ID">{{ item.pk }}</td>
-                <td data-label="Category">{{ item.get_category_display }}</td>
-                <td data-label="Name">{{ item.name }}</td>
-                <td data-label="Serial Number">{{ item.serial_no }}</td>
-                <td data-label="Quantity">{{ item.quantity }}</td>
-                <td data-label="Unit Price">{{ item.unit_price }}</td>
-                <td data-label="Action">
-                    <a href="{% url 'category-detail' item.pk %}" class="btn btn-outline-primary btn-sm">
-                        <i class="fa-solid fa-info-circle me-2"></i> View Details
-                    </a>
-                </td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+<!-- ✅ Custom Dark Theme Styles -->
+<style>
+/* 🌙 Dark Card Style */
+.card-dark {
+    background-color: #0d1117;
+    color: #e6edf3;
+    border: 1px solid #30363d;
+    transition: all 0.3s ease;
+}
+.card-dark:hover {
+    border-color: #58a6ff;
+    box-shadow: 0 0 10px rgba(88, 166, 255, 0.2);
+}
+
+/* 💫 Header Styling */
+.header-section h4 {
+    font-size: 1.75rem;
+    font-weight: 600;
+    margin: 0;
+}
+.text-gradient {
+    background: linear-gradient(90deg, #00ff9d, #00b3ff);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+/* 💡 Hover Glow Buttons */
+.hover-glow:hover {
+    box-shadow: 0 0 10px rgba(88, 166, 255, 0.4);
+    transform: translateY(-1px);
+    transition: all 0.2s ease-in-out;
+}
+
+/* ✨ Input Focus */
+.form-control.bg-dark:focus {
+    box-shadow: 0 0 0 0.2rem rgba(88, 166, 255, 0.25);
+    border-color: #58a6ff;
+}
+
+/* 📱 Responsive */
+@media (max-width: 767.98px) {
+    #searchform {
+        flex-direction: column;
+    }
+    #searchform button {
+        width: 100%;
+    }
+}
+</style>
+
+
+<!-- 🧾 Table Section -->
+{% if catogaryitem %}
+<div class="table-container mt-4">
+  <table>
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Category</th>
+        <th>Name</th>
+        <th>Serial Number</th>
+        <th>Quantity</th>
+        <th>Unit Price</th>
+        <th>Action</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for item in catogaryitem %}
+      <tr>
+        <td data-label="ID">{{ forloop.counter|add:page_obj.start_index|add:"-1" }}</td>
+        <td data-label="Category">{{ item.get_category_display }}</td>
+        <td data-label="Name">{{ item.name }}</td>
+        <td data-label="Serial Number">{{ item.serial_no }}</td>
+        <td data-label="Quantity">{{ item.quantity }}</td>
+        <td data-label="Unit Price">{{ item.unit_price }}</td>
+        <td data-label="Action">
+          <a href="{% url 'category-detail' item.pk %}" class="btn-modern">View Details</a>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
 </div>
 {% else %}
-<!-- ✅ No Item Message -->
-<div class="alert alert-warning text-center">
-    <p>No items found for "{{ request.GET.q }}". You can
-        <a href="{% url 'category-create' %}" class="btn btn-success btn-sm rounded-pill shadow-sm">
-            Add a new item
-        </a>.
-    </p>
+<div class="alert alert-warning text-center mt-4" style="background:#1b1f27; color:#f8fafc; border:none;">
+  <p>No items found for "{{ request.GET.q }}".  
+    <a href="{% url 'category-create' %}" class="btn-add">Add a new item</a>.
+  </p>
 </div>
 {% endif %}
 
-<!-- ✅ Pagination -->
+<!-- 📄 Pagination -->
 {% if is_paginated %}
-<nav aria-label="Page navigation">
-    <ul class="pagination justify-content-center flex-wrap">
-        {% if page_obj.has_previous %}
-        <li class="page-item">
-            <a class="page-link" href="{% querystring 'page'=page_obj.previous_page_number %}" aria-label="Previous">
-                <span aria-hidden="true">&laquo;</span>
-            </a>
-        </li>
-        {% else %}
-        <li class="page-item disabled">
-            <span class="page-link">&laquo;</span>
-        </li>
-        {% endif %}
+<nav aria-label="Page navigation" class="mt-4">
+  <ul class="pagination justify-content-center flex-wrap">
+    {% if page_obj.has_previous %}
+    <li class="page-item">
+      <a class="btn-modern" href="{% querystring 'page'=page_obj.previous_page_number %}">&laquo; Prev</a>
+    </li>
+    {% endif %}
 
-        {% for i in paginator.page_range %}
-        {% if page_obj.number == i %}
-        <li class="page-item active" aria-current="page">
-            <span class="page-link">{{ i }}</span>
-        </li>
-        {% else %}
-        <li class="page-item">
-            <a class="page-link" href="{% querystring 'page'=i %}">{{ i }}</a>
-        </li>
-        {% endif %}
-        {% endfor %}
 
-        {% if page_obj.has_next %}
-        <li class="page-item">
-            <a class="page-link" href="{% querystring 'page'=page_obj.next_page_number %}" aria-label="Next">
-                <span aria-hidden="true">&raquo;</span>
-            </a>
-        </li>
+    {% for i in paginator.page_range %}
+      {% if i == 1 %}
+        {% if page_obj.number == 1 %}
+          <li class="page-item"><span class="btn-modern" style="background:#3b82f6; color:white;">1</span></li>
         {% else %}
-        <li class="page-item disabled">
-            <span class="page-link">&raquo;</span>
-        </li>
+          <li class="page-item"><a class="btn-modern" href="{% querystring 'page'=1 %}">1</a></li>
         {% endif %}
-    </ul>
+        {% if window_start > 2 %}
+          <li class="page-item"><span class="btn-modern">...</span></li>
+        {% endif %}
+      {% elif i >= window_start and i <= window_end %}
+        {% if i == page_obj.number %}
+          <li class="page-item"><span class="btn-modern" style="background:#3b82f6; color:white;">{{ i }}</span></li>
+        {% else %}
+          <li class="page-item"><a class="btn-modern" href="{% querystring 'page'=i %}">{{ i }}</a></li>
+        {% endif %}
+      {% elif i == paginator.num_pages %}
+  {% if window_end < last_page_minus_one %}
+          <li class="page-item"><span class="btn-modern">...</span></li>
+        {% endif %}
+        {% if page_obj.number == paginator.num_pages %}
+          <li class="page-item"><span class="btn-modern" style="background:#3b82f6; color:white;">{{ i }}</span></li>
+        {% else %}
+          <li class="page-item"><a class="btn-modern" href="{% querystring 'page'=i %}">{{ i }}</a></li>
+        {% endif %}
+      {% endif %}
+    {% endfor %}
+
+    {% if page_obj.has_next %}
+    <li class="page-item">
+      <a class="btn-modern" href="{% querystring 'page'=page_obj.next_page_number %}">Next &raquo;</a>
+    </li>
+    {% endif %}
+  </ul>
 </nav>
 {% endif %}
 
-<!-- ✅ Search Suggestion Script -->
+<!-- 🔍 Search Suggestions -->
 <script>
-    const searchBox = document.getElementById('searchbox');
-    const suggestionsBox = document.getElementById('suggestions');
-    const searchForm = document.getElementById('searchform');
-    const clearButton = document.getElementById('clearSearch');
+  const searchBox = document.getElementById('searchbox');
+  const suggestionsBox = document.getElementById('suggestions');
+  const searchForm = document.getElementById('searchform');
+  const clearButton = document.getElementById('clearSearch');
 
-    searchBox.addEventListener('input', function () {
-        const query = searchBox.value;
-        if (query.length >= 2) {
-            fetch(`/search-suggestions/?q=${query}`)
-                .then(response => response.json())
-                .then(data => {
-                    suggestionsBox.innerHTML = '';
-                    if (data.suggestions.length > 0) {
-                        data.suggestions.forEach(suggestion => {
-                            const item = document.createElement('a');
-                            item.href = `?q=${suggestion}`;
-                            item.classList.add('list-group-item', 'list-group-item-action');
-                            item.textContent = suggestion;
-                            suggestionsBox.appendChild(item);
-                        });
-                    } else {
-                        const noResultsItem = document.createElement('a');
-                        noResultsItem.classList.add('list-group-item', 'text-danger');
-                        noResultsItem.textContent = 'No suggestions found! Click here to add item';
-                        noResultsItem.style.cursor = 'pointer';
-                        noResultsItem.addEventListener('click', () => {
-                            window.location.href = "{% url 'category-create' %}";
-                        });
-                        suggestionsBox.appendChild(noResultsItem);
-                    }
-                })
-                .catch(error => console.error('Error fetching suggestions:', error));
-        } else {
-            suggestionsBox.innerHTML = '';
-        }
-    });
+  searchBox.addEventListener('input', function () {
+    const query = searchBox.value;
+    if (query.length >= 2) {
+      fetch(`/search-suggestions/?q=${query}`)
+        .then(response => response.json())
+        .then(data => {
+          suggestionsBox.innerHTML = '';
+          if (data.suggestions.length > 0) {
+            data.suggestions.forEach(suggestion => {
+              const item = document.createElement('a');
+              item.href = `?q=${suggestion}`;
+              item.classList.add('list-group-item', 'list-group-item-action');
+              item.textContent = suggestion;
+              item.style.background = '#1e2530';
+              item.style.color = '#f1f5f9';
+              item.style.padding = '8px 12px';
+              item.style.borderBottom = '1px solid rgba(255,255,255,0.1)';
+              suggestionsBox.appendChild(item);
+            });
+          }
+        });
+    } else {
+      suggestionsBox.innerHTML = '';
+    }
+  });
 
-    document.addEventListener('click', function (event) {
-        if (!searchBox.contains(event.target) && !suggestionsBox.contains(event.target)) {
-            suggestionsBox.innerHTML = '';
-        }
-    });
+document.addEventListener('click', function (e) {
+  if (!searchBox.contains(e.target) && !suggestionsBox.contains(e.target)) {
+    suggestionsBox.innerHTML = '';
+  }
+});
 
-    clearButton.addEventListener('click', function () {
-        searchBox.value = '';
-        searchForm.submit();
-    });
+clearButton.addEventListener('click', function () {
+  searchBox.value = '';
+  searchForm.submit();
+});
 </script>
+
+<script>
+document.getElementById("clearSearch")?.addEventListener("click", () => {
+    document.getElementById("searchbox").value = "";
+    document.getElementById("searchform").submit();
+});
+</script>
+
 {% endblock %}

@@ -1,6 +1,9 @@
 from django.views.decorators.http import require_POST
 from .models import ServiceBillItem
 
+
+
+
 # Receive payment for ServiceBillItem
 @require_POST
 def receive_payment_service(request):
@@ -367,6 +370,8 @@ class SaleListView(ListView):
         inv_filter = self.request.GET.get('inv', '').upper()
         serial_filter = self.request.GET.get('serial', '')
         mobileno_filter = self.request.GET.get('mobileno', '')
+        start_date = self.request.GET.get('start_date', '')
+        end_date = self.request.GET.get('end_date', '')
 
 
         # --- Filter Sales ---
@@ -389,6 +394,11 @@ class SaleListView(ListView):
         if mobileno_filter:
             sales_qs = sales_qs.filter(customer__phone__icontains=mobileno_filter)
 
+        if start_date:
+            sales_qs = sales_qs.filter(date_added__date__gte=start_date)
+        if end_date:
+            sales_qs = sales_qs.filter(date_added__date__lte=end_date)
+
         # --- Filter ServiceBillItems ---
         # Only apply non-status filters to ServiceBillItem
         if inv_filter:
@@ -406,6 +416,11 @@ class SaleListView(ListView):
 
         if mobileno_filter:
             service_qs = service_qs.filter(customer__phone__icontains=mobileno_filter)
+
+        if start_date:
+            service_qs = service_qs.filter(date_created__date__gte=start_date)
+        if end_date:
+            service_qs = service_qs.filter(date_created__date__lte=end_date)
 
         servies1 =  self.request.GET.get('status', '')
         if servies1 == 'Service':
@@ -991,8 +1006,9 @@ class PurchaseListView(LoginRequiredMixin, ExportMixin, tables.SingleTableView):
     def get_queryset(self):
         # Get base queryset
         queryset = super().get_queryset()
+        print('queryset',queryset)
         # Filter items where purchased_type == 'vendor'
-        queryset = queryset.filter(purchased_type='vendor')
+        queryset = queryset.all().filter(purchased_type='vendor')
         return queryset
 
     def get_context_data(self, **kwargs):
@@ -1068,7 +1084,7 @@ class PurchaseItemSearchListView(PurchaseListView):
         result = super().get_queryset()
 
         query = self.request.GET.get("q")
-        vendor = self.request.GET.get("vendor", "").strip()
+        vendor = self.request.GET.get("customer_id", "").strip()
         purchased_code = self.request.GET.get("purchased_code", "").strip()
 
         print('jihkjdkhd', query, vendor, purchased_code)
@@ -1168,8 +1184,20 @@ class PurchasedCreateView(LoginRequiredMixin, CreateView):
 
         item = form.save(commit=False)
         item.created_by = self.request.user  # Set the user who created the item
-        item.purchased_type = 'vendor'
+
+
+        # ✅ Get the customer ID from the POST data
+        customer_id = self.request.POST.get('customer_id')
+        if customer_id:
+            try:
+                customer = Customer.objects.get(id=customer_id)
+                item.customer = customer  # Assuming Item has a ForeignKey to Customer
+            except Customer.DoesNotExist:
+                messages.error(self.request, "Selected customer does not exist.")
+                return self.form_invalid(form)
+
         item.save()
+
         serialno = item.serialno.strip()
 
 
@@ -1202,7 +1230,7 @@ class PurchasedCreateView(LoginRequiredMixin, CreateView):
                         serial_no=serialno,
                         quantity=qty_int,
                         unit_price=0.00,  # Set as needed
-                        purchased_code = item.purchased_code.strip(),
+                        purchase_lot_code = self.request.POST.get('purchased_code', None),
                         created_by=self.request.user
                     )
         except Exception as e:
@@ -1276,7 +1304,8 @@ from operator import attrgetter
 class cashbankListView(LoginRequiredMixin, ListView):
 
     template_name = "transactions/bank_acc.html"
-    paginate_by = None
+    paginate_by = 10
+    context_object_name = "transactions"
 
     def get_queryset(self):
         # Not used, but required by ListView

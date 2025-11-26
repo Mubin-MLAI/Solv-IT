@@ -16,14 +16,196 @@
 
 <!-- Page content  -->
 {% block content %}
+
+<style>
+/* ===== GLOBAL DARK THEME ===== */
+body {
+    background-color: #111 !important;
+    color: #f1f1f1 !important;
+}
+
+/* Cards */
+.card {
+    background: #1a1a1a !important;
+    border: 1px solid #2b2b2b !important;
+}
+.card-header {
+    background: #0d6e4f !important; /* keep your success color */
+    border-bottom: 1px solid #2b2b2b !important;
+}
+
+/* Inputs */
+.form-control,
+.form-select,
+.select2-selection {
+    background-color: #222 !important;
+    color: #fff !important;
+    border: 1px solid #444 !important;
+}
+.form-control:focus,
+.form-select:focus,
+.select2-selection:focus {
+    background-color: #2c2c2c !important;
+    border-color: #00c47a !important;
+    box-shadow: 0 0 0 0.25rem rgba(1, 156, 252, 0.349) !important;
+}
+
+/* Buttons */
+.btn {
+    border-radius: 6px !important;
+}
+.btn-success {
+    background: linear-gradient(90deg, #00a86b, #00d48f) !important;
+    border: none !important;
+}
+.btn-outline-success {
+    color: #00d48f !important;
+    border-color: #00d48f !important;
+}
+.btn-outline-success:hover {
+    background-color: #00d48f !important;
+    color: #111 !important;
+}
+.btn-danger {
+    background: linear-gradient(90deg, #b30021, #e6002a) !important;
+    border: none !important;
+}
+
+/* Tables */
+/* ✅ Table Styling */
+    .table-container {
+    width: 100%;
+    background: #161b22;
+    border-radius: 16px;
+    overflow-x: auto;
+    border: 1px solid #30363d;
+}
+table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 900px;
+}
+thead th {
+    background-color: #22262e;
+    color: #00ffc8;
+    text-align: center;
+    padding: 8px;
+}
+tbody td {
+    text-align: center;
+    border-bottom: 1px solid #30363d;
+    padding: 10px 7px;
+}
+tbody tr:hover {
+    background-color: #1c2128;
+}
+
+/* Dropdowns / Select2 */
+.select2-dropdown {
+    background: #222 !important;
+    color: #fff !important;
+}
+.select2-results__option {
+    background: #222 !important;
+    color: #fff !important;
+}
+.select2-results__option--highlighted {
+    background: #028dff !important;
+}
+
+/* Autocomplete suggestions */
+#customer_suggestions,
+#item_suggestions {
+    background: #1c1c1c !important;
+    border: 1px solid #333 !important;
+    color: #fff !important;
+}
+.list-group-item {
+    background: #1c1c1c !important;
+    color: #fff !important;
+}
+.list-group-item:hover {
+    background: #686c6d !important;
+    color: #fff !important;
+}
+
+
+
+/* Modal */
+.modal-content {
+    background: #1a1a1a !important;
+    color: #fff !important;
+    border: 1px solid #333 !important;
+}
+.modal-header,
+.modal-footer {
+    border-color: #333 !important;
+}
+
+/* Alerts */
+.alert-success {
+    background: #0d6e4f !important;
+    border: none !important;
+    color: #fff !important;
+}
+
+/* DataTables */
+.dataTables_wrapper .dataTables_filter input {
+    background: #222 !important;
+    color: #fff !important;
+    border: 1px solid #444 !important;
+}
+.dataTables_wrapper .dataTables_length select {
+    background: #222 !important;
+    color: #fff !important;
+}
+.dataTables_wrapper .dataTables_paginate .paginate_button {
+    color: #fff !important;
+    background: #222 !important;
+    border: 1px solid #444 !important;
+}
+.dataTables_wrapper .dataTables_paginate .paginate_button.current {
+    background: #0d6e4f !important;
+}
+
+label.form-label {
+        color: #bdbdbd;
+        font-weight: 500;
+        text-transform: uppercase;
+        font-size: 0.9rem;
+        margin-bottom: 6px;
+    }
+
+input.form-control::placeholder,
+    textarea.form-control::placeholder {
+        color: #999;
+    }
+
+/* SweetAlert2 */
+.swal2-popup {
+    background: #1e1e1e !important;
+    color: #fff !important;
+}
+.swal2-title {
+    color: #fff !important;
+}
+.swal2-styled.swal2-confirm {
+    background: #00d48f !important;
+}
+.swal2-styled.swal2-cancel {
+    background: #b30021 !important;
+}
+</style>
+
+
 <div class="container py-5">
     <!-- Go back -->
-    <div class="mb-4">
+    <!-- <div class="mb-4">
         <a href="{% url 'saleslist' %}" class="btn btn-outline-success">
             <i class="fas fa-arrow-left me-2"></i>
             Go back
         </a>
-    </div>
+    </div> -->
 
     <form id="form_sale" action="{% url 'sale-create' %}" class="saleForm" method="post">
         {% csrf_token %}
@@ -35,9 +217,6 @@
                     <div class="card-header bg-success text-white">
                         <h5 class="mb-0">Sale Items</h5>
                     </div>
-
-                        
-
 
                     <div class="card-body">
                         <div class="mb-3">
@@ -54,7 +233,7 @@
                             <button type="button" id="process_excel_btn" class="btn btn-primary mt-2">Upload & Add
                                 Items</button>
                         </div>
-                        OR
+                        <div style="color: red;"> OR </div>
                         <!-- Search item -->
                         <div class="mb-4 position-relative">
                             <label for="searchbox_items" class="form-label">Search Item:</label>
@@ -69,7 +248,7 @@
 
                         <!-- Items Table -->
                         <div class="table-responsive my-3">
-                            <table class="table table-bordered table-striped" id="table_items">
+                            <table class="table-container table-bordered table-striped" id="table_items">
                                 <thead>
                                     <tr>
                                         <th>#</th>
@@ -85,10 +264,10 @@
                                     </tr>
                                 </thead>
                                 <tbody></tbody>
-                                <p class="text-muted mt-2">
-                                    <small><span class="badge bg-warning text-dark">Note:</span> Highlighted rows
-                                        indicate low stock.</small>
-                                </p>
+                                <!-- <p class="text-muted mt-2 ">
+                                    <span class="badge bg-warning text-light form-label">Note:</span> Highlighted rows
+                                        indicate low stock.
+                                </p> -->
                             </table>
                         </div>
                     </div>

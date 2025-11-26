@@ -207,6 +207,16 @@ class ProductListView(LoginRequiredMixin, ExportMixin, tables.SingleTableView):
 
 
 class CatogaryItemListView(LoginRequiredMixin, ExportMixin, tables.SingleTableView):
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        window = 5
+        page_number = context['page_obj'].number
+        num_pages = context['paginator'].num_pages
+        context['window_start'] = max(1, page_number - window)
+        context['window_end'] = min(num_pages, page_number + window)
+        context['last_page_minus_one'] = num_pages - 1
+        return context
+    
     """
     View class to display a list of products.
 
@@ -221,9 +231,24 @@ class CatogaryItemListView(LoginRequiredMixin, ExportMixin, tables.SingleTableVi
     model = catogaryitem
     table_class = CategoryItemTable
     template_name = "store/category_list.html"
-    context_object_name = "catogaryitems"
+    context_object_name = "catogaryitem"
     paginate_by = 10
     SingleTableView.table_pagination = False
+
+
+    def get_queryset(self):
+        result = super(CatogaryItemListView, self).get_queryset().order_by('id')
+
+        query = self.request.GET.get("q")
+        if query:
+            query_list = query.split()
+            result = result.filter(
+                reduce(
+                    operator.and_, (Q(name__icontains=q) | Q(category__icontains=q) | Q(serial_no__icontains=q) for q in query_list)
+                )
+            )
+
+        return result
 
 class CatogaryItemSearchListView(CatogaryItemListView):
     """
@@ -235,9 +260,10 @@ class CatogaryItemSearchListView(CatogaryItemListView):
     model = catogaryitem
     table_class = CategoryItemTable
     template_name = "store/category_list.html"
-    context_object_name = "catogaryitems"
+    context_object_name = "catogaryitem"
     paginate_by = 10
-    SingleTableView.table_pagination = False
+    SingleTableView.table_pagination = False # type: ignore
+
 
     def get_queryset(self):
         result = super(CatogaryItemSearchListView, self).get_queryset()
@@ -250,6 +276,8 @@ class CatogaryItemSearchListView(CatogaryItemListView):
                     operator.and_, (Q(name__icontains=q) | Q(category__icontains=q) | Q(serial_no__icontains=q) for q in query_list)
                 )
             )
+
+        print('result', result)
         return result
     
 
@@ -262,26 +290,42 @@ class ItemSearchListView(ProductListView):
     Attributes:
     - paginate_by: Number of items per page for pagination.
     """
+    template_name = "store/productslist.html"
+    context_object_name = "items"
     table_class = ItemTable
     paginate_by = 10
     SingleTableView.table_pagination = False
 
+
     def get_queryset(self):
-        result = super().get_queryset()
+        result = super(ItemSearchListView, self).get_queryset()
 
         query = self.request.GET.get("q")
-
-        if not query:
-            return result.none()
-        
         if query:
             query_list = query.split()
             result = result.filter(
                 reduce(
-                    operator.and_, (Q(name__icontains=q) | Q(serialno__icontains=q) | Q(make_and_models__icontains=q) for q in query_list)
+                    operator.and_, (Q(name__icontains=q) | Q(make_and_models__icontains=q) | Q(serialno__icontains=q) for q in query_list)
                 )
             )
         return result
+
+    # def get_queryset(self):
+    #     result = super().get_queryset()
+
+    #     query = self.request.GET.get("q")
+
+    #     if not query:
+    #         return result.none()
+        
+    #     if query:
+    #         query_list = query.split()
+    #         result = result.filter(
+    #             reduce(
+    #                 operator.and_, (Q(name__icontains=q) | Q(serialno__icontains=q) | Q(make_and_models__icontains=q) for q in query_list)
+    #             )
+    #         )
+    #     return result
     
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -971,7 +1015,7 @@ class ProductUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
             user_profile = self.request.user.profile
             if user_profile.role == 'OP':
                 messages.success(self.request, "Product update successful!")  # Add a success message
-                return reverse_lazy('dashboard')
+                return reverse_lazy('productslist')
             else:
                 messages.success(self.request, "Product update successful!")  # Add a success message
                 return reverse_lazy('productslist')
@@ -1016,7 +1060,8 @@ class ProductUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
                     #     messages.error(self.request, "No '{}' assigned to {}.".format(clean_name, serialno))
                     #     return reverse_lazy('productslist')
 
-                    total_available = sum(item.quantity for item in assigned_item)
+                    total_available = assigned_item.aggregate(Sum('quantity'))['quantity__sum'] if assigned_item.exists() else 0
+                    print('total_available', total_available)
                     if total_available < qty:
                         messages.error(self.request, "Not enough '{}' in {}.".format(clean_name, serialno))
                         return reverse_lazy('productslist')
@@ -1040,8 +1085,12 @@ class ProductUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
                         assigned_item.delete()
                         # print("❌ Deleted {} from {} (Qty reached zero).".format(clean_name, serialno))
                     else:
-                        assigned_item.updated_by = self.request.user
-                        assigned_item.save()
+                        # assigned_item.updated_by = self.request.user
+                        assigned_item = catogaryitem.objects.filter(
+                        name=clean_name,
+                        category=component,
+                        serial_no=serialno
+                    ).update(updated_by=self.request.user, quantity=total_available)
                         # print("➖ Deducted {} from {} ({}). Remaining: {}".format(qty, serialno, clean_name, assigned_item.quantity))
 
                     # Add to 'Solv-IT'
@@ -1052,7 +1101,7 @@ class ProductUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
                         updated_by = self.request.user,
                         defaults={
                             'quantity': 0,
-                            'unit_price': sum(item.unit_price for item in assigned_item) / len(assigned_item) if assigned_item else 0,
+                            'unit_price': assigned_item,
                         }
                     )
                     stock_item.quantity += qty
@@ -1062,12 +1111,14 @@ class ProductUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
                     # print("✅ Moved {} of '{}' to Solv-IT. {} entry.".format(qty, clean_name, 'Created new' if created else 'Updated existing'))
 
 
-                messages.success(self.request, "✅ Moved {} of '{}' to Solv-IT. {} entry.".format(qty, clean_name, 'Created new' if created else 'Updated existing'))
-                return reverse_lazy('dashboard')
+                    messages.success(self.request, "✅ Moved {} of '{}' to Solv-IT. {} entry.".format(qty, clean_name, serialno, 'Created new' if created else 'Updated existing'))
+                    return reverse_lazy('dashboard')
             else:
+                print('button3 else')
                 messages.success(self.request, "Product update successful!")  # Add a success message
                 return reverse_lazy('productslist')
         else:
+            print('button main')
             serialno = self.request.POST['serialno'].strip()
             print('serialno', serialno)
             print('dataaa', self.request.POST)
@@ -1196,6 +1247,7 @@ class ProductUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
                         f"✅ Assigned {qty} of '{name}' to {serialno}. {'Created new' if created else 'Updated existing'}."
                     )
             return reverse_lazy('productslist')
+
 
 
 
@@ -1791,52 +1843,87 @@ def upload_category_items(request):
                 serial_no = str(row.get('Serialno')).strip()
                 name = row.get('Name', '').strip()
                 vendor_name = str(row.get('vendor_name', '')).strip()
-                customer_name = str(row.get('customer_name', '')).strip()
-                purchased_code = str(row.get('purchased_code', '')).strip()
+                # customer_name = str(row.get('Customer', '')).strip()
+                purchased_code = str(row.get('Purchased code', '')).strip()
+                purchased_type = str(row.get('Purchased type', '')).strip()
 
                 print('dadadadad', vendor_name, purchased_code)
 
                 vendor = Vendor.objects.filter(name__iexact=vendor_name).first()
-                customer = Customer.objects.filter(first_name__iexact=customer_name).first()
+                from django.db.models import Q
+
+                full_name = row.get('Customer', '').strip()
+                first = last = ''
+
+                # Split the name
+                if full_name:
+                    parts = full_name.split()
+                    first = parts[0]
+                    last = parts[-1] if len(parts) > 1 else ''
+
+                # Build filter dynamically
+                if first and last:
+                    # Both provided → match both
+                    customer = Customer.objects.filter(
+                        first_name__iexact=first,
+                        last_name__iexact=last
+                    ).first()
+
+                elif first:
+                    # Only first provided → match first OR last
+                    customer = Customer.objects.filter(
+                        Q(first_name__iexact=first) | Q(last_name__iexact=first)
+                    ).first()
+
+                else:
+                    customer = None
+
+
+                # customer = Customer.objects.filter(first_name__iexact=customer_name).first()
+                print('customer', customer)
                 if not vendor and vendor_name:
                     vendor = Vendor.objects.create(name=vendor_name)
-                if vendor:
-                    Itempurchased.objects.create(
+                if purchased_type == 'Vendor' or 'vendor' in purchased_type.lower():
+                    Item.objects.create(
                     name=name,
                     serialno=serial_no,
                     make_and_models=row.get('Make and models', ''),
-                    smps_status=row.get('Smps / Adapter status', '').strip(),
+                    smps_status=row.get('Smps status', '').strip(),
                     motherboard_status=row.get('Motherboard status', '').strip(),
                     quantity=row.get('Quantity', 1),
                     price=row.get('Price', 0.0),
                     note=row.get('Note', '').strip(),
-                    vendor_name=vendor,
                     purchased_code=purchased_code,
-                    customer=customer_name,
+                    purchased_type = 'vendor',
+                    customer=customer,
                     created_by = request.user
                     )
 
                     # print('12345', row.get('Processor', ''), serial_no, 'processor', row.get('processor_qty', ''), request.user)
                     # Inside your row loop
-                    create_category_itemspurchase(row.get('Processor', ''), serial_no, 'processor', row.get('Processor_Qty', ''), request.user, purchased_code)
-                    create_category_items(row.get('RAM', ''), serial_no, 'ram', row.get('Ram_Qty', ''), request.user, purchased_code)
-                    create_category_itemspurchase(row.get('Hdd ', ''), serial_no, 'hdd', row.get('Hdd_Qty', ''), request.user, purchased_code)
-                    create_category_itemspurchase(row.get('Sdd', ''), serial_no, 'ssd',row.get('Ssd_Qty', ''), request.user, purchased_code)
+                    create_category_items(row.get('Processor', ''), serial_no, 'processor', row.get('Processor_Qty', ''),0.0, request.user, purchased_code)
+                    create_category_items(row.get('RAM', ''), serial_no, 'ram', row.get('Ram_Qty', ''),0.0, request.user, purchased_code)
+                    create_category_items(row.get('HDD', ''), serial_no, 'hdd', row.get('Hdd_Qty', ''),0.0, request.user, purchased_code)
+                    create_category_items(row.get('SSD', ''), serial_no, 'ssd',row.get('Ssd_Qty', ''),0.0, request.user, purchased_code)
+                    
+                    
                     return render(request, 'transactions/purchasecreate.html', {
                         'form': ExcelUploadForm(),
                         'success': "Excel imported successfully!"
                     })
+
+                
                 else:
                     # Create the Item entry
                     item = Item.objects.create(
                         name=name,
                         serialno=serial_no,
                         make_and_models=row.get('Make and models', ''),
-                        smps_status=row.get('Smps / Adapter status', '').strip(),
-                        motherboard_status=row.get('Motherboard status', '').strip(),
+                        smps_status=row.get('Smps status', ''),
+                        motherboard_status=row.get('Motherboard status', ''),
                         quantity=row.get('Quantity', 1),
                         price=row.get('Price', 0.0),
-                        note=row.get('Note', '').strip(),
+                        note=row.get('Note', ''),
                         purchased_code=purchased_code,
                         customer=customer,
                         created_by=request.user

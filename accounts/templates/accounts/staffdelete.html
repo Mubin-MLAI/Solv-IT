@@ -1,16 +1,84 @@
-{% extends "store/base.html" %} {% block title %}Confirm delete{% endblock %}
+{% extends "store/base.html" %}
+{% block title %}Confirm Delete{% endblock %}
+
 {% block content %}
-<div class="container pt-5">
+<style>
+    body {
+        background-color: #121212 !important;
+        color: #e0e0e0 !important;
+    }
+
+    .delete-card {
+        background: #1e1e1e;
+        padding: 35px;
+        border-radius: 14px;
+        max-width: 550px;
+        margin: auto;
+        margin-top: 80px;
+        box-shadow: 0 0 20px rgba(0,0,0,0.6);
+        animation: fadeIn 0.4s ease-in-out;
+        text-align: center;
+    }
+
+    .delete-card h2 {
+        color: #ff5252;
+        font-weight: 700;
+        margin-bottom: 20px;
+    }
+
+    .delete-card h5 {
+        color: #e0e0e0;
+    }
+
+    .btn-danger-modern {
+        background: linear-gradient(90deg, #ff5252, #ff1744);
+        border: none;
+        padding: 10px 25px;
+        border-radius: 50px;
+        color: #fff;
+        font-weight: 600;
+        margin-right: 10px;
+        transition: 0.3s;
+    }
+
+    .btn-danger-modern:hover {
+        transform: scale(1.05);
+        background: linear-gradient(90deg, #ff1744, #ff5252);
+    }
+
+    .btn-cancel-modern {
+        background: linear-gradient(90deg, #00c853, #00e676);
+        border: none;
+        padding: 10px 25px;
+        border-radius: 50px;
+        color: black;
+        font-weight: 600;
+        transition: 0.3s;
+    }
+
+    .btn-cancel-modern:hover {
+        transform: scale(1.05);
+        background: linear-gradient(90deg, #00e676, #1de9b6);
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+</style>
+
+<div class="delete-card">
     <form method="POST">
         {% csrf_token %}
-        <fieldset class="form-group">
-            <legend class="border-bottom mb-4">Delete Sale</legend>
-            <h5>Are you sure you want to delete staff "{{ object.username }}"</h5>
-        </fieldset>
-        <div class="form-group">
-            <button class="btn btn-outline-danger btn-sm" type="submit">Yes, Delete</button>
-            <a class="btn btn-outline-success btn-sm" href="{% url 'saleslist' %}">Cancel</a>
+        <h2>Delete Staff</h2>
+
+        <h5>Are you sure you want to delete staff "<strong>{{ object.username }}</strong>"?</h5>
+
+        <div class="mt-4">
+            <button class="btn-danger-modern" type="submit">Yes, Delete</button>
+            <a class="btn-cancel-modern" href="{% url 'saleslist' %}">Cancel</a>
         </div>
     </form>
 </div>
+
 {% endblock content %}

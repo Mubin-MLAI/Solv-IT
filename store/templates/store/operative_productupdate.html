@@ -6,12 +6,125 @@ Update Product
 {% endblock title %}
 
 {% block content %}
+
+<style>
+/* ------------------------------
+   GLOBAL DARK THEME
+--------------------------------*/
+body {
+    background: #0d1117;
+    color: #e6edf3;
+    font-family: "Inter", sans-serif;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+}
+
+/* ------------------------------
+   LAYOUT
+--------------------------------*/
+.container {
+    margin-top: 20px;
+}
+
+/* Column titles */
+.text-center {
+    font-size: 20px;
+    font-weight: 600;
+    margin-bottom: 12px;
+    color: #58a6ff;
+}
+
+/* ------------------------------
+   CARDS
+--------------------------------*/
+.card {
+    background: #161b22 !important;
+    border: 1px solid #30363d !important;
+    border-radius: 14px !important;
+    padding: 20px;
+    color: #e6edf3;
+    box-shadow: 0 0 12px rgba(0,0,0,0.4);
+}
+
+/* ------------------------------
+   FORM ELEMENTS
+--------------------------------*/
+.form-label {
+    font-weight: 500;
+    color: #c9d1d9;
+}
+
+.form-control, select, input[type="text"], input[type="number"] {
+    background: #0d1117;
+    border: 1px solid #30363d;
+    color: #e6edf3;
+    border-radius: 10px;
+    padding: 8px 12px;
+    transition: 0.25s ease;
+}
+
+.form-control:focus {
+    background: #0d1117;
+    border-color: #58a6ff;
+    box-shadow: 0 0 0 3px rgba(88,166,255,0.3);
+    color: white;
+}
+
+select option {
+    background: #0d1117;
+    color: #e6edf3;
+    border-radius: 8px;
+}
+
+/* ------------------------------
+   BUTTONS
+--------------------------------*/
+.btn-success {
+    background: #238636;
+    border-radius: 10px;
+    border: none;
+    font-weight: 600;
+    transition: 0.2s ease;
+}
+
+.btn-success:hover {
+    background: #2ea043;
+    transform: translateY(-1px);
+    box-shadow: 0 0 10px rgba(46,160,67,0.4);
+}
+
+/* ------------------------------
+   ERROR TEXT
+--------------------------------*/
+.text-danger {
+    color: #ff6b6b !important;
+    font-size: 13px;
+    margin-top: 4px;
+}
+
+/* ------------------------------
+   ROW SPACING
+--------------------------------*/
+.row {
+    margin-bottom: 15px;
+}
+
+/* Column box */
+.col-sm.form-control {
+    background: #161b22 !important;
+    border-radius: 12px;
+    border: 1px solid #30363d;
+    padding: 20px;
+    box-shadow: inset 0 0 6px rgba(0,0,0,0.4);
+}
+</style>
+
 <br>
 <div class="container">
     <div class="row align-items-stretch">
         <div class="col-sm mt-5 form-control">
             <div class="text-center">IN - Solv-IT Raw Parts</div>
-            <div class="col-lg-12 col-md-5 h-100">
+            <div class="col-lg-12 col-md-5 h-70">
                 <div class="card shadow-sm border-dark form-control h-100 d-flex flex-column" style="background-color: #a9a5b2;">
                     <div class="card-body flex-fill">
                         <form method="POST" enctype="multipart/form-data">
@@ -33,7 +146,7 @@ Update Product
                                     </label>
                                     <input type="text" name="make_and_models" id="make_and_models" class="form-control"
                                         placeholder="Enter Make & Models" value="{{ form.make_and_models.value }}"
-                                        readonly>
+                                         style="background-color: #060606;" readonly>
                                     <div class="text-danger">{{ form.make_and_models.errors }}</div>
 
                                 </div>
@@ -46,7 +159,7 @@ Update Product
                                         Serial No
                                     </label>
                                     <input type="text" name="serialno" id="serial_no" class="form-control"
-                                        placeholder="Enter Serial Number" value="{{ form.serialno.value }}" readonly>
+                                        placeholder="Enter Serial Number" value="{{ form.serialno.value }}" style="background-color: #060606;" readonly>
                                     <div class="text-danger">{{ form.serialno.errors }}</div>
                                 </div>
                             </div>
@@ -177,8 +290,17 @@ Update Product
                                 <div class="col-md-6">
                                     <label for="price" class="form-label">Price</label>
                                     <input type="text" id="price" name="price" class="form-control"
-                                        value="{{ form.price.value }}" readonly>
+                                        value="{{ form.price.value }}"   style="background-color: #060606;" readonly>
                                     <div class="text-danger">{{ form.price.errors }}</div>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label for="{{ form.purchased_type.id_for_label }}" class="form-label" placeholder="Enter Purchase / LOT Code">
+                                        Purchase Type
+                                    </label>
+                                    <input type="text" id="purchased_type" name="purchased_type" class="form-control"
+                                        value="{{ form.purchased_type.value }}"  style="background-color: #060606;" readonly>
+                                    <div class="text-danger">{{ form.purchased_type.errors }}</div>
                                 </div>
                             </div>
 
@@ -188,7 +310,7 @@ Update Product
                                         Purchase / LOT Code
                                     </label>
                                     <input type="text" id="purchased_code" name="purchased_code" class="form-control"
-                                        value="{{ form.purchased_code.value }}" readonly>
+                                        value="{{ form.purchased_code.value }}"  style="background-color: #060606;" readonly>
                                     <div class="text-danger">{{ form.purchased_code.errors }}</div>
                                 </div>
                             </div>
@@ -197,8 +319,8 @@ Update Product
                             <div class="col-md-6 col-lg-8">
                                 <label for="smps_status" class="form-label">SMPS / Adapter Status</label>
                                 <select id="smps_status1" name="smps_status" class="form-control" onchange="toggleReplacementDescription1()">
-                                    <option value="available" {% if form.smps_status.value == 'available' %}selected{% endif %}>Available</option>
-                                    <option value="not_available" {% if form.smps_status.value == 'not_available' %}selected{% endif %}>Not Available</option>
+                                    <option value="Available" {% if form.smps_status.value == 'Available' %}selected{% endif %}>Available</option>
+                                    <option value="Not_available" {% if form.smps_status.value == 'Not_available' %}selected{% endif %}>Not Available</option>
                                     <option value="replacement" {% if form.smps_status.value == 'replacement' %}selected{% endif %}>Replacement</option>
                                 </select>
                                 <div class="text-danger">{{ form.smps_status.errors }}</div>
@@ -210,8 +332,8 @@ Update Product
                             <div class="col-md-6 col-lg-8" id="motherboard_status_div">
                                 <label for="motherboard_status" class="form-label">Motherboard Status</label>
                                 <select id="motherboard_status1" name="motherboard_status" class="form-control" onchange="toggleMotherboardReplacementDescription1()">
-                                    <option value="available" {% if form.motherboard_status.value == 'available'%}selected{% endif %}>Available</option>
-                                    <option value="not_available" {% if form.motherboard_status.value == 'not_available'%}selected{% endif %}>Not Available</option>
+                                    <option value="Available" {% if form.motherboard_status.value == 'Available'%}selected{% endif %}>Available</option>
+                                    <option value="Not_available" {% if form.motherboard_status.value == 'Not_available'%}selected{% endif %}>Not Available</option>
                                     <option value="replacement" {% if form.motherboard_status.value == 'replacement'%}selected{% endif %}>Replacement</option>
                                 </select>
                                 <div class="text-danger">{{ form.motherboard_status.errors }}</div>
@@ -251,7 +373,7 @@ Update Product
                                         Make & Models
                                     </label>
                                     <input type="text" name="make_and_models" id="make_and_models" class="form-control"
-                                        placeholder="Enter Make & Models" value="{{ form.make_and_models.value }}" readonly>
+                                        placeholder="Enter Make & Models" value="{{ form.make_and_models.value }}"  style="background-color: #060606;" readonly>
                                     <div class="text-danger">{{ form.make_and_models.errors }}</div>
 
                                 </div>
@@ -264,7 +386,7 @@ Update Product
                                         Serial No
                                     </label>
                                     <input type="text" name="serialno" id="serialno" class="form-control"
-                                        placeholder="Enter Serial Number" value="{{ form.serialno.value }}" readonly>
+                                        placeholder="Enter Serial Number" value="{{ form.serialno.value }}"  style="background-color: #060606;" readonly>
                                     <div class="text-danger">{{ form.serialno.errors }}</div>
                                 </div>
                             </div>
@@ -359,8 +481,17 @@ Update Product
                                 <div class="col-md-6">
                                     <label for="price" class="form-label">Price</label>
                                     <input type="text" id="price" name="price" class="form-control"
-                                        value="{{ form.price.value }}" readonly>
+                                        value="{{ form.price.value }}"  style="background-color: #060606;" readonly>
                                     <div class="text-danger">{{ form.price.errors }}</div>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label for="{{ form.purchased_type.id_for_label }}" class="form-label" placeholder="Enter Purchase / LOT Code">
+                                        Purchase Type
+                                    </label>
+                                    <input type="text" id="purchased_type" name="purchased_type" class="form-control"
+                                        value="{{ form.purchased_type.value }}"  style="background-color: #060606;" readonly>
+                                    <div class="text-danger">{{ form.purchased_type.errors }}</div>
                                 </div>
                             </div>
 
@@ -370,7 +501,7 @@ Update Product
                                         Purchase / LOT Code
                                     </label>
                                     <input type="text" id="purchased_code" name="purchased_code" class="form-control"
-                                        value="{{ form.purchased_code.value }}" readonly>
+                                        value="{{ form.purchased_code.value }}"  style="background-color: #060606;" readonly>
                                     <div class="text-danger">{{ form.purchased_code.errors }}</div>
                                 </div>
                             </div>
@@ -379,8 +510,8 @@ Update Product
                             <div class="col-md-6 col-lg-8">
                                 <label for="smps_status" class="form-label">SMPS / Adapter Status</label>
                                 <select id="smps_status1" name="smps_status" class="form-control" onchange="toggleReplacementDescription1()">
-                                    <option value="available" {% if form.smps_status.value == 'available' %}selected{% endif %}>Available</option>
-                                    <option value="not_available" {% if form.smps_status.value == 'not_available' %}selected{% endif %}>Not Available</option>
+                                    <option value="Available" {% if form.smps_status.value == 'Available' %}selected{% endif %}>Available</option>
+                                    <option value="Not_available" {% if form.smps_status.value == 'Not_available' %}selected{% endif %}>Not Available</option>
                                     <option value="replacement" {% if form.smps_status.value == 'replacement' %}selected{% endif %}>Replacement</option>
                                 </select>
                                 <div class="text-danger">{{ form.smps_status.errors }}</div>
@@ -392,64 +523,12 @@ Update Product
                             <div class="col-md-6 col-lg-8" id="motherboard_status_div">
                                 <label for="motherboard_status" class="form-label">Motherboard Status</label>
                                 <select id="motherboard_status1" name="motherboard_status" class="form-control" onchange="toggleMotherboardReplacementDescription1()">
-                                    <option value="available" {% if form.motherboard_status.value == 'available'%}selected{% endif %}>Available</option>
-                                    <option value="not_available" {% if form.motherboard_status.value == 'not_available'%}selected{% endif %}>Not Available</option>
+                                    <option value="Available" {% if form.motherboard_status.value == 'Available'%}selected{% endif %}>Available</option>
+                                    <option value="Not_available" {% if form.motherboard_status.value == 'Not_available'%}selected{% endif %}>Not Available</option>
                                     <option value="replacement" {% if form.motherboard_status.value == 'replacement'%}selected{% endif %}>Replacement</option>
                                 </select>
                                 <div class="text-danger">{{ form.motherboard_status.errors }}</div>
                             </div>
-
-
-                            <!-- <div class="row mb-3">
-                                SMPS Status
-                                <div class="col-md-6 col-lg-8">
-                                    <label for="smps_status" class="form-label">SMPS Status</label>
-                                    <select id="smps_status" name="smps_status" class="form-control" onchange="toggleReplacementDescription()">
-                                        <option value="available" {% if form.smps_status.value == 'available' %}selected{%endif %}>Available</option>
-                                        <option value="not_available" {% if form.smps_status.value == 'not_available'%}selected{% endif %}>Not Available</option>
-                                        <option value="replacement" {% if form.smps_status.value == 'replacement' %}selected{%endif %}>Replacement</option>
-                                    </select>
-                                    <div class="text-danger">{{ form.smps_status.errors }}</div>
-                                </div>
-
-                                Motherboard Status
-                                <div class="col-md-6 col-lg-8" id="motherboard_status_div">
-                                    <label for="motherboard_status" class="form-label">Motherboard Status</label>
-                                    <select id="motherboard_status" name="motherboard_status" class="form-control" onchange="toggleMotherboardReplacementDescription()">
-                                        <option value="available" {% if form.motherboard_status.value == 'available'%}selected{% endif %}>Available</option>
-                                        <option value="not_available" {% if form.motherboard_status.value == 'not_available'%}selected{% endif %}>NotAvailable</option>
-                                        <option value="replacement" {% if form.motherboard_status.value == 'replacement'%}selected{% endif %}>Replacement</option>
-                                    </select>
-                                    <div class="text-danger">{{ form.motherboard_status.errors }}</div>
-                                </div>
-                            </div>
-
-
-                            <div class="row mb-3">
-                                SMPS Replacement Description
-                                <div class="col-md-6 col-lg-8" id="smps_replacement_description_div" style="display: none;">
-                                    <label for="smps_replacement_description" class="form-label">SMPS Replacement
-                                        Description</label>
-                                    <input type="text" id="smps_replacement_description" name="smps_replacement_description"
-                                        class="form-control" value="{{ form.smps_replacement_description.value }}">
-                                </div>
-
-                                Motherboard Replacement Description
-                                <div class="col-md-6 col-lg-8" id="motherboard_replacement_description_div"
-                                    style="display: none;">
-                                    <label for="motherboard_replacement_description" class="form-label">Motherboard
-                                        Replacement Description</label>
-                                    <input type="text" id="motherboard_replacement_description"
-                                        name="motherboard_replacement_description" class="form-control"
-                                        value="{{ form.motherboard_replacement_description.value }}">
-                                </div>
-                            </div> -->
-
-                            <!-- <div class="form-group text-center">
-                                <button class="btn btn-success btn-lg" name="button2" type="submit">
-                                    <i class="fas fa-check"></i> Update Product
-                                </button>
-                            </div> -->
                         </form>
                     </div>
                 </div>
@@ -477,7 +556,7 @@ Update Product
                                         Make & Models
                                     </label>
                                     <input type="text" name="make_and_models" id="make_and_models" class="form-control"
-                                        placeholder="Enter Make & Models" value="{{ form.make_and_models.value }}" readonly>
+                                        placeholder="Enter Make & Models" value="{{ form.make_and_models.value }}"  style="background-color: #060606;" readonly>
                                     <div class="text-danger">{{ form.make_and_models.errors }}</div>
 
                                 </div>
@@ -489,7 +568,7 @@ Update Product
                                         Serial No
                                     </label>
                                     <input type="text" name="serialno" id="serial_no" class="form-control"
-                                        placeholder="Enter Serial Number" value="{{ form.serialno.value }}" readonly>
+                                        placeholder="Enter Serial Number" value="{{ form.serialno.value }}"  style="background-color: #060606;" readonly>
                                     <div class="text-danger">{{ form.serialno.errors }}</div>
                                 </div>
                             </div>
@@ -579,8 +658,17 @@ Update Product
                                 <div class="col-md-6">
                                     <label for="price" class="form-label">Price</label>
                                     <input type="text" id="price" name="price" class="form-control"
-                                        value="{{ form.price.value }}" readonly>
+                                        value="{{ form.price.value }}"  style="background-color: #060606;" readonly>
                                     <div class="text-danger">{{ form.price.errors }}</div>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label for="{{ form.purchased_type.id_for_label }}" class="form-label" placeholder="Enter Purchase / LOT Code">
+                                        Purchase Type
+                                    </label>
+                                    <input type="text" id="purchased_type" name="purchased_type" class="form-control"
+                                        value="{{ form.purchased_type.value }}"  style="background-color: #060606;" readonly>
+                                    <div class="text-danger">{{ form.purchased_type.errors }}</div>
                                 </div>
                             </div>
 
@@ -590,7 +678,7 @@ Update Product
                                         Purchase / LOT Code
                                     </label>
                                     <input type="text" id="purchased_code" name="purchased_code" class="form-control"
-                                        value="{{ form.purchased_code.value }}" readonly>
+                                        value="{{ form.purchased_code.value }}"  style="background-color: #060606;" readonly>
                                     <div class="text-danger">{{ form.purchased_code.errors }}</div>
                                 </div>
                             </div>
@@ -599,8 +687,8 @@ Update Product
                             <div class="col-md-6 col-lg-8">
                                 <label for="smps_status" class="form-label">SMPS / Adapter Status</label>
                                 <select id="smps_status1" name="smps_status" class="form-control" onchange="toggleReplacementDescription1()">
-                                    <option value="available" {% if form.smps_status.value == 'available' %}selected{% endif %}>Available</option>
-                                    <option value="not_available" {% if form.smps_status.value == 'not_available' %}selected{% endif %}>Not Available</option>
+                                    <option value="Available" {% if form.smps_status.value == 'Available' %}selected{% endif %}>Available</option>
+                                    <option value="Not_available" {% if form.smps_status.value == 'Not_available' %}selected{% endif %}>Not Available</option>
                                     <option value="replacement" {% if form.smps_status.value == 'replacement' %}selected{% endif %}>Replacement</option>
                                 </select>
                                 <div class="text-danger">{{ form.smps_status.errors }}</div>
@@ -612,59 +700,13 @@ Update Product
                             <div class="col-md-6 col-lg-8" id="motherboard_status_div">
                                 <label for="motherboard_status" class="form-label">Motherboard Status</label>
                                 <select id="motherboard_status1" name="motherboard_status" class="form-control" onchange="toggleMotherboardReplacementDescription1()">
-                                    <option value="available" {% if form.motherboard_status.value == 'available'%}selected{% endif %}>Available</option>
-                                    <option value="not_available" {% if form.motherboard_status.value == 'not_available'%}selected{% endif %}>Not Available</option>
+                                    <option value="Available" {% if form.motherboard_status.value == 'Available'%}selected{% endif %}>Available</option>
+                                    <option value="Not_available" {% if form.motherboard_status.value == 'Not_available'%}selected{% endif %}>Not Available</option>
                                     <option value="replacement" {% if form.motherboard_status.value == 'replacement'%}selected{% endif %}>Replacement</option>
                                 </select>
                                 <div class="text-danger">{{ form.motherboard_status.errors }}</div>
                             </div>
 
-                            <!-- <div class="row mb-3">
-                                SMPS Status
-                                <div class="col-md-6 col-lg-8">
-                                    <label for="smps_status" class="form-label">SMPS Status</label>
-                                    <select id="smps_status2" name="smps_status" class="form-control" onchange="toggleReplacementDescription2()">
-                                        <option value="available" {% if form.smps_status.value == 'available' %}selected{%endif %}>Available</option>
-                                        <option value="not_available" {% if form.smps_status.value == 'not_available'%}selected{% endif %}>Not Available</option>
-                                        <option value="replacement" {% if form.smps_status.value == 'replacement' %}selected{%endif %}>Replacement</option>
-                                    </select>
-                                    <div class="text-danger">{{ form.smps_status.errors }}</div>
-                                </div>
-
-                                Motherboard Status
-                                <div class="col-md-6 col-lg-8" id="motherboard_status_div">
-                                    <label for="motherboard_status" class="form-label">Motherboard Status</label>
-                                    <select id="motherboard_status2" name="motherboard_status" class="form-control" onchange="toggleMotherboardReplacementDescription2()">
-                                        <option value="available" {% if form.motherboard_status.value == 'available'%}selected{% endif %}>Available</option>
-                                        <option value="not_available" {% if form.motherboard_status.value == 'not_available'%}selected{% endif %}>Not Available</option>
-                                        <option value="replacement" {% if form.motherboard_status.value == 'replacement'%}selected{% endif %}>Replacement</option>
-                                    </select>
-                                    <div class="text-danger">{{ form.motherboard_status.errors }}</div>
-                                </div>
-                            </div>
-
-
-
-                            <div class="row mb-3">
-                                SMPS Replacement Description
-                                <div class="col-md-6 col-lg-8" id="smps_replacement_description_div2"
-                                    style="display: none;">
-                                    <label for="smps_replacement_description" class="form-label">SMPS Replacement
-                                        Description</label>
-                                    <input type="text" id="smps_replacement_description" name="smps_replacement_description"
-                                        class="form-control" value="{{ form.smps_replacement_description.value }}">
-                                </div>
-
-                                Motherboard Replacement Description
-                                <div class="col-md-6 col-lg-8" id="motherboard_replacement_description_div2"
-                                    style="display: none;">
-                                    <label for="motherboard_replacement_description" class="form-label">Motherboard
-                                        Replacement Description</label>
-                                    <input type="text" id="motherboard_replacement_description"
-                                        name="motherboard_replacement_description" class="form-control"
-                                        value="{{ form.motherboard_replacement_description.value }}">
-                                </div>
-                            </div> -->
                             <br>
                             <div class="form-group text-center">
                                 <button class="btn btn-success btn-lg form-control" name="button3"  type="submit">

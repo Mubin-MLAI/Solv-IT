@@ -1,28 +1,101 @@
 {% extends "store/base.html" %}
 {% load static %}
 {% load crispy_forms_tags %}
-{% block title %}Update staff{%endblock title%}{% block content %}
-<div class="col container p-5">
-    <div class="row">
-        <div class="col-md-3 col-lg-3"></div>
-          <div class="col-md-6 col-lg-6">
+
+{% block title %}Update Staff{% endblock title %}
+
+{% block content %}
+<style>
+    /* ===== Dark Modern UI Styling ===== */
+    body {
+        background-color: #121212 !important;
+        color: #e0e0e0 !important;
+    }
+
+    .update-container {
+        background: #1e1e1e;
+        padding: 30px;
+        border-radius: 12px;
+        box-shadow: 0px 0px 20px rgba(0, 0, 0, 0.6);
+        animation: fadeIn 0.4s ease-in-out;
+    }
+
+    h1 {
+        color: #00e676; /* Neon-green accent */
+        font-weight: 700;
+        text-align: center;
+    }
+
+    hr {
+        border-color: #333;
+    }
+
+    .btn-modern {
+        background: linear-gradient(90deg, #00e676, #00c853);
+        border: none;
+        padding: 10px 30px;
+        font-size: 18px;
+        border-radius: 50px;
+        color: black;
+        font-weight: bold;
+        transition: 0.3s ease;
+    }
+
+    .btn-modern:hover {
+        transform: scale(1.05);
+        background: linear-gradient(90deg, #00c853, #1de9b6);
+    }
+
+    .form-control,
+    .form-select {
+        background: #2a2a2a !important;
+        border: 1px solid #3c3c3c !important;
+        color: #e0e0e0 !important;
+        padding: 12px;
+        border-radius: 8px;
+    }
+
+    .form-control:focus,
+    .form-select:focus {
+        border-color: #00e676 !important;
+        box-shadow: 0px 0px 8px rgba(0, 230, 118, 0.7);
+        background: #2f2f2f !important;
+    }
+
+    label {
+        font-weight: 500;
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+</style>
+
+<div class="container p-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6 col-lg-6 update-container">
+
             <form method="POST" enctype="multipart/form-data">
                 {% csrf_token %}
-                <section class="section-bg" id="plans">
-                    <fieldset class="form-group">
-                        <header class="section-header">
-                            <h1 class="text-success">Update staff</h1>
-                            <hr>
-                        </header>
-                        {{ form.media }} {{ form|crispy }}
-                    </fieldset>
-                </section>
+
+                <header class="section-header">
+                    <h1>Update Staff</h1>
+                    <hr>
+                </header>
+
+                <fieldset class="form-group">
+                    {{ form.media }}
+                    {{ form|crispy }}
+                </fieldset>
+
                 <div class="form-group mt-4 text-center">
-                    <button class="btn btn-success" type="submit">Submit</button>
+                    <button class="btn-modern" type="submit">Update</button>
                 </div>
             </form>
+
         </div>
-        <div class="col-md-3 col-lg-3"></div>
     </div>
 </div>
+
 {% endblock content %}
