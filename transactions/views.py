@@ -1008,7 +1008,7 @@ class PurchaseListView(LoginRequiredMixin, ExportMixin, tables.SingleTableView):
         queryset = super().get_queryset()
         print('queryset',queryset)
         # Filter items where purchased_type == 'vendor'
-        queryset = queryset.all().filter(purchased_type='vendor')
+        queryset = queryset.all().filter(Q(purchased_type='vendor') | Q(purchased_type='customer') )
         return queryset
 
     def get_context_data(self, **kwargs):
@@ -1084,10 +1084,11 @@ class PurchaseItemSearchListView(PurchaseListView):
         result = super().get_queryset()
 
         query = self.request.GET.get("q")
-        vendor = self.request.GET.get("customer_id", "").strip()
+        customer = self.request.GET.get("customer_id", "").strip()
         purchased_code = self.request.GET.get("purchased_code", "").strip()
+        purchased_type = self.request.GET.get("purchased_type", "").strip()
 
-        print('jihkjdkhd', query, vendor, purchased_code)
+        print('jihkjdkhd', query, customer, purchased_code, purchased_type)
 
         # if not query or vendor or purchased_code:
         #     return result.none()
@@ -1101,8 +1102,8 @@ class PurchaseItemSearchListView(PurchaseListView):
                 )
             )
 
-        if vendor:
-            query_list = vendor.split()
+        if customer:
+            query_list = customer.split()
             result = result.filter(
                 reduce(
                     and_,
@@ -1119,6 +1120,10 @@ class PurchaseItemSearchListView(PurchaseListView):
                     operator.and_, (Q(purchased_code__icontains=q) for q in query_list)
                 )
             )
+
+        if purchased_type:
+            result = result.filter(purchased_type=purchased_type)
+
         return result
     
     def get_context_data(self, **kwargs):

@@ -21,39 +21,39 @@ class ItemTable(tables.Table):
 
     def render_processor(self, record):
         items = self.get_cat_items(record).filter(category='processor')
-        return ", ".join(f"{item.name}" for item in items) if items else "-"
+        return ", ".join(f"{item.name}" for item in items) if items else ""
 
     def render_processor_qty(self, record):
         items = self.get_cat_items(record).filter(category='processor')
-        return ", ".join(str(item.quantity) for item in items) if items else "-"
+        return ", ".join(str(item.quantity) for item in items) if items else ""
 
     def render_ram(self, record):
         items = self.get_cat_items(record).filter(category='ram')
-        return ", ".join(f"{item.name}" for item in items) if items else "-"
+        return ", ".join(f"{item.name}" for item in items) if items else ""
 
     def render_ram_qty(self, record):
         items = self.get_cat_items(record).filter(category='ram')
-        return ", ".join(str(item.quantity) for item in items) if items else "-"
+        return ", ".join(str(item.quantity) for item in items) if items else ""
 
     def render_hdd(self, record):
         items = self.get_cat_items(record).filter(category='hdd')
-        return ", ".join(f"{item.name}" for item in items) if items else "-"
+        return ", ".join(f"{item.name}" for item in items) if items else ""
 
     def render_hdd_qty(self, record):
         items = self.get_cat_items(record).filter(category='hdd')
-        return ", ".join(str(item.quantity) for item in items) if items else "-"
+        return ", ".join(str(item.quantity) for item in items) if items else ""
 
     def render_ssd(self, record):
         items = self.get_cat_items(record).filter(category='ssd')
-        return ", ".join(f"{item.name}" for item in items) if items else "-"
+        return ", ".join(f"{item.name}" for item in items) if items else ""
 
     def render_ssd_qty(self, record):
         items = self.get_cat_items(record).filter(category='ssd')
-        return ", ".join(str(item.quantity) for item in items) if items else "-"
+        return ", ".join(str(item.quantity) for item in items) if items else ""
     
     def render_purchased_code(self, record):
         items = self.get_item_items(record)
-        return ", ".join(f"{item.purchased_code}" for item in items) if items else "-"
+        return ", ".join(f"{item.purchased_code}" for item in items) if items else ""
 
 
 
@@ -62,7 +62,7 @@ class ItemTable(tables.Table):
         model = Item
         template_name = "django_tables2/semantic.html"
         fields = (
-            'id', 'name', 'serialno', 'make_and_models','quantity',
+            'name', 'customer' ,'serialno', 'make_and_models','quantity',
             'processor','processor_qty', 'ram','ram_qty','hdd','hdd_qty','ssd','ssd_qty','price',
             'smps_status', 'motherboard_status','purchased_code','note'
         )

@@ -161,9 +161,9 @@ class catogaryitem(models.Model):
 
 class Item(models.Model):
     STATUS_CHOICES = [
-        ('NA', 'NA'),
-        ('Available', 'Available'),
-        ('Not_available', 'Not Available'),
+        ('Na', 'NA'),
+        ('available', 'Available'),
+        ('not available', 'Not Available'),
         ('Replacement', 'Replacement'),
     ]
 
@@ -184,7 +184,7 @@ class Item(models.Model):
     quantity = models.IntegerField(default=1, null=True, blank=True)
     price = models.DecimalField(max_digits=10, decimal_places=2, default=0.0)
     purchased_code =  models.CharField(max_length=100,null=True, blank=True)
-    purchased_type =  models.CharField(max_length=50, choices=Purchase_type, default='NA')
+    purchased_type =  models.CharField(max_length=50, choices=Purchase_type, default=None, null=True, blank=True)
     note = models.TextField(max_length=500, null=True, blank=True, help_text="Additional notes about the item")
 
     created_by = models.ForeignKey(

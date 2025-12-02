@@ -164,6 +164,33 @@ input.form-control::placeholder,
         color: #999;
     } 
 
+    .dark-select {
+    background: rgba(25, 25, 30, 0.65);
+    color: #e9e9e9;
+    border: 1px solid rgba(255, 255, 255, 0.09);
+    border-radius: 10px;
+    padding: 10px 12px;
+    font-size: 15px;
+    transition: 0.3s ease;
+    backdrop-filter: blur(12px);
+}
+
+.dark-select option {
+    background: #16161a;
+    color: #e9e9e9;
+}
+
+.dark-select:hover {
+    border-color: #4b7cff;
+}
+
+.dark-select:focus {
+    border-color: #4b7cff;
+    box-shadow: 0 0 0 0.25rem rgba(75, 124, 255, 0.30);
+    outline: none;
+}
+
+
     /* ✅ Mobile Responsive */
     @media (max-width: 991.98px) {
         .table thead {
@@ -236,22 +263,30 @@ input.form-control::placeholder,
 
     <!-- Search Form -->
     <form class="row g-2 mt-3" id="searchform1" action="{% url 'purchase_item_search_list_view' %}" method="get">
-        <div class="col-md-4">
-            <input id="searchbox1" name="q" type="text" class="form-control"
+        <div class="col-md-2">
+            <select name="purchased_type" id="purchased_type" class="form-control dark-select">
+                <option value="">All Purchase Types</option>
+                <option value="vendor" {% if request.GET.purchased_type == 'vendor' %}selected{% endif %}>Vendor</option>
+                <option value="customer" {% if request.GET.purchased_type == 'customer' %}selected{% endif %}>Customer</option>
+            </select>
+        </div>
+
+        <div class="col-md-3">
+            <input id="searchbox1" name="q" type="text" class="form-control dark-select"
                 placeholder="Find products by Serial No, Make & Models..." value="{{ request.GET.q }}">
         </div>
-        <div class="col-md-3 position-relative">
-            <input type="text" id="customer_searchbox" name="customer_id" class="form-control"
-                placeholder="Find products by customer name" value="{{ request.GET.customer_id }}" autocomplete="off">
+        <div class="col-md-2">
+            <input type="text" id="customer_searchbox" name="customer_id" class="form-control dark-select"
+                placeholder="Find by customer name" value="{{ request.GET.customer_id }}" autocomplete="off">
             <!-- <div id="customer_suggestions" class="list-group position-absolute w-100" style="z-index: 1000;"></div>
             <input type="hidden" name="customer_id" id="customer_id"> -->
         </div>
-        <div class="col-md-3">
-            <input name="purchased_code" id="purchased_code" type="text" class="form-control"
-                placeholder="Find products by Purchase / LOT Code" value="{{ request.GET.purchased_code }}">
+        <div class="col-md-2">
+            <input name="purchased_code" id="purchased_code" type="text" class="form-control dark-select"
+                placeholder="Purchase / LOT Code" value="{{ request.GET.purchased_code }}">
         </div>
-        <div class="col-md-2 d-flex gap-2">
-            <button class="btn btn-outline-success shadow-sm w-100" type="submit">
+        <div class="col-md-3 d-flex gap-2">
+            <button class="btn btn-outline-success shadow-sm" type="submit">
                 <i class="fa-solid fa-search"></i>
             </button>
             <a href="{% url 'purchase_item_search_list_view' %}" class="btn btn-outline-secondary shadow-sm">
@@ -324,7 +359,7 @@ input.form-control::placeholder,
     <ul class="pagination justify-content-center">
         {% if page_obj.has_previous %}
         <li class="page-item">
-            <a class="page-link" href="?q={{ request.GET.q }}&vendor={{ request.GET.vendor }}&code={{ request.GET.code }}&page={{ page_obj.previous_page_number }}">
+            <a class="page-link" href="?q={{ request.GET.q }}&purchased_type={{ request.GET.purchased_type }}&customer_id={{ request.GET.customer_id }}&purchased_code={{ request.GET.purchased_code }}&page={{ page_obj.previous_page_number }}">
                 &laquo;
             </a>
         </li>
@@ -335,12 +370,12 @@ input.form-control::placeholder,
             {% if page_obj.number == i %}
                 <li class="page-item active"><span class="page-link">{{ i }}</span></li>
             {% else %}
-                <li class="page-item"><a class="page-link" href="?q={{ request.GET.q }}&vendor={{ request.GET.vendor }}&code={{ request.GET.code }}&page={{ i }}">{{ i }}</a></li>
+                <li class="page-item"><a class="page-link" href="?q={{ request.GET.q }}&purchased_type={{ request.GET.purchased_type }}&customer_id={{ request.GET.customer_id }}&purchased_code={{ request.GET.purchased_code }}&page={{ i }}">{{ i }}</a></li>
             {% endif %}
         {% endfor %}
         {% if page_obj.has_next %}
         <li class="page-item">
-            <a class="page-link" href="?q={{ request.GET.q }}&vendor={{ request.GET.vendor }}&code={{ request.GET.code }}&page={{ page_obj.next_page_number }}">
+            <a class="page-link" href="?q={{ request.GET.q }}&purchased_type={{ request.GET.purchased_type }}&customer_id={{ request.GET.customer_id }}&purchased_code={{ request.GET.purchased_code }}&page={{ page_obj.next_page_number }}">
                 &raquo;
             </a>
         </li>

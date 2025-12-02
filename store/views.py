@@ -1740,10 +1740,11 @@ def create_category_items(spec_string, serial_no, category, quantity,price,creat
             name=name.upper(),
             serial_no=serial_no,
             category=category,
-            quantity=quantity,
+            quantity=1 if not quantity.isdigit() else int(quantity),
             unit_price=price,
             created_by=createdby,
-            purchase_lot_code = product_code
+            purchase_lot_code = product_code,
+            
         )
 
 
@@ -1881,20 +1882,21 @@ def upload_category_items(request):
 
                 # customer = Customer.objects.filter(first_name__iexact=customer_name).first()
                 print('customer', customer)
+                print('Purchased type', row.get('Purchased type', '').strip())
                 if not vendor and vendor_name:
                     vendor = Vendor.objects.create(name=vendor_name)
-                if purchased_type == 'Vendor' or 'vendor' in purchased_type.lower():
+                if purchased_type:
                     Item.objects.create(
                     name=name,
                     serialno=serial_no,
                     make_and_models=row.get('Make and models', ''),
-                    smps_status=row.get('Smps status', '').strip(),
-                    motherboard_status=row.get('Motherboard status', '').strip(),
+                    smps_status=row.get('Smps status', '').strip().lower(),
+                    motherboard_status=row.get('Motherboard status', '').strip().lower(),
                     quantity=row.get('Quantity', 1),
                     price=row.get('Price', 0.0),
                     note=row.get('Note', '').strip(),
                     purchased_code=purchased_code,
-                    purchased_type = 'vendor',
+                    purchased_type = row.get('Purchased type', '').strip().lower(),
                     customer=customer,
                     created_by = request.user
                     )
@@ -1919,8 +1921,8 @@ def upload_category_items(request):
                         name=name,
                         serialno=serial_no,
                         make_and_models=row.get('Make and models', ''),
-                        smps_status=row.get('Smps status', ''),
-                        motherboard_status=row.get('Motherboard status', ''),
+                        smps_status=str(row.get('Smps status', '')).strip().lower(),
+                        motherboard_status=str(row.get('Motherboard status', '')).strip().lower(),
                         quantity=row.get('Quantity', 1),
                         price=row.get('Price', 0.0),
                         note=row.get('Note', ''),

@@ -61,7 +61,7 @@ class BankTransaction(models.Model):
     note = models.CharField(max_length=255, null=True, blank=True,)
 
     def __str__(self):
-        return f"{self.transaction_type.title()} of {self.amount} on {self.transaction_date} id is {self.id}"
+        return f"{self.transaction_type} of {self.amount} on {self.transaction_date} id is {self.id}"
     
 
     def clean(self):

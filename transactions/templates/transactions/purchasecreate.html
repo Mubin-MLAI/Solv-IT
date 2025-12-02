@@ -9,6 +9,32 @@ Add Product
 {% block content %}
 
 <style>
+
+.dark-select {
+    background: rgba(25, 25, 30, 0.65);
+    color: #e9e9e9;
+    border: 1px solid rgba(255, 255, 255, 0.09);
+    border-radius: 10px;
+    padding: 10px 12px;
+    font-size: 15px;
+    transition: 0.3s ease;
+    backdrop-filter: blur(12px);
+}
+
+.dark-select option {
+    background: #16161a;
+    color: #e9e9e9;
+}
+
+.dark-select:hover {
+    border-color: #4b7cff;
+}
+
+.dark-select:focus {
+    border-color: #4b7cff;
+    box-shadow: 0 0 0 0.25rem rgba(75, 124, 255, 0.30);
+    outline: none;
+}
 /* ===========================
    🌙 DARK MODERN UI THEME
    =========================== */
@@ -147,12 +173,12 @@ body {
 <br>
 <div class="container my-5">
     <!-- Go back -->
-    <div class="mb-4">
+    <!-- <div class="mb-4">
         <a href="{% url 'purchaseslist' %}" class="btn btn-outline-success">
             <i class="fas fa-arrow-left me-2"></i>
             Go back
         </a>
-    </div>
+    </div> -->
     <div class="row justify-content-center">
         <!-- Excel Import Form -->
         <div class="card shadow-sm border-light w-100">
@@ -313,10 +339,10 @@ body {
                         <!-- SMPS Section -->
                         <div class="col-md-4">
                             <label for="id_smps_status" class="form-label">SMPS / Adapter Status</label>
-                            <select name="smps_status" id="id_smps_status" class="form-control">
-                                <option value="NA" selected>NA</option>
+                            <select name="smps_status" id="id_smps_status" class="form-control dark-select">
+                                <option value="Na" selected>NA</option>
                                 <option value="available">Available</option>
-                                <option value="not_available">Not Available</option>
+                                <option value="not available">Not Available</option>
                                 <!-- <option value="replacement">Replacement</option> -->
                             </select>
                             <div class="text-danger">{{ form.smps_status.errors }}</div>
@@ -324,10 +350,10 @@ body {
                         <!-- Motherboard Section -->
                         <div class="col-md-4">
                             <label for="id_motherboard_status" class="form-label">Motherboard Status</label>
-                            <select name="motherboard_status" id="id_motherboard_status" class="form-control">
-                                <option value="NA" selected>NA</option>
+                            <select name="motherboard_status" id="id_motherboard_status" class="form-control dark-select">
+                                <option value="Na" selected>NA</option>
                                 <option value="available">Available</option>
-                                <option value="not_available">Not Available</option>
+                                <option value="not available">Not Available</option>
                                 <!-- <option value="replacement">Replacement</option> -->
                             </select>
                             <div class="text-danger">{{ form.motherboard_status.errors }}</div>
@@ -335,7 +361,7 @@ body {
 
                         <div class="col-md-4">
                             <label for="id_purchased_type" class="form-label">Purchase Type</label>
-                            <select name="purchased_type" id="id_purchased_type" class="form-control">
+                            <select name="purchased_type" id="id_purchased_type" class="form-control dark-select">
                                 <option value="vendor">Vendor</option>
                                 <option value="customer">Customer</option>
                                 <!-- <option value="replacement">Replacement</option> -->
