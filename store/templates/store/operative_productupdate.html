@@ -319,9 +319,12 @@ select option {
                             <div class="col-md-6 col-lg-8">
                                 <label for="smps_status" class="form-label">SMPS / Adapter Status</label>
                                 <select id="smps_status1" name="smps_status" class="form-control" onchange="toggleReplacementDescription1()">
-                                    <option value="Available" {% if form.smps_status.value == 'Available' %}selected{% endif %}>Available</option>
-                                    <option value="Not_available" {% if form.smps_status.value == 'Not_available' %}selected{% endif %}>Not Available</option>
-                                    <option value="replacement" {% if form.smps_status.value == 'replacement' %}selected{% endif %}>Replacement</option>
+                                    <option value="NA" {% if form.smps_status.value == 'NA' %}selected{% endif %}>NA</option>
+                                    <option value="available" {% if form.smps_status.value == 'available' %}selected{% endif %}>Available</option>
+                                    <option value="not available" {% if form.smps_status.value == 'not available' %}selected{% endif %}>Not Available</option>
+                                    <option value="Replacement" {% if form.smps_status.value == 'Replacement' %}selected{% endif %}>Replacement</option>
+
+
                                 </select>
                                 <div class="text-danger">{{ form.smps_status.errors }}</div>
                             </div>
@@ -332,9 +335,10 @@ select option {
                             <div class="col-md-6 col-lg-8" id="motherboard_status_div">
                                 <label for="motherboard_status" class="form-label">Motherboard Status</label>
                                 <select id="motherboard_status1" name="motherboard_status" class="form-control" onchange="toggleMotherboardReplacementDescription1()">
-                                    <option value="Available" {% if form.motherboard_status.value == 'Available'%}selected{% endif %}>Available</option>
-                                    <option value="Not_available" {% if form.motherboard_status.value == 'Not_available'%}selected{% endif %}>Not Available</option>
-                                    <option value="replacement" {% if form.motherboard_status.value == 'replacement'%}selected{% endif %}>Replacement</option>
+                                    <option value="NA" {% if form.motherboard_status.value == 'NA' %}selected{% endif %}>NA</option>
+                                    <option value="available" {% if form.motherboard_status.value == 'available' %}selected{% endif %}>Available</option>
+                                    <option value="not available" {% if form.motherboard_status.value == 'not available' %}selected{% endif %}>Not Available</option>
+                                    <option value="Replacement" {% if form.motherboard_status.value == 'Replacement' %}selected{% endif %}>Replacement</option>
                                 </select>
                                 <div class="text-danger">{{ form.motherboard_status.errors }}</div>
                             </div>
@@ -687,9 +691,10 @@ select option {
                             <div class="col-md-6 col-lg-8">
                                 <label for="smps_status" class="form-label">SMPS / Adapter Status</label>
                                 <select id="smps_status1" name="smps_status" class="form-control" onchange="toggleReplacementDescription1()">
-                                    <option value="Available" {% if form.smps_status.value == 'Available' %}selected{% endif %}>Available</option>
-                                    <option value="Not_available" {% if form.smps_status.value == 'Not_available' %}selected{% endif %}>Not Available</option>
-                                    <option value="replacement" {% if form.smps_status.value == 'replacement' %}selected{% endif %}>Replacement</option>
+                                    <option value="NA" {% if form.smps_status.value == 'NA' %}selected{% endif %}>NA</option>
+                                    <option value="available" {% if form.smps_status.value == 'available' %}selected{% endif %}>Available</option>
+                                    <option value="not available" {% if form.smps_status.value == 'not available' %}selected{% endif %}>Not Available</option>
+                                    <option value="Replacement" {% if form.smps_status.value == 'Replacement' %}selected{% endif %}>Replacement</option>
                                 </select>
                                 <div class="text-danger">{{ form.smps_status.errors }}</div>
                             </div>
@@ -700,9 +705,10 @@ select option {
                             <div class="col-md-6 col-lg-8" id="motherboard_status_div">
                                 <label for="motherboard_status" class="form-label">Motherboard Status</label>
                                 <select id="motherboard_status1" name="motherboard_status" class="form-control" onchange="toggleMotherboardReplacementDescription1()">
-                                    <option value="Available" {% if form.motherboard_status.value == 'Available'%}selected{% endif %}>Available</option>
-                                    <option value="Not_available" {% if form.motherboard_status.value == 'Not_available'%}selected{% endif %}>Not Available</option>
-                                    <option value="replacement" {% if form.motherboard_status.value == 'replacement'%}selected{% endif %}>Replacement</option>
+                                    <option value="NA" {% if form.motherboard_status.value == 'NA' %}selected{% endif %}>NA</option>
+                                    <option value="available" {% if form.motherboard_status.value == 'available' %}selected{% endif %}>Available</option>
+                                    <option value="not available" {% if form.motherboard_status.value == 'not available' %}selected{% endif %}>Not Available</option>
+                                    <option value="Replacement" {% if form.motherboard_status.value == 'Replacement' %}selected{% endif %}>Replacement</option>
                                 </select>
                                 <div class="text-danger">{{ form.motherboard_status.errors }}</div>
                             </div>

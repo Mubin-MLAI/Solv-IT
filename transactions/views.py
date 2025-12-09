@@ -14,6 +14,10 @@ def receive_payment_service(request):
     if form.is_valid():
         servicebill = get_object_or_404(ServiceBillItem, id=form.cleaned_data['servicebill_id'])
         received = form.cleaned_data['amount_received']
+        bank_account_id = request.POST.get('bank_account')
+        payment_mode = request.POST.get('payment_mode', 'Cash')
+        transaction_id = request.POST.get('transaction_id', '')
+        
         # Update ServiceBillItem amounts
         servicebill.amount_paid += received
         # Update amount_change (balance due)
@@ -23,6 +27,43 @@ def receive_payment_service(request):
             servicebill.status = "Paid"
         else:
             servicebill.status = "Balance"
+        
+        # Store the existing/source bank account before updating
+        source_bank_account = servicebill.bank_account
+        
+        # Determine receiving bank account based on payment mode
+        if payment_mode == 'Online' and bank_account_id:
+            # Online mode: use selected bank account
+            try:
+                from decimal import Decimal
+                bank_account = Bankaccount.objects.get(id=int(bank_account_id))
+                bank_account.opening_balance += Decimal(str(received))
+                bank_account.save()
+                servicebill.bank_account = bank_account
+                receiving_bank_account = bank_account
+            except (Bankaccount.DoesNotExist, ValueError):
+                messages.warning(request, "Bank account not found or invalid.")
+                receiving_bank_account = source_bank_account
+        else:
+            # Cash mode: use existing/source account
+            receiving_bank_account = source_bank_account
+            if source_bank_account:
+                from decimal import Decimal
+                source_bank_account.opening_balance += Decimal(str(received))
+                source_bank_account.save()
+        
+        # ✅ Record payment history
+        if receiving_bank_account:
+            PaymentRecord.objects.create(
+                servicebill=servicebill,
+                source_bank_account=source_bank_account,
+                receiving_bank_account=receiving_bank_account,
+                payment_amount=Decimal(str(received)),
+                payment_source_type='Service',
+                payment_mode=payment_mode,
+                transaction_id=transaction_id if transaction_id else None
+            )
+        
         servicebill.save()
         messages.success(request, f"Payment of ₹{received:.2f} received for service bill #{servicebill.id}.")
     else:
@@ -1323,6 +1364,15 @@ class cashbankListView(LoginRequiredMixin, ListView):
         context['all_bankaccounts'] = Bankaccount.objects.all().order_by('id')
 
         account_id = self.request.GET.get('account_id')
+        
+        # Get the selected account object if account_id is provided
+        selected_account = None
+        if account_id:
+            try:
+                selected_account = Bankaccount.objects.get(id=account_id)
+                context['selected_account'] = selected_account
+            except Bankaccount.DoesNotExist:
+                pass
 
         # Fetch related transactions
         sales = Sale.objects.select_related('customer').all()
@@ -1384,7 +1434,7 @@ class BankCreateView(LoginRequiredMixin, CreateView):
 from django.shortcuts import redirect, get_object_or_404
 from django.contrib import messages
 from django.views.decorators.http import require_POST
-from .models import Sale
+from .models import Sale, PaymentRecord
 from .forms import PaymentForm
 
 @require_POST
@@ -1393,6 +1443,9 @@ def receive_payment(request):
     if form.is_valid():
         sale = get_object_or_404(Sale, id=form.cleaned_data['sale_id'])
         received = form.cleaned_data['amount_received']
+        bank_account_id = request.POST.get('bank_account')
+        payment_mode = request.POST.get('payment_mode', 'Cash')
+        transaction_id = request.POST.get('transaction_id', '')
         
         # Update Sale amounts
         sale.amount_paid += received
@@ -1409,6 +1462,42 @@ def receive_payment(request):
         else:
             sale.status = "Balance"  # Or "Unpaid" depending on your logic
 
+        # Store the existing/source bank account before updating
+        source_bank_account = sale.bank_account
+
+        # Determine receiving bank account based on payment mode
+        if payment_mode == 'Online' and bank_account_id:
+            # Online mode: use selected bank account
+            try:
+                bank_account = Bankaccount.objects.get(id=int(bank_account_id))
+                bank_account.opening_balance += Decimal(str(received))
+                bank_account.save()
+                sale.bank_account = bank_account
+                receiving_bank_account = bank_account
+            except (Bankaccount.DoesNotExist, ValueError):
+                messages.warning(request, "Bank account not found or invalid.")
+                receiving_bank_account = source_bank_account
+        else:
+            # Cash mode: use existing/source account
+            receiving_bank_account = source_bank_account
+            if source_bank_account:
+                source_bank_account.opening_balance += Decimal(str(received))
+                source_bank_account.save()
+        
+        # ✅ Record payment history
+        # For Cash: source and receiving are the SAME (existing account)
+        # For Online: source is existing, receiving is selected account
+        if receiving_bank_account:
+            PaymentRecord.objects.create(
+                sale=sale,
+                source_bank_account=source_bank_account,
+                receiving_bank_account=receiving_bank_account,
+                payment_amount=Decimal(str(received)),
+                payment_source_type='Sale',
+                payment_mode=payment_mode,
+                transaction_id=transaction_id if transaction_id else None
+            )
+
         sale.save()
 
         messages.success(request, f"Payment of ₹{received:.2f} received for sale #{sale.id}.")
@@ -1424,8 +1513,11 @@ def receive_payment_purchase(request):
     if form.is_valid():
         purchase = get_object_or_404(Purchase, id=form.cleaned_data['purchase_id'])
         received = form.cleaned_data['amount_received']
+        bank_account_id = request.POST.get('bank_account')
+        payment_mode = request.POST.get('payment_mode', 'Cash')
+        transaction_id = request.POST.get('transaction_id', '')
         
-        # Update Sale amounts
+        # Update Purchase amounts
         purchase.amount_paid += received
         # Calculate remaining balance
         remaining = purchase.grand_total - purchase.amount_paid
@@ -1438,6 +1530,42 @@ def receive_payment_purchase(request):
             purchase.status = "Paid"
         else:
             purchase.status = "Balance"  # Or "Unpaid" depending on your logic
+        
+        # Store the existing/source bank account before updating
+        source_bank_account = purchase.bank_account
+        
+        # Determine receiving bank account based on payment mode
+        if payment_mode == 'Online' and bank_account_id:
+            # Online mode: use selected bank account
+            try:
+                from decimal import Decimal
+                bank_account = Bankaccount.objects.get(id=int(bank_account_id))
+                bank_account.opening_balance += Decimal(str(received))
+                bank_account.save()
+                purchase.bank_account = bank_account
+                receiving_bank_account = bank_account
+            except (Bankaccount.DoesNotExist, ValueError):
+                messages.warning(request, "Bank account not found or invalid.")
+                receiving_bank_account = source_bank_account
+        else:
+            # Cash mode: use existing/source account
+            receiving_bank_account = source_bank_account
+            if source_bank_account:
+                from decimal import Decimal
+                source_bank_account.opening_balance += Decimal(str(received))
+                source_bank_account.save()
+        
+        # ✅ Record payment history
+        if receiving_bank_account:
+            PaymentRecord.objects.create(
+                purchase=purchase,
+                source_bank_account=source_bank_account,
+                receiving_bank_account=receiving_bank_account,
+                payment_amount=Decimal(str(received)),
+                payment_source_type='Purchase',
+                payment_mode=payment_mode,
+                transaction_id=transaction_id if transaction_id else None
+            )
         
         purchase.save()
         

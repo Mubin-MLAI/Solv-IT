@@ -161,7 +161,7 @@ class catogaryitem(models.Model):
 
 class Item(models.Model):
     STATUS_CHOICES = [
-        ('Na', 'NA'),
+        ('NA', 'NA'),
         ('available', 'Available'),
         ('not available', 'Not Available'),
         ('Replacement', 'Replacement'),

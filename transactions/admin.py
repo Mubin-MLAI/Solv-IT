@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Sale, SaleDetail, Purchase,Bankaccount,BankTransaction, catogaryitempurchased, Itempurchased, PurchaseDetail, Expense, ServiceItem, ServiceBillItem
+from .models import Sale, SaleDetail, Purchase, Bankaccount, BankTransaction, catogaryitempurchased, Itempurchased, PurchaseDetail, Expense, ServiceItem, ServiceBillItem, PaymentRecord
 
 @admin.register(ServiceBillItem)
 class ServiceBillItemAdmin(admin.ModelAdmin):
@@ -128,6 +128,36 @@ class PurchaseAdmin(admin.ModelAdmin):
         obj.grand_total = obj.sub_total + obj.tax_amount
         obj.amount_change = obj.amount_paid - obj.grand_total
         super().save_model(request, obj, form, change)
+
+
+@admin.register(PaymentRecord)
+class PaymentRecordAdmin(admin.ModelAdmin):
+    """
+    Admin interface for tracking payment records with partial payments across accounts.
+    """
+    list_display = (
+        'id',
+        'payment_source_type',
+        'get_transaction_id',
+        'payment_amount',
+        'receiving_bank_account',
+        'payment_date'
+    )
+    search_fields = ('receiving_bank_account__account_name', 'sale__id', 'purchase__id', 'servicebill__id')
+    list_filter = ('payment_source_type', 'receiving_bank_account', 'payment_date')
+    ordering = ('-payment_date',)
+    readonly_fields = ('payment_date',)
+    
+    def get_transaction_id(self, obj):
+        if obj.sale:
+            return f"Sale #{obj.sale.id}"
+        elif obj.purchase:
+            return f"Purchase #{obj.purchase.id}"
+        elif obj.servicebill:
+            return f"Service #{obj.servicebill.id}"
+        return "N/A"
+    get_transaction_id.short_description = "Transaction"
+
 
         
 

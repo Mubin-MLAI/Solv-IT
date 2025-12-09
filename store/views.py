@@ -1005,7 +1005,7 @@ class ProductUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
 
                     # print("✅ Assigned {} of '{}' to {}. {} entry.".format(qty, clean_name, serialno, 'Created new' if created else 'Updated existing'))
 
-                messages.success(self.request, "✅ Assigned {} of '{}' to {}. {} entry.".format(qty2, clean_name, serialno, 'Created new' if created else 'Updated existing'))
+                messages.success(self.request, "✅ Parts Assigned to {}. {} entry.".format(serialno, 'Created new' if created else 'Updated existing'))
                 return reverse_lazy('dashboard')
             else:
                 messages.success(self.request, "Product update successful!")  # Add a success message
@@ -1111,12 +1111,12 @@ class ProductUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
                     # print("✅ Moved {} of '{}' to Solv-IT. {} entry.".format(qty, clean_name, 'Created new' if created else 'Updated existing'))
 
 
-                    messages.success(self.request, "✅ Moved {} of '{}' to Solv-IT. {} entry.".format(qty, clean_name, serialno, 'Created new' if created else 'Updated existing'))
+                    messages.success(self.request, "✅ Parts Moved to Solv-IT. {} entry.".format(serialno, 'Created new' if created else 'Updated existing'))
                     return reverse_lazy('dashboard')
             else:
                 print('button3 else')
                 messages.success(self.request, "Product update successful!")  # Add a success message
-                return reverse_lazy('productslist')
+                return reverse_lazy('dashboard')
         else:
             print('button main')
             serialno = self.request.POST['serialno'].strip()

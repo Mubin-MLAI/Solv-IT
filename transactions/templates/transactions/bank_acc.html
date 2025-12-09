@@ -196,6 +196,27 @@ input.form-control::placeholder,
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
 }
+
+/* � Payment History Row Styling */
+.payment-history-trigger {
+    transition: all 0.3s ease;
+}
+
+.payment-history-trigger:hover {
+    background-color: rgba(33, 150, 243, 0.2) !important;
+}
+
+.payment-history-details {
+    background-color: rgba(0, 0, 0, 0.2);
+}
+
+.payment-history-details table {
+    font-size: 0.9rem;
+}
+
+.payment-history-details table thead {
+    background-color: rgba(33, 150, 243, 0.1);
+}
 </style>
 
 <!-- ✅ HEADER -->
@@ -292,7 +313,12 @@ input.form-control::placeholder,
     <!-- ✅ Transactions -->
     <div class="col-md-8">
         <div class="card-dark p-3">
-            <h5 class="mb-3 text-primary"><i class="fa-solid fa-money-bill-transfer me-2"></i> Account Transactions</h5>
+            <h5 class="mb-3 text-primary">
+                <i class="fa-solid fa-money-bill-transfer me-2"></i> Account Transactions
+                {% if selected_account %}
+                    <span class="badge bg-info ms-2">{{ selected_account.account_name }}</span>
+                {% endif %}
+            </h5>
 
             <!-- Filters -->
             <form id="filterForm" class="row g-2 mb-3">
@@ -310,7 +336,8 @@ input.form-control::placeholder,
                             <th>Name</th>
                             <th>Date</th>
                             <th>Amount</th>
-                            <th>Balance Due</th>
+                            <th>Received</th>
+                            <th>Due</th>
                             <th>Action</th>
                         </tr>
                     </thead>
@@ -334,12 +361,17 @@ input.form-control::placeholder,
                                     {{ sale.date_added|date:"Y-m-d" }}
                                 {% endif %}
                             </td>
-                            <td data-label="Amount">₹{{ sale.amount_paid }}</td>
+                            <td data-label="Grand Amount">
+                                <span class="badge bg-dark">₹{{ sale.grand_total|floatformat:2 }}</span>
+                            </td>
+                            <td data-label="Amount">
+                                <span class="badge bg-success">₹{{ sale.amount_paid|floatformat:2 }}</span>
+                            </td>
                             <td data-label="Balance Due">
                                 {% if sale.status == "Paid" %}
                                     <span class="text-primary">₹0.00</span>
                                 {% elif sale.status == "Unpaid" or sale.status == "Balance" %}
-                                    <span class="text-danger">₹{{ sale.amount_change|floatformat:2 }}</span>
+                                    <span class="text-light badge bg-danger">₹{{ sale.amount_change|floatformat:2 }}</span>
                                 {% else %}
                                     <span>-</span>
                                 {% endif %}
@@ -362,8 +394,73 @@ input.form-control::placeholder,
                                 {% endif %}
                             </td>
                         </tr>
+                        <!-- Payment History Row - Collapsible -->
+                        {% if sale.payment_records.all %}
+                        <tr class="payment-history-trigger" onclick="togglePaymentHistory({{ sale.id }})" style="cursor: pointer; background-color: rgba(33, 150, 243, 0.1);">
+                            <td colspan="7" class="text-center py-2">
+                                <i class="fa-solid fa-chevron-down me-2" id="chevron-{{ sale.id }}"></i>
+                                <strong>📋 View Payment History ({{ sale.payment_records.count }} records)</strong>
+                            </td>
+                        </tr>
+                        <!-- Hidden Payment Details -->
+                        <tr class="payment-history-details" id="payment-history-{{ sale.id }}" style="display: none; background-color: rgba(0, 0, 0, 0.2);">
+                            <td colspan="7" class="p-3">
+                                <h6 class="text-gradient mb-3">💳 Partial Payment History</h6>
+                                <table class="table table-sm table-dark mb-0">
+                                    <thead>
+                                        <tr>
+                                            <th>Date & Time</th>
+                                            <th>Customer</th>
+                                            <th>Amount Received</th>
+                                            <th>From Bank Account</th>
+                                            <th>Payment Mode</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for payment in sale.payment_records.all %}
+                                        <tr>
+                                            <td>{{ payment.payment_date|date:"M d, Y H:i" }}</td>
+                                            <td>
+                                                {% if payment.sale and payment.sale.customer %}
+                                                    <strong>{{ payment.sale.customer.first_name }}</strong>
+                                                {% elif payment.servicebill %}
+                                                    <small class="text-muted">Service</small>
+                                                {% elif payment.purchase and payment.purchase.vendor %}
+                                                    <strong>{{ payment.purchase.vendor.name }}</strong>
+                                                {% else %}
+                                                    <small class="text-muted">-</small>
+                                                {% endif %}
+                                            </td>
+                                            <td><span class="badge bg-success">₹{{ payment.payment_amount|floatformat:2 }}</span></td>
+                                            <td>
+                                                {% if payment.source_bank_account %}
+                                                    <small><strong>{{ payment.source_bank_account.account_name }}</strong></small>
+                                                {% else %}
+                                                    <small class="text-muted">-</small>
+                                                {% endif %}
+                                            </td>
+                                            <td>
+                                                {% if payment.payment_mode == "Online" %}
+                                                    <span class="badge bg-info">💳 Online</span>
+                                                    {% if payment.transaction_id %}
+                                                        <br><b><small class="text-gradient">Ref: {{ payment.transaction_id }}</small></b>
+                                                    {% endif %}
+                                                {% else %}
+                                                    <span class="badge bg-warning">💵 Cash</span>
+                                                {% endif %}
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                                <div class="mt-2 text-end">
+                                    <small class="text-white">Total Received: <strong class="text-success">₹{{ sale.amount_paid|floatformat:2 }}</strong> | Remaining: <strong class="text-danger">₹{{ sale.amount_change|floatformat:2 }}</strong></small>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endif %}
                         {% empty %}
-                        <tr><td colspan="6" class="text-muted">No transactions found.</td></tr>
+                        <tr><td colspan="6" class="text-white">No transactions found.</td></tr>
                         {% endfor %}
                     </tbody>
                 </table>
@@ -395,6 +492,35 @@ input.form-control::placeholder,
           </div>
 
           <div class="mb-3">
+            <label class="form-label text-light">Payment Mode</label>
+            <select id="paymentModeSelect" name="payment_mode" class="form-control bg-dark text-light border-secondary">
+              <option value="Cash">Cash</option>
+              <option value="Online">Online</option>
+            </select>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label text-light">Bank Account</label>
+            <select id="bankAccountSelect" name="bank_account" class="form-control bg-dark text-light border-secondary">
+              <option value="">-- Select Bank Account --</option>
+              {% for bank in all_bankaccounts %}
+                <option value="{{ bank.id }}">{{ bank.account_name }} (₹{{ bank.opening_balance|floatformat:2 }})</option>
+              {% endfor %}
+            </select>
+            <b><small id="cashAccountInfo" class="form-text text-gradient" style="display: none; margin-top: 0.5rem;">
+              💵 Cash payment will use your current/existing account
+            </small></b>
+          </div>
+
+          <!-- Transaction ID field - shown only for Online payments -->
+          <div class="mb-3" id="transactionIdDiv" style="display: none;">
+            <label class="form-label text-light">Transaction ID / Reference Number</label>
+            <input type="text" name="transaction_id" id="transactionIdInput" 
+                   class="form-control bg-dark text-light border-secondary" 
+                   placeholder="e.g., UPI Ref, Check No., Transfer Ref" required>
+          </div>
+
+          <div class="mb-3">
             <label class="form-label text-light">Balance Due</label>
             <input type="text" id="balanceDue" class="form-control bg-dark text-info border-secondary" readonly>
           </div>
@@ -412,7 +538,7 @@ input.form-control::placeholder,
         </div>
 
         <div class="modal-footer border-secondary">
-          <button type="submit" class="btn btn-success rounded-pill hover-glow">
+          <button type="submit" class="btn btn-success rounded-pill hover-glow" id="submitPaymentBtn">
             <i class="fa-solid fa-check"></i> Submit Payment
           </button>
           <button type="button" class="btn btn-outline-light rounded-pill" data-bs-dismiss="modal">
@@ -458,6 +584,22 @@ input.form-control::placeholder,
 
 <!-- ✅ JS -->
 <script>
+// Toggle Payment History visibility
+function togglePaymentHistory(saleId) {
+    const historyRow = document.getElementById(`payment-history-${saleId}`);
+    const chevron = document.getElementById(`chevron-${saleId}`);
+    
+    if (historyRow.style.display === 'none' || historyRow.style.display === '') {
+        historyRow.style.display = 'table-row';
+        chevron.classList.remove('fa-chevron-down');
+        chevron.classList.add('fa-chevron-up');
+    } else {
+        historyRow.style.display = 'none';
+        chevron.classList.remove('fa-chevron-up');
+        chevron.classList.add('fa-chevron-down');
+    }
+}
+
 document.addEventListener('DOMContentLoaded', function () {
     const paymentModal = document.getElementById('paymentModal');
     const balanceDueInput = document.getElementById('balanceDue');
@@ -466,7 +608,32 @@ document.addEventListener('DOMContentLoaded', function () {
     const saleIdInput = document.getElementById('saleIdInput');
     const serviceBillIdInput = document.getElementById('serviceBillIdInput');
     const customerNameInput = document.getElementById('customerName');
+    const bankAccountSelect = document.getElementById('bankAccountSelect');
+    const paymentModeSelect = document.getElementById('paymentModeSelect');
+    const transactionIdDiv = document.getElementById('transactionIdDiv');
+    const transactionIdInput = document.getElementById('transactionIdInput');
+    const cashAccountInfo = document.getElementById('cashAccountInfo');
     const paymentForm = document.getElementById('paymentForm');
+
+    // ✅ Toggle Bank Account & Transaction ID fields based on payment mode
+    paymentModeSelect.addEventListener('change', function () {
+        if (this.value === 'Online') {
+            // Online mode: Show bank account dropdown, hide cash info
+            bankAccountSelect.style.display = 'block';
+            bankAccountSelect.required = true;
+            cashAccountInfo.style.display = 'none';
+            transactionIdDiv.style.display = 'block';
+            transactionIdInput.focus();
+        } else {
+            // Cash mode: Hide bank account dropdown, show cash info
+            bankAccountSelect.style.display = 'none';
+            bankAccountSelect.required = false;
+            bankAccountSelect.value = '';  // Clear selection
+            cashAccountInfo.style.display = 'block';
+            transactionIdDiv.style.display = 'none';
+            transactionIdInput.value = '';
+        }
+    });
 
     paymentModal.addEventListener('show.bs.modal', function (event) {
         const button = event.relatedTarget;
@@ -481,6 +648,15 @@ document.addEventListener('DOMContentLoaded', function () {
         remainingBalanceInput.value = balance.toFixed(2);
         amountReceivedInput.value = '';
         amountReceivedInput.setAttribute('max', balance.toFixed(2));
+        bankAccountSelect.value = ''; 
+        paymentModeSelect.value = 'Cash'; // Set to Cash by default
+        transactionIdInput.value = '';
+        
+        // Initialize UI state for Cash mode
+        bankAccountSelect.style.display = 'none';
+        bankAccountSelect.required = false;
+        cashAccountInfo.style.display = 'block';
+        transactionIdDiv.style.display = 'none';
 
         saleIdInput.value = '';
         serviceBillIdInput.value = '';
@@ -498,6 +674,34 @@ document.addEventListener('DOMContentLoaded', function () {
         let balance = parseFloat(balanceDueInput.value);
         if (received > balance) received = balance;
         remainingBalanceInput.value = (balance - received).toFixed(2);
+    });
+
+    // ✅ Validate form submission
+    paymentForm.addEventListener('submit', function (e) {
+        // For Online payments: require bank account selection
+        if (paymentModeSelect.value === 'Online') {
+            if (!bankAccountSelect.value) {
+                e.preventDefault();
+                alert('Please select a bank account for online payment.');
+                bankAccountSelect.focus();
+                return false;
+            }
+        }
+        // For Cash payments: no bank account needed (uses existing account)
+        
+        if (!amountReceivedInput.value || parseFloat(amountReceivedInput.value) <= 0) {
+            e.preventDefault();
+            alert('Please enter a valid payment amount.');
+            amountReceivedInput.focus();
+            return false;
+        }
+        // ✅ Require transaction ID for online payments
+        if (paymentModeSelect.value === 'Online' && !transactionIdInput.value.trim()) {
+            e.preventDefault();
+            alert('Please enter a Transaction ID / Reference Number for online payments.');
+            transactionIdInput.focus();
+            return false;
+        }
     });
 
     // ✅ Table Filtering

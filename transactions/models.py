@@ -72,6 +72,42 @@ class BankTransaction(models.Model):
             raise ValidationError("Only one of sale or purchase can be linked.")
 
 
+class PaymentRecord(models.Model):
+    """
+    Track partial payments received for Sales, Purchases, and Service Bills.
+    Records which bank account received the payment.
+    """
+    PAYMENT_SOURCE_CHOICES = [
+        ('Sale', 'Sale'),
+        ('Purchase', 'Purchase'),
+        ('Service', 'Service'),
+    ]
+
+    PAYMENT_MODE_CHOICES = [
+        ('Cash', 'Cash'),
+        ('Online', 'Online'),
+    ]
+
+    sale = models.ForeignKey('Sale', null=True, blank=True, on_delete=models.CASCADE, related_name='payment_records')
+    purchase = models.ForeignKey('Purchase', null=True, blank=True, on_delete=models.CASCADE, related_name='payment_records')
+    servicebill = models.ForeignKey('ServiceBillItem', null=True, blank=True, on_delete=models.CASCADE, related_name='payment_records')
+    
+    receiving_bank_account = models.ForeignKey(Bankaccount, on_delete=models.CASCADE, related_name='received_payments')
+    source_bank_account = models.ForeignKey(Bankaccount, null=True, blank=True, on_delete=models.CASCADE, related_name='sent_payments', help_text="Original bank account sending the payment")
+    payment_amount = models.DecimalField(max_digits=10, decimal_places=2)
+    payment_date = models.DateTimeField(auto_now_add=True)
+    payment_source_type = models.CharField(max_length=20, choices=PAYMENT_SOURCE_CHOICES)
+    payment_mode = models.CharField(max_length=20, choices=PAYMENT_MODE_CHOICES, default='Cash')
+    transaction_id = models.CharField(max_length=255, blank=True, null=True, help_text="Transaction ID for online payments (UPI, Reference Number, etc.)")
+    
+    class Meta:
+        ordering = ['-payment_date']
+
+    def __str__(self):
+        source_id = self.sale_id or self.purchase_id or self.servicebill_id
+        return f"₹{self.payment_amount} to {self.receiving_bank_account.account_name} on {self.payment_date.strftime('%Y-%m-%d %H:%M')}"
+
+
 
 class Sale(models.Model):
     """
