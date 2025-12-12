@@ -22,6 +22,7 @@ from django import forms
 from django.contrib.auth.models import User
 from django.utils import timezone
 from accounts.models import Vendor, Customer
+from django.conf import settings
 
 class Ram(models.Model):
     """
@@ -264,6 +265,49 @@ class Delivery(models.Model):
             f"Delivery of {self.item} to {self.customer_name} "
             f"at {self.location} on {self.date}"
         )
+    
+
+class ProductAuditTrail(models.Model):
+    ACTION_CHOICES = [
+        ('ASSIGN', 'Parts Assigned'),
+        ('REMOVE', 'Parts Removed'),
+    ]
+    
+    # Basic Information
+    name = models.CharField(max_length=255, blank=True, null=True)
+    serial_no = models.CharField(max_length=100)
+    make_and_models = models.CharField(max_length=255, blank=True, null=True)
+    price = models.DecimalField(max_digits=10, decimal_places=2, default=0.0)
+    
+    # Components
+    processor = models.CharField(max_length=255, blank=True, null=True)
+    processor_qty = models.IntegerField(default=0)
+    
+    ram = models.CharField(max_length=255, blank=True, null=True)
+    ram_qty = models.IntegerField(default=0)
+    
+    hdd = models.CharField(max_length=255, blank=True, null=True)
+    hdd_qty = models.IntegerField(default=0)
+    
+    ssd = models.CharField(max_length=255, blank=True, null=True)
+    ssd_qty = models.IntegerField(default=0)
+    
+    smps = models.CharField(max_length=255, blank=True, null=True)
+    motherboard = models.CharField(max_length=255, blank=True, null=True)
+    
+    # Audit Information
+    action = models.CharField(max_length=20, choices=ACTION_CHOICES)
+    performed_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True)
+    timestamp = models.DateTimeField(auto_now_add=True)
+    
+    class Meta:
+        ordering = ['-timestamp']
+        verbose_name = 'Product Audit Trail'
+        verbose_name_plural = 'Product Audit Trails'
+    
+    def __str__(self):
+        return f"{self.serial_no} - {self.action} - {self.timestamp}"
+
 
     
 

@@ -232,7 +232,9 @@ tbody tr:hover {
                     <div class="d-flex flex-wrap gap-2 justify-content-center">
                         <a class="btn btn-outline-info btn-sm" href="{% url 'product-update' item.slug %}"><i class="fa-solid fa-pen"></i></a>
                         <a class="btn btn-outline-danger btn-sm" href="{% url 'product-delete' item.slug %}"><i class="fa-solid fa-trash"></i></a>
-                        <a class="btn btn-outline-success btn-sm" href="#"><i class="fa-solid fa-eye"></i></a>
+                        <a class="btn btn-outline-success btn-sm" href="{% url 'product-audit-trail' item.slug %}">
+                            <i class="fa-solid fa-eye"></i>
+                        </a>
                     </div>
                 </td>
             </tr>

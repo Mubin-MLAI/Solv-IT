@@ -11,6 +11,17 @@ This module defines the following admin classes:
 
 from django.contrib import admin
 from .models import Ssd, Item, Delivery, Hdd,Ram,Processor, catogaryitem
+
+
+from .models import ProductAuditTrail
+
+@admin.register(ProductAuditTrail)
+class ProductAuditTrailAdmin(admin.ModelAdmin):
+    list_display = ['serial_no', 'action', 'performed_by', 'timestamp']
+    list_filter = ['action', 'timestamp']
+    search_fields = ['serial_no', 'name']
+    readonly_fields = ['timestamp']
+    
 class RamAdmin(admin.ModelAdmin):
     """ 
     Admin configuration for the Ram model.

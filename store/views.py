@@ -20,7 +20,7 @@ from django.contrib import messages
 from django.contrib.messages import success
 
 # Django core imports
-from django.shortcuts import redirect, render
+from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse, reverse_lazy
 from django.http import HttpResponse, JsonResponse
 from django.views.decorators.http import require_POST
@@ -47,7 +47,7 @@ from requests import Response
 # Local app imports
 from accounts.models import Profile, Vendor
 from transactions.models import Itempurchased, Sale, catogaryitempurchased
-from .models import  Item, Delivery, Ram, Ssd, Hdd, Processor , catogaryitem  #, Nvme, M_2
+from .models import  Item, Delivery, ProductAuditTrail, Ram, Ssd, Hdd, Processor , catogaryitem  #, Nvme, M_2
 from .forms import ItemForm,  DeliveryForm, RamForm, SddForm, HddForm, ProcessorForm , catogaryForm   #, NvmeForm, M_2Form
 from .tables import ItemTable, CategoryItemTable
 from accounts.models import Customer
@@ -439,6 +439,26 @@ class ProductCreateView(LoginRequiredMixin, CreateView):
         serialno = item.serialno.strip()
         component_fields = ['processor', 'ram', 'hdd', 'ssd']
 
+        # Prepare audit data
+        audit_data = {
+            'serial_no': serialno,
+            'name': getattr(item, 'name', None),
+            'make_and_models': getattr(item, 'make_and_models', None),
+            'smps': getattr(item, 'smps_status', None),
+            'motherboard': getattr(item, 'motherboard_status', None),
+            'price' : getattr(item, 'price', None),
+            'action': 'ASSIGN',  # Product creation is treated as initial assignment
+            'performed_by': self.request.user,
+            'processor': None,
+            'processor_qty': 0,
+            'ram': None,
+            'ram_qty': 0,
+            'hdd': None,
+            'hdd_qty': 0,
+            'ssd': None,
+            'ssd_qty': 0,
+        }
+
         try:
             for component in component_fields:
                 names_str = self.request.POST.get(component, '')
@@ -450,6 +470,10 @@ class ProductCreateView(LoginRequiredMixin, CreateView):
                 if len(names) != len(qtys):
                     messages.error(self.request, f"Mismatch in count of names and quantities for {component}.")
                     continue
+
+                # Store first component and sum quantities for audit trail
+                component_names = []
+                total_qty = 0
 
                 for name, qty in zip(names, qtys):
                     try:
@@ -468,10 +492,22 @@ class ProductCreateView(LoginRequiredMixin, CreateView):
                         unit_price=0.00,
                         created_by=self.request.user
                     )
+
+                    component_names.append(name.upper())
+                    total_qty += qty_int
+
+                # Update audit data for this component
+                if component_names:
+                    audit_data[component] = ', '.join(component_names)
+                    audit_data[f'{component}_qty'] = total_qty
+
         except Exception as e:
             messages.error(self.request, f"Error while saving components: {str(e)}")
 
-        messages.success(self.request, "Product and components saved.")
+        # Create audit trail record
+        ProductAuditTrail.objects.create(**audit_data)
+
+        messages.success(self.request, "Product and components saved. Audit trail created.")
         return super().form_valid(form)
 
     def get_success_url(self):
@@ -648,8 +684,7 @@ class ProductUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
         ]
 
         ram_sizes = [
-            '2GB', '4GB', '6GB', '8GB', '12GB', '16GB', '24GB', '32GB', '48GB',
-            '64GB', '96GB', '128GB'
+            '4GB','8GB', '16GB','32GB','64GB','128GB','256GB','512GB'
         ]
 
         rambysize = {}
@@ -672,8 +707,12 @@ class ProductUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
                 if size_key not in rambysize:
                     rambysize[size_key] = []
 
+                print('size_key', size_key)
+                print('ram_name', ram_name)
+
                 # Add the formatted RAM info
                 rambysize[size_key].append(f"{ram_name} X({data.quantity}) - ({data.serial_no})")
+                print('rambysize', size_key, rambysize[size_key])
                 for size, options in rambysize.items():
                     # Consolidate entries with the same name and serial_no
                     consolidated = {}
@@ -922,8 +961,36 @@ class ProductUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
                     'ssd': self.request.POST.get('ssd_qty', '').strip(),
                 }
 
+                # Prepare audit data
+                audit_data = {
+                    'serial_no': serialno,
+                    'action': 'ASSIGN',
+                    'performed_by': self.request.user,
+                    'processor': None,
+                    'processor_qty': 0,
+                    'ram': None,
+                    'ram_qty': 0,
+                    'hdd': None,
+                    'hdd_qty': 0,
+                    'ssd': None,
+                    'ssd_qty': 0
+                }
+
+
+                
+
+                # Get additional info from Item model if exists
+                try:
+                    item = Item.objects.get(serialno__iexact=serialno)
+                    audit_data['name'] = getattr(item, 'name', None)
+                    audit_data['make_and_models'] = getattr(item, 'make_and_models', None)
+                    audit_data['smps'] = getattr(item, 'smps_status', None)
+                    audit_data['motherboard'] = getattr(item, 'motherboard_status', None)
+                except Item.DoesNotExist:
+                    pass
+
                 for component in components:
-                    print('component',component)
+                    print('component', component)
                     item_raw = self.request.POST.get(component, '').strip()
                     if not item_raw:
                         continue
@@ -937,7 +1004,9 @@ class ProductUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
                     clean_name = item_raw.split(' X(')[0].strip()
                     print(f"\nProcessing {component.upper()}: {clean_name} | Qty: {qty}")
                     
-                    qty2 = qty
+                    # Store in audit data
+                    audit_data[component] = clean_name
+                    audit_data[f'{component}_qty'] = qty
 
                     # Get all matching items and work with total available quantity
                     available_items = catogaryitem.objects.filter(
@@ -955,21 +1024,23 @@ class ProductUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
                         messages.error(self.request, f"Not enough '{clean_name}' available in {component}.")
                         return reverse_lazy('productslist')
 
-                    # Get the unit price from the first item (assuming all have the same price)
-                    # unit_price = available_items.first().unit_price
-                    # print('unit_price', unit_price)
-
-                    
-                    # ✅ Get the minimum unit price from available items
+                    # Get the minimum unit price from available items
                     unit_price = available_items.aggregate(Min('unit_price'))['unit_price__min']
                     print('unit_price', unit_price)
 
+                    audit_data['price'] = unit_price * qty
+
+
+                    
                     # Addition of price based on category price on purchased price
                     update_items = Item.objects.filter(serialno__iexact=serialno)
                     for items1 in update_items:
                         print('items1', items1, items1.price)
                         items1.price += unit_price
+
                         items1.save()
+
+
 
                     # Deduct from items (FIFO approach)
                     remaining_to_deduct = qty
@@ -986,6 +1057,8 @@ class ProductUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
                         else:
                             item.save()
 
+                    
+
                     # Assign to serialno: update if exists, else create new
                     assigned_item, created = catogaryitem.objects.get_or_create(
                         name=clean_name,
@@ -994,30 +1067,31 @@ class ProductUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
                         updated_by=self.request.user,
                         defaults={
                             'quantity': 0,
-                            'unit_price': unit_price,  # Now using unit_price from first item
-                            # add other fields if needed
+                            'unit_price': unit_price,
                         }
                     )
 
                     assigned_item.quantity += qty
                     assigned_item.updated_by = self.request.user
-                    assigned_item.save()    
+                    assigned_item.save()
 
-                    # print("✅ Assigned {} of '{}' to {}. {} entry.".format(qty, clean_name, serialno, 'Created new' if created else 'Updated existing'))
+                # Create audit trail record
+                ProductAuditTrail.objects.create(**audit_data)
 
-                messages.success(self.request, "✅ Parts Assigned to {}. {} entry.".format(serialno, 'Created new' if created else 'Updated existing'))
+                messages.success(self.request, f"✅ Parts Assigned to {serialno}. Audit trail created.")
                 return reverse_lazy('dashboard')
             else:
-                messages.success(self.request, "Product update successful!")  # Add a success message
+                messages.success(self.request, "Product update successful!")
                 return reverse_lazy('productslist')
+
         elif 'button2' in self.request.POST:
             print('button2')
             user_profile = self.request.user.profile
             if user_profile.role == 'OP':
-                messages.success(self.request, "Product update successful!")  # Add a success message
+                messages.success(self.request, "Product update successful!")
                 return reverse_lazy('productslist')
             else:
-                messages.success(self.request, "Product update successful!")  # Add a success message
+                messages.success(self.request, "Product update successful!")
                 return reverse_lazy('productslist')
             
         elif 'button3' in self.request.POST:
@@ -1025,13 +1099,53 @@ class ProductUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
             user_profile = self.request.user.profile
             if user_profile.role == 'OP':
                 serialno = self.request.POST['serialno'].strip()
-                components = ['processor','ram', 'hdd', 'ssd']
+                components = ['processor', 'ram', 'hdd', 'ssd']
                 quantities = {
                     'processor': self.request.POST.get('processor_qty', '').strip(),
                     'ram': self.request.POST.get('ram_qty', '').strip(),
                     'hdd': self.request.POST.get('hdd_qty', '').strip(),
                     'ssd': self.request.POST.get('ssd_qty', '').strip(),
                 }
+
+                # Prepare audit data with existing values from DB
+                existing_items = catogaryitem.objects.filter(serial_no=serialno)
+
+                # Build a map of existing category → (name, qty)
+                existing_map = {}
+                for comp in ['processor', 'ram', 'hdd', 'ssd']:
+                    item = existing_items.filter(category=comp).aggregate(
+                        total_qty=Sum('quantity'),
+                        first_name=Min('name')
+                    )
+                    existing_map[comp] = {
+                        'name': item['first_name'],
+                        'qty': item['total_qty'] if item['total_qty'] else 0
+                    }
+
+                # Prepare audit data
+                audit_data = {
+                    'serial_no': serialno,
+                    'action': 'REMOVE',
+                    'performed_by': self.request.user,
+                    'processor': None,
+                    'processor_qty': 0,
+                    'ram': None,
+                    'ram_qty': 0,
+                    'hdd': None,
+                    'hdd_qty': 0,
+                    'ssd': None,
+                    'ssd_qty': 0,
+                }
+
+                # Get additional info from Item model if exists
+                try:
+                    item = Item.objects.get(serialno__iexact=serialno)
+                    audit_data['name'] = getattr(item, 'name', None)
+                    audit_data['make_and_models'] = getattr(item, 'make_and_models', None)
+                    audit_data['smps'] = getattr(item, 'smps_status', None)
+                    audit_data['motherboard'] = getattr(item, 'motherboard_status', None)
+                except Item.DoesNotExist:
+                    pass
 
                 for component in components:
                     print('component', self.request.POST.get(component, '').strip())
@@ -1049,29 +1163,31 @@ class ProductUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
                     clean_name = item_raw.split(' X(')[0].strip()
                     print(f"\nProcessing {component.upper()}: {clean_name} | Qty: {qty}")
 
-                    # Get the item from the source device (e.g., LAP786786)
-                    # try:
+                    # Store in audit data
+                    audit_data[component] = clean_name
+                    audit_data[f'{component}_qty'] = qty
+
+                    # Get the item from the source device
                     assigned_item = catogaryitem.objects.filter(
                         name=clean_name,
                         category=component,
                         serial_no=serialno
                     )
-                    # except catogaryitem.DoesNotExist:
-                    #     messages.error(self.request, "No '{}' assigned to {}.".format(clean_name, serialno))
-                    #     return reverse_lazy('productslist')
 
                     total_available = assigned_item.aggregate(Sum('quantity'))['quantity__sum'] if assigned_item.exists() else 0
                     print('total_available', total_available)
                     if total_available < qty:
-                        messages.error(self.request, "Not enough '{}' in {}.".format(clean_name, serialno))
+                        messages.error(self.request, f"Not enough '{clean_name}' in {serialno}.")
                         return reverse_lazy('productslist')
-                    
 
-                    # ✅ Get the minimum unit price from available items
+                    # Get the minimum unit price from available items
                     unit_price = assigned_item.aggregate(Min('unit_price'))['unit_price__min']
                     print('unit_price', unit_price)
 
-                    # Addition of price based on category price on purchased price
+
+                    audit_data['price'] = unit_price * qty
+
+                    # Deduction of price based on category price
                     update_items = Item.objects.filter(serialno__iexact=serialno)
                     for items1 in update_items:
                         print('items1', items1, items1.price)
@@ -1083,39 +1199,32 @@ class ProductUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
                     
                     if total_available <= 0:
                         assigned_item.delete()
-                        # print("❌ Deleted {} from {} (Qty reached zero).".format(clean_name, serialno))
                     else:
-                        # assigned_item.updated_by = self.request.user
-                        assigned_item = catogaryitem.objects.filter(
-                        name=clean_name,
-                        category=component,
-                        serial_no=serialno
-                    ).update(updated_by=self.request.user, quantity=total_available)
-                        # print("➖ Deducted {} from {} ({}). Remaining: {}".format(qty, serialno, clean_name, assigned_item.quantity))
+                        assigned_item.update(updated_by=self.request.user, quantity=total_available)
 
                     # Add to 'Solv-IT'
                     stock_item, created = catogaryitem.objects.get_or_create(
                         name=clean_name,
                         category=component,
                         serial_no='Solv-IT',
-                        updated_by = self.request.user,
+                        updated_by=self.request.user,
                         defaults={
                             'quantity': 0,
-                            'unit_price': assigned_item,
+                            'unit_price': unit_price,
                         }
                     )
                     stock_item.quantity += qty
                     stock_item.updated_by = self.request.user
                     stock_item.save()
 
-                    # print("✅ Moved {} of '{}' to Solv-IT. {} entry.".format(qty, clean_name, 'Created new' if created else 'Updated existing'))
+                # Create audit trail record
+                ProductAuditTrail.objects.create(**audit_data)
 
-
-                    messages.success(self.request, "✅ Parts Moved to Solv-IT. {} entry.".format(serialno, 'Created new' if created else 'Updated existing'))
-                    return reverse_lazy('dashboard')
+                messages.success(self.request, f"✅ Parts Moved to Solv-IT. Audit trail created.")
+                return reverse_lazy('dashboard')
             else:
                 print('button3 else')
-                messages.success(self.request, "Product update successful!")  # Add a success message
+                messages.success(self.request, "Product update successful!")
                 return reverse_lazy('dashboard')
         else:
             print('button main')
@@ -2041,6 +2150,61 @@ def upload_category_only(request):
         form = ExcelUploadForm()
 
     return render(request, 'store/category_form.html', {'form': form})
+
+
+
+class ProductAuditTrailView(LoginRequiredMixin, ListView):
+    """
+    View to display audit trail for a specific product by serial number.
+    """
+    template_name = "store/product_audit_trail.html"
+    
+    def get(self, request, slug):
+        # Get the item by slug
+        item = get_object_or_404(Item, slug=slug)
+        
+        # Get all audit trails for this serial number
+        audit_trails = ProductAuditTrail.objects.filter(
+            serial_no=item.serialno
+        ).order_by('-timestamp')
+
+        # Prepare data for template
+        audit_data = []
+        for audit in audit_trails:
+            if Profile.objects.get(user=audit.performed_by).role == 'AD':  
+                admin_name =  audit.performed_by.username if audit.performed_by else 'Unknown'     
+                performed_by =  'Admin'
+            else:
+                admin_name = audit.performed_by.username if audit.performed_by else 'Unknown'
+                performed_by =  'Operative --> ' + 'Product Operative'
+            audit_data.append({
+                'id': audit.id,
+                'name': audit.name or '',
+                'serial_no': audit.serial_no,
+                'make_and_models': audit.make_and_models or '',
+                'price' : float(audit.price or 0.0),
+                'processor': audit.processor or '',
+                'processor_qty': audit.processor_qty,
+                'ram': audit.ram or '',
+                'ram_qty': audit.ram_qty,
+                'hdd': audit.hdd or '',
+                'hdd_qty': audit.hdd_qty,
+                'ssd': audit.ssd or '',
+                'ssd_qty': audit.ssd_qty,
+                'smps':  audit.smps or '',
+                'motherboard': audit.motherboard or '',
+                'action': audit.action,
+                'performed_by': {'role': performed_by, 'name': admin_name} if audit.performed_by else 'Unknown',
+                'timestamp': audit.timestamp.isoformat(),
+            })
+        
+        context = {
+            'item': item,
+            'audit_trails': audit_data,
+            'audit_trails_json': json.dumps(audit_data),
+        }
+        
+        return render(request, self.template_name, context)
 
 
 

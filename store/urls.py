@@ -38,7 +38,8 @@ from .views import (
     get_category_items,
     operativedashboard,
     upload_category_items,
-    upload_category_only
+    upload_category_only,
+    ProductAuditTrailView
     
 )
 
@@ -192,7 +193,7 @@ urlpatterns = [
     path('customers/', customer_search, name='customer_search'),
     path('customer_create11/', customer_create, name='customer_create11'),
     path('search-customer/', views.customer_search_suggestions, name='customer_search_suggestions'),
-
+    path('product/<slug:slug>/audit-trail/', ProductAuditTrailView.as_view(), name='product-audit-trail')
 ]
 
 # Static media files configuration for development

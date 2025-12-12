@@ -288,13 +288,6 @@ select option {
 
                             <div class="row mb-3">
                                 <div class="col-md-6">
-                                    <label for="price" class="form-label">Price</label>
-                                    <input type="text" id="price" name="price" class="form-control"
-                                        value="{{ form.price.value }}"   style="background-color: #060606;" readonly>
-                                    <div class="text-danger">{{ form.price.errors }}</div>
-                                </div>
-
-                                <div class="col-md-6">
                                     <label for="{{ form.purchased_type.id_for_label }}" class="form-label" placeholder="Enter Purchase / LOT Code">
                                         Purchase Type
                                     </label>
@@ -302,6 +295,14 @@ select option {
                                         value="{{ form.purchased_type.value }}"  style="background-color: #060606;" readonly>
                                     <div class="text-danger">{{ form.purchased_type.errors }}</div>
                                 </div>
+                                <div class="col-md-6">
+                                    <label for="price" class="form-label" hidden>Price</label>
+                                    <input type="text" id="price" name="price" class="form-control"
+                                        value="{{ form.price.value }}"   style="background-color: #060606;" readonly hidden>
+                                    <div class="text-danger" hidden>{{ form.price.errors }}</div>
+                                </div>
+
+                                
                             </div>
 
                             <div class="row mb-3">
@@ -483,13 +484,6 @@ select option {
 
                             <div class="row mb-3">
                                 <div class="col-md-6">
-                                    <label for="price" class="form-label">Price</label>
-                                    <input type="text" id="price" name="price" class="form-control"
-                                        value="{{ form.price.value }}"  style="background-color: #060606;" readonly>
-                                    <div class="text-danger">{{ form.price.errors }}</div>
-                                </div>
-
-                                <div class="col-md-6">
                                     <label for="{{ form.purchased_type.id_for_label }}" class="form-label" placeholder="Enter Purchase / LOT Code">
                                         Purchase Type
                                     </label>
@@ -497,6 +491,14 @@ select option {
                                         value="{{ form.purchased_type.value }}"  style="background-color: #060606;" readonly>
                                     <div class="text-danger">{{ form.purchased_type.errors }}</div>
                                 </div>
+                                <div class="col-md-6">
+                                    <label for="price" class="form-label" hidden>Price</label>
+                                    <input type="text" id="price" name="price" class="form-control"
+                                        value="{{ form.price.value }}"  style="background-color: #060606;" readonly hidden>
+                                    <div class="text-danger" hidden>{{ form.price.errors }}</div>
+                                </div>
+
+                                
                             </div>
 
                             <div class="row mb-3">
@@ -660,19 +662,18 @@ select option {
                             </div>
                             <div class="row mb-3">
                                 <div class="col-md-6">
-                                    <label for="price" class="form-label">Price</label>
-                                    <input type="text" id="price" name="price" class="form-control"
-                                        value="{{ form.price.value }}"  style="background-color: #060606;" readonly>
-                                    <div class="text-danger">{{ form.price.errors }}</div>
-                                </div>
-
-                                <div class="col-md-6">
                                     <label for="{{ form.purchased_type.id_for_label }}" class="form-label" placeholder="Enter Purchase / LOT Code">
                                         Purchase Type
                                     </label>
                                     <input type="text" id="purchased_type" name="purchased_type" class="form-control"
                                         value="{{ form.purchased_type.value }}"  style="background-color: #060606;" readonly>
                                     <div class="text-danger">{{ form.purchased_type.errors }}</div>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="price" class="form-label" hidden>Price</label>
+                                    <input type="text" id="price" name="price" class="form-control"
+                                        value="{{ form.price.value }}"  style="background-color: #060606;" readonly hidden>
+                                    <div class="text-danger" hidden>{{ form.price.errors }}</div>
                                 </div>
                             </div>
 

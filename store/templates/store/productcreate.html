@@ -342,7 +342,7 @@ body {
                         <div class="col-md-4">
                             <label for="id_smps_status" class="form-label">SMPS / Adapter Status</label>
                             <select name="smps_status" id="id_smps_status" class="form-control dark-select">
-                                <option value="Na" selected>NA</option>
+                                <option value="NA" selected>NA</option>
                                 <option value="available">Available</option>
                                 <option value="not available">Not Available</option>
                                 <!-- <option value="replacement">Replacement</option> -->
@@ -353,7 +353,7 @@ body {
                         <div class="col-md-4">
                             <label for="id_motherboard_status" class="form-label">Motherboard Status</label>
                             <select name="motherboard_status" id="id_motherboard_status" class="form-control dark-select">
-                                <option value="Na" selected>NA</option>
+                                <option value="NA" selected>NA</option>
                                 <option value="available">Available</option>
                                 <option value="not available">Not Available</option>
                                 <!-- <option value="replacement">Replacement</option> -->
@@ -361,8 +361,8 @@ body {
                             <div class="text-danger">{{ form.motherboard_status.errors }}</div>
                         </div>  
                         <div class="col-md-4">
-                            <label for="id_purchased_type" class="form-label" hidden>Purchase Type</label>
-                            <select name="purchased_type" id="id_purchased_type" class="form-control dark-select" hidden>
+                            <label for="id_purchased_type" class="form-label">Purchase Type</label>
+                            <select name="purchased_type" id="id_purchased_type" class="form-control dark-select">
                                 <option value="" selected>-- Select Purchase Type --</option>
                                 <option value="vendor">Vendor</option>
                                 <option value="customer">Customer</option>
