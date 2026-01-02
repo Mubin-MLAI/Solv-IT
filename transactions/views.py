@@ -1465,6 +1465,8 @@ def receive_payment(request):
         # Store the existing/source bank account before updating
         source_bank_account = sale.bank_account
 
+        print('payment_mode', payment_mode)
+
         # Determine receiving bank account based on payment mode
         if payment_mode == 'Online' and bank_account_id:
             # Online mode: use selected bank account

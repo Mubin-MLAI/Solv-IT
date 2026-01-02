@@ -517,23 +517,23 @@ input.form-control::placeholder,
             <label class="form-label text-light">Transaction ID / Reference Number</label>
             <input type="text" name="transaction_id" id="transactionIdInput" 
                    class="form-control bg-dark text-light border-secondary" 
-                   placeholder="e.g., UPI Ref, Check No., Transfer Ref" required>
+                   placeholder="e.g., UPI Ref, Check No., Transfer Ref" >
           </div>
 
           <div class="mb-3">
             <label class="form-label text-light">Balance Due</label>
-            <input type="text" id="balanceDue" class="form-control bg-dark text-info border-secondary" readonly>
+            <input type="text" id="balanceDue" class="form-control bg-dark text-info border-secondary" >
           </div>
 
           <div class="mb-3">
             <label class="form-label text-light">Received</label>
             <input type="number" step="0.01" min="0" id="amountReceived" name="amount_received"
-                   class="form-control bg-dark text-light border-secondary" required>
+                   class="form-control bg-dark text-light border-secondary" placeholder="Enter amount received" >
           </div>
 
           <div class="mb-3">
             <label class="form-label text-light">Remaining Balance</label>
-            <input type="text" id="remainingBalance" class="form-control bg-dark text-warning border-secondary" readonly>
+            <input type="text" id="remainingBalance" class="form-control bg-dark text-warning border-secondary"  >
           </div>
         </div>
 
@@ -687,6 +687,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 return false;
             }
         }
+
         // For Cash payments: no bank account needed (uses existing account)
         
         if (!amountReceivedInput.value || parseFloat(amountReceivedInput.value) <= 0) {
