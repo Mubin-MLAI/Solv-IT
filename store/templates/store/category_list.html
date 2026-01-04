@@ -305,6 +305,7 @@ input.form-control::placeholder,
         <th>ID</th>
         <th>Category</th>
         <th>Name</th>
+        <th>Date</th>
         <th>Serial Number</th>
         <th>Quantity</th>
         <th>Unit Price</th>
@@ -317,6 +318,7 @@ input.form-control::placeholder,
         <td data-label="ID">{{ forloop.counter|add:page_obj.start_index|add:"-1" }}</td>
         <td data-label="Category">{{ item.get_category_display }}</td>
         <td data-label="Name">{{ item.name }}</td>
+        <td data-label="Date">{{ item.created_date|date:"y/m/d h:m:s" }}</td>
         <td data-label="Serial Number">{{ item.serial_no }}</td>
         <td data-label="Quantity">{{ item.quantity }}</td>
         <td data-label="Unit Price">{{ item.unit_price }}</td>

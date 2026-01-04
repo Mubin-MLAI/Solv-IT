@@ -206,6 +206,7 @@ tbody tr:hover {
                 <th>Name</th>
                 <th>Serial No</th>
                 <th>Make & Model</th>
+                <th>Date</th>
                 <th>Processor</th>
                 <th>RAM</th>
                 <th>HDD</th>
@@ -222,6 +223,7 @@ tbody tr:hover {
                 <td data-label="Name">{{ item.name }}</td>
                 <td data-label="Serial No">{{ item.serialno }}</td>
                 <td data-label="Make & Model">{{ item.make_and_models }}</td>
+                <td data-label="Date">{{ item.created_date|date:"y/m/d h:m:s" }}</td>
                 <td data-label="Processor">{% for p in item.processors %}<li>{{ p }}</li>{% endfor %}</td>
                 <td data-label="RAM">{% for p in item.rams %}<li>{{ p }}</li>{% endfor %}</td>
                 <td data-label="HDD">{% for p in item.hdds %}<li>{{ p }}</li>{% endfor %}</td>
