@@ -179,7 +179,7 @@ tbody tr:hover {
     {% endif %}
 </div>
 
-<!-- 🟢 SEARCH -->
+<!-- 🟢 SEARCH & FILTER -->
 <div class="card-dark p-3 mb-4 rounded-4 shadow-sm border border-dark-subtle">
     <form class="d-flex flex-wrap gap-2" id="searchform1" action="{% url 'item_search_list_view' %}" method="get">
         <div class="input-group flex-grow-1">
@@ -187,8 +187,15 @@ tbody tr:hover {
                 <i class="fa-solid fa-search"></i>
             </span>
             <input id="searchbox1" name="q" type="text" class="form-control bg-dark text-light border-0"
-                placeholder="Search products..." style="border-top-right-radius:50px;border-bottom-right-radius:50px;">
+                placeholder="Search products..." style="border-top-right-radius:50px;border-bottom-right-radius:50px;" value="{{ request.GET.q }}">
         </div>
+        <!-- Purchased Type Filter -->
+        <select name="purchased_type" id="purchasedTypeFilter" class="form-control bg-dark text-light border-0 rounded-pill" style="max-width: 180px;">
+            
+            <option value="">Filter All Types</option>
+            <option value="vendor" {% if request.GET.purchased_type == 'vendor' %}selected{% endif %}>Vendor</option>
+            <option value="customer" {% if request.GET.purchased_type == 'customer' %}selected{% endif %}>Customer</option>
+        </select>
         <button type="submit" class="btn btn-outline-success rounded-pill"><i class="fa-solid fa-magnifying-glass"></i> Search</button>
         <button type="button" id="clearSearch1" class="btn btn-outline-danger rounded-pill"><i class="fa-solid fa-xmark"></i> Clear</button>
     </form>
@@ -335,6 +342,7 @@ clearButton.addEventListener('click', function () {
 <script>
 document.getElementById("clearSearch1")?.addEventListener("click", () => {
     document.getElementById("searchbox1").value = "";
+    document.getElementById("purchasedTypeFilter").value = "";
     document.getElementById("searchform1").submit();
 });
 </script>

@@ -175,7 +175,7 @@ class ProductListView(LoginRequiredMixin, ExportMixin, tables.SingleTableView):
         print('working ')
         # Get all category items in one go to reduce DB hits
         all_category_items = catogaryitem.objects.filter(
-            serial_no__in=[item.serialno for item in items]
+            serial_no__in=[item.serialno for item in items],
         )
 
         # Group them by serial number, but only store the component name
@@ -308,6 +308,12 @@ class ItemSearchListView(ProductListView):
                     operator.and_, (Q(name__icontains=q) | Q(make_and_models__icontains=q) | Q(serialno__icontains=q) for q in query_list)
                 )
             )
+        
+        # Filter by purchased type (vendor/customer)
+        purchased_type = self.request.GET.get("purchased_type")
+        if purchased_type and purchased_type in ['vendor', 'customer']:
+            result = result.filter(purchased_type=purchased_type)
+        
         return result
 
     # def get_queryset(self):
