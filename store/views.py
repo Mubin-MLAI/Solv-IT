@@ -1834,27 +1834,54 @@ def operativedashboard(request):
     else:
         return render(request, "store/productslist.html")
 
-
 @csrf_exempt
-def create_category_items(spec_string, serial_no, category, quantity,price,createdby,product_code):
-    print(f"create_category_items called with serial_no={serial_no}, category={category}, spec_string={spec_string}, quantity={quantity}, createdby={createdby}, product_code={product_code}")
-    spec_string = '' if spec_string is None else spec_string
-    quantity = '' if quantity is None else quantity
-    price = '' if price is None else price
-    
-    names = [n.strip() for n in str(spec_string).split(',') if n.strip()]
-    quantitys = [n for n in str(quantity).split(',') if n]
-    for name, quantity in zip( names, quantitys) :
+def create_category_items(spec_string, serial_no, category,quantity, price, createdby, product_code):
+    print(
+        f"create_category_items called with "
+        f"serial_no={serial_no}, category={category}, "
+        f"spec_string={spec_string}, quantity={quantity}, "
+        f"createdby={createdby}, product_code={product_code}"
+    )
+
+    # Normalize inputs
+    spec_string = '' if spec_string in [None, 'nan'] else str(spec_string)
+    quantity = '' if quantity in [None, 'nan'] else str(quantity)
+    price = '' if price in [None, 'nan'] else str(price)
+
+    names = [n.strip() for n in spec_string.split(',') if n.strip()]
+    quantities = [q.strip() for q in quantity.split(',') if q.strip()]
+
+    # Prevent zip() data loss
+    pairs = zip_longest(names, quantities, fillvalue='1')
+
+    # Validate price once
+    try:
+        price_val = float(price) if price else 0.0
+    except Exception:
+        price_val = 0.0
+
+    for name, qty in pairs:
+        if not name or name.lower() == 'nan':
+            continue
+
+        # Safe quantity parsing
+        try:
+            qty_val = int(float(qty))
+            if qty_val <= 0:
+                qty_val = 1
+        except Exception:
+            qty_val = 1
+
         catogaryitem.objects.create(
             name=name.upper(),
-            serial_no=serial_no,
-            category=category,
-            quantity=1 if not quantity.isdigit() else int(quantity),
-            unit_price=price,
+            serial_no=str(serial_no),
+            category=str(category),
+            quantity=qty_val,
+            unit_price=price_val,
             created_by=createdby,
-            purchase_lot_code = product_code,
-            
+            purchase_lot_code=str(product_code)
         )
+
 
 
 @csrf_exempt
@@ -1869,7 +1896,13 @@ def create_category_itemsproduct(spec_string, serial_no, category, quantity, pri
     try:
         print(f"create_category_items called with serial_no={serial_no}, category={category}, spec_string={spec_string}, quantity={quantity}, price={price}, createdby={createdby}, purchased_code={purchased_code}")
         # Normalize inputs and guard against pandas NaN
-        spec_string = '' if spec_string is None else spec_string
+        if spec_string is None or str(spec_string).strip().lower() == 'nan':
+            spec_string = ''
+        if quantity is None or str(quantity).strip().lower() == 'nan':
+            quantity = ''
+        if price is None or str(price).strip().lower() == 'nan':
+            price = ''
+        spec_string = None if spec_string is None else spec_string
         quantity = '' if quantity is None else quantity
         price = '' if price is None else price
 
@@ -1938,95 +1971,71 @@ def create_category_itemspurchase(spec_string, serial_no, category, quantity, cr
         print(f"create_category_itemspurchase error for serial {serial_no} category {category}: {e}")
         raise
 
-
+@login_required
 @csrf_exempt
 def upload_category_items(request):
     if request.method == 'POST':
         form = ExcelUploadForm(request.POST, request.FILES)
         if form.is_valid():
             excel_file = request.FILES['file']
-            # try:
             df = pd.read_excel(excel_file)
 
+            render_purchase = False  # 🔑 flag
+
             for _, row in df.iterrows():
-                print(row)
                 serial_no = str(row.get('Serialno')).strip()
-                name = row.get('Name', '').strip()
+                name = str(row.get('Name', '')).strip()
                 vendor_name = str(row.get('vendor_name', '')).strip()
-                # customer_name = str(row.get('Customer', '')).strip()
                 purchased_code = str(row.get('Purchased code', '')).strip()
                 purchased_type = str(row.get('Purchased type', '')).strip()
 
-                print('dadadadad', vendor_name, purchased_code)
+                if purchased_type:
+                    render_purchase = True  # remember choice
 
+                # ----- your existing logic -----
                 vendor = Vendor.objects.filter(name__iexact=vendor_name).first()
+                if not vendor and vendor_name:
+                    vendor = Vendor.objects.create(name=vendor_name)
+
+                # Customer logic (unchanged)
                 from django.db.models import Q
-
-                full_name = row.get('Customer', '').strip()
+                full_name = str(row.get('Customer', '')).strip()
                 first = last = ''
-
-                # Split the name
                 if full_name:
                     parts = full_name.split()
                     first = parts[0]
                     last = parts[-1] if len(parts) > 1 else ''
 
-                # Build filter dynamically
                 if first and last:
-                    # Both provided → match both
                     customer = Customer.objects.filter(
                         first_name__iexact=first,
                         last_name__iexact=last
                     ).first()
-
                 elif first:
-                    # Only first provided → match first OR last
                     customer = Customer.objects.filter(
                         Q(first_name__iexact=first) | Q(last_name__iexact=first)
                     ).first()
-
                 else:
                     customer = None
 
-
-                # customer = Customer.objects.filter(first_name__iexact=customer_name).first()
-                print('customer', customer)
-                print('Purchased type', row.get('Purchased type', '').strip())
-                if not vendor and vendor_name:
-                    vendor = Vendor.objects.create(name=vendor_name)
+                # Item creation
                 if purchased_type:
                     Item.objects.create(
-                    name=name,
-                    serialno=serial_no,
-                    make_and_models=row.get('Make and models', ''),
-                    smps_status=row.get('Smps status', '').strip().lower(),
-                    motherboard_status=row.get('Motherboard status', '').strip().lower(),
-                    quantity=row.get('Quantity', 1),
-                    price=row.get('Price', 0.0),
-                    note=row.get('Note', '').strip(),
-                    purchased_code=purchased_code,
-                    purchased_type = row.get('Purchased type', '').strip().lower(),
-                    customer=customer,
-                    created_by = request.user
+                        name=name,
+                        serialno=serial_no,
+                        make_and_models=row.get('Make and models', ''),
+                        smps_status=str(row.get('Smps status', '')).strip().lower(),
+                        motherboard_status=str(row.get('Motherboard status', '')).strip().lower(),
+                        quantity=row.get('Quantity', 1),
+                        price=row.get('Price', 0.0),
+                        note=row.get('Note', ''),
+                        purchased_code=purchased_code,
+                        purchased_type=purchased_type.lower(),
+                        customer=customer,
+                        created_by=request.user
                     )
-
-                    # print('12345', row.get('Processor', ''), serial_no, 'processor', row.get('processor_qty', ''), request.user)
-                    # Inside your row loop
-                    create_category_items(row.get('Processor', ''), serial_no, 'processor', row.get('Processor_Qty', ''),0.0, request.user, purchased_code)
-                    create_category_items(row.get('RAM', ''), serial_no, 'ram', row.get('Ram_Qty', ''),0.0, request.user, purchased_code)
-                    create_category_items(row.get('HDD', ''), serial_no, 'hdd', row.get('Hdd_Qty', ''),0.0, request.user, purchased_code)
-                    create_category_items(row.get('SSD', ''), serial_no, 'ssd',row.get('Ssd_Qty', ''),0.0, request.user, purchased_code)
-                    
-                    
-                    return render(request, 'transactions/purchasecreate.html', {
-                        'form': ExcelUploadForm(),
-                        'success': "Excel imported successfully!"
-                    })
-
-                
                 else:
-                    # Create the Item entry
-                    item = Item.objects.create(
+                    Item.objects.create(
                         name=name,
                         serialno=serial_no,
                         make_and_models=row.get('Make and models', ''),
@@ -2040,28 +2049,54 @@ def upload_category_items(request):
                         created_by=request.user
                     )
 
-                    # print('12345', row.get('Processor', ''), serial_no, 'processor', row.get('processor_qty', ''), request.user)
-                    # Inside your row loop
-                    create_category_items(row.get('Processor', ''), serial_no, 'processor', row.get('Processor_Qty', ''),0.0, request.user, purchased_code)
-                    create_category_items(row.get('RAM', ''), serial_no, 'ram', row.get('Ram_Qty', ''),0.0, request.user, purchased_code)
-                    create_category_items(row.get('HDD', ''), serial_no, 'hdd', row.get('Hdd_Qty', ''),0.0, request.user, purchased_code)
-                    create_category_items(row.get('SSD', ''), serial_no, 'ssd',row.get('Ssd_Qty', ''),0.0, request.user, purchased_code)
+                # Category items
+                create_category_items(row.get('Processor', ''), serial_no, 'processor', row.get('Processor_Qty', ''), 0.0, request.user, purchased_code)
+                create_category_items(row.get('RAM', ''), serial_no, 'ram', row.get('Ram_Qty', ''), 0.0, request.user, purchased_code)
+                create_category_items(row.get('HDD', ''), serial_no, 'hdd', row.get('Hdd_Qty', ''), 0.0, request.user, purchased_code)
+                create_category_items(row.get('SSD', ''), serial_no, 'ssd', row.get('Ssd_Qty', ''), 0.0, request.user, purchased_code)
+
+                    
+                # Audit Trail
+                audit_data = {
+                    'name': name,
+                    'serial_no': serial_no,
+                    'make_and_models': row.get('Make and models', ''),
+                    'smps': str(row.get('Smps status', '')).strip().lower(),
+                    'motherboard': str(row.get('Motherboard status', '')).strip().lower(),
+                    'price': row.get('Price', 0.0),
+                    'ram': row.get('RAM', ''),
+                    'processor': row.get('Processor', ''),
+                    'hdd': row.get('HDD', ''),
+                    'ssd': row.get('SSD', ''),
+                    'ram_qty': 0 if row.get('Ram_Qty') in [None, 'nan'] else row.get('Ram_Qty'),
+                    'processor_qty': 0 if row.get('Processor_Qty', '') in [None, 'nan'] else row.get('Processor_Qty', 0),
+                    'hdd_qty': 0 if row.get('Hdd_Qty', '') in [None, 'nan'] else row.get('Hdd_Qty', 0),
+                    'ssd_qty': 0 if row.get('Ssd_Qty', '') in [None, 'nan'] else row.get('Ssd_Qty', 0),
+                    'performed_by': request.user,
+                    'action': 'ASSIGN'
+                }
 
 
-                    return render(request, 'store/productcreate.html', {
-                        'form': ExcelUploadForm(),
-                        'success': "Excel imported successfully!"
-                    })
+                ProductAuditTrail.objects.create(**audit_data)
+                
 
-            # except Exception as e:
-            #     return render(request, 'store/productcreate.html', {
-            #         'form': form,
-            #         'error': f"Import failed: {e}"
-            #     })
+            # ✅ Render AFTER loop
+            template = (
+                'transactions/purchasecreate.html'
+                if render_purchase
+                else 'store/productcreate.html'
+            )
+
+            return render(request, template, {
+                'form': ExcelUploadForm(),
+                'success': "Excel imported successfully!"
+            })
+
     else:
         form = ExcelUploadForm()
 
     return render(request, 'store/productcreate.html', {'form': form})
+
 
 
 

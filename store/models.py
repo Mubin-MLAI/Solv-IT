@@ -141,6 +141,7 @@ class catogaryitem(models.Model):
     quantity = models.IntegerField(default=1, null=True, blank=True)
     unit_price = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
     purchase_lot_code = models.CharField(max_length=100, null=True, blank=True, default=None)
+    
 
     created_by = models.ForeignKey(
         User, on_delete=models.SET_NULL, null=True, blank=True, related_name='category_items_created'
@@ -281,16 +282,16 @@ class ProductAuditTrail(models.Model):
     
     # Components
     processor = models.CharField(max_length=255, blank=True, null=True)
-    processor_qty = models.IntegerField(default=0)
+    processor_qty = models.CharField(max_length=255, blank=True, null=True)
     
     ram = models.CharField(max_length=255, blank=True, null=True)
-    ram_qty = models.IntegerField(default=0)
+    ram_qty = models.CharField(max_length=255, blank=True, null=True)
     
     hdd = models.CharField(max_length=255, blank=True, null=True)
-    hdd_qty = models.IntegerField(default=0)
+    hdd_qty = models.CharField(max_length=255, blank=True, null=True)
     
     ssd = models.CharField(max_length=255, blank=True, null=True)
-    ssd_qty = models.IntegerField(default=0)
+    ssd_qty = models.CharField(max_length=255, blank=True, null=True)
     
     smps = models.CharField(max_length=255, blank=True, null=True)
     motherboard = models.CharField(max_length=255, blank=True, null=True)

@@ -62,7 +62,7 @@ class ItemTable(tables.Table):
         model = Item
         template_name = "django_tables2/semantic.html"
         fields = (
-            'name', 'customer' ,'serialno', 'make_and_models','quantity',
+            'name', 'customer','purchased_type' ,'serialno', 'make_and_models','quantity',
             'processor','processor_qty', 'ram','ram_qty','hdd','hdd_qty','ssd','ssd_qty','price',
             'smps_status', 'motherboard_status','purchased_code','note'
         )
