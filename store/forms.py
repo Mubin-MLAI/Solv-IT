@@ -35,7 +35,7 @@ class ItemForm(forms.ModelForm):
         ]
         widgets = {
             'name': forms.TextInput(attrs={'class': 'form-control',
-                'placeholder': 'Enter Product Name',
+                'placeholder': 'Enter Brand Name',
                 'style': 'text-transform: uppercase;'}),
             'serialno': forms.TextInput(attrs={'class': 'form-control',
                 'placeholder': 'Enter Serial No',
