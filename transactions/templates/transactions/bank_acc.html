@@ -1,0 +1,1033 @@
+{% extends "store/base.html" %}
+{% load static %}
+
+{% block title %}Bank Accounts{% endblock title %}
+
+{% block content %}
+<div class="container-fluid py-4">
+
+<style>
+/* 🌌 DARK BLUE THEME */
+body {
+    background-color: #0d1117;
+    color: #dce3f0;
+}
+
+/* 🌙 CARD BASE */
+.card-dark {
+    background: rgba(16, 22, 30, 0.95);
+    border: 1px solid #2b3340;
+    border-radius: 1rem;
+    color: #dce3f0;
+    transition: all 0.3s ease;
+}
+.card-dark:hover {
+    border-color: #2196f3;
+    box-shadow: 0 0 14px rgba(33, 150, 243, 0.25);
+}
+
+/* 💡 HEADER SECTION */
+.page-header {
+    background: linear-gradient(90deg, #2196f320, #00b3ff20);
+    border: 1px solid #2b3340;
+    border-radius: 1rem;
+    padding: 1rem 1.25rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+}
+.page-header h4 {
+    color: #5bc0ff;
+    font-weight: 600;
+}
+.page-header .btn {
+    border-radius: 50px;
+}
+
+/* 💳 ACCOUNT CARDS */
+.account-card {
+    background: #121826;
+    border: 1px solid #2b3340;
+    border-radius: 0.75rem;
+    transition: all 0.3s ease;
+}
+.account-card:hover {
+    border-color: #2196f3;
+    transform: translateY(-2px);
+    box-shadow: 0 0 10px rgba(33, 150, 243, 0.25);
+}
+.account-card.active {
+    border-color: #5bc0ff;
+    background: rgba(91,192,255,0.1);
+}
+.account-card a {
+    text-decoration: none;
+    color: inherit;
+}
+.account-card small {
+    color: #9aa7bb;
+}
+
+/* 🔍 FILTER FORM */
+#filterForm .form-control,
+#filterForm button {
+    background-color: #121826;
+    color: #e6edf3;
+    border: 1px solid #2b3340;
+}
+#filterForm .form-control:focus {
+    border-color: #5bc0ff;
+    box-shadow: 0 0 0 0.25rem rgba(91,192,255,0.2);
+}
+
+/* 📊 TABLE */
+.table-dark-custom {
+    color: #e6edf3;
+    border-color: #2b3340;
+}
+.table-dark-custom thead {
+    background-color: #121826;
+    position: sticky;
+    top: 0;
+    z-index: 2;
+}
+.table-dark-custom tbody tr:hover {
+    background-color: rgba(33,150,243,0.1);
+}
+.transaction-row:hover {
+    background-color: rgba(33,150,243,0.2) !important;
+    border-left: 3px solid #5bc0ff;
+}
+.table-dark-custom td, .table-dark-custom th {
+    border-color: #2b3340;
+}
+
+/* ✅ BADGES */
+.text-primary { color: #5bc0ff !important; }
+.text-danger { color: #ff6666 !important; }
+
+/* 🧾 MODAL */
+.modal-content {
+    background-color: #121826;
+    color: #e6edf3;
+    border: 1px solid #2b3340;
+}
+.modal-header {
+    border-bottom: 1px solid #2b3340;
+}
+.btn-close {
+    filter: invert(1);
+}
+
+/* 💫 Buttons */
+.hover-glow {
+    transition: all 0.3s ease;
+}
+.hover-glow:hover {
+    box-shadow: 0 0 12px rgba(91,192,255,0.35);
+    transform: translateY(-1px);
+}
+.btn-outline-light:hover {
+    background-color: #2196f3;
+    color: #fff;
+    border-color: #2196f3;
+}
+
+.table-responsive {
+    max-height: 500px;
+    overflow-y: auto;
+    overflow-x: hidden; /* hide horizontal scroll gap */
+    padding-right: 0;
+    margin-right: 0;
+}
+
+.table-dark-custom {
+    width: 100%;
+    margin-right: 0;
+    border-collapse: collapse;
+}
+
+.table-dark-custom td, 
+.table-dark-custom th {
+    white-space: nowrap;
+}
+
+label.form-label {
+        color: #bdbdbd;
+        font-weight: 500;
+        text-transform: uppercase;
+        font-size: 0.9rem;
+        margin-bottom: 6px;
+    }
+
+input.form-control::placeholder,
+    textarea.form-control::placeholder {
+        color: #999;
+    }
+
+/* 📱 Responsive Tables */
+@media (max-width: 991.98px) {
+    .table thead { display: none; }
+    .table, .table tbody, .table tr, .table td { display: block; width: 100%; }
+    .table tr {
+        margin-bottom: 1rem;
+        background-color: #121826;
+        border-radius: .75rem;
+        padding: .75rem;
+    }
+    .table td {
+        text-align: right;
+        padding-left: 50%;
+        position: relative;
+        border: none;
+    }
+    .table td::before {
+        content: attr(data-label);
+        position: absolute;
+        left: 0;
+        width: 50%;
+        padding-left: .75rem;
+        font-weight: 600;
+        color: #9aa7bb;
+        text-align: left;
+    }
+}
+
+/* 🌈 Gradient Text */
+.text-gradient {
+    background: linear-gradient(90deg, #00b3ff, #2196f3);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+/* � Payment History Row Styling */
+.payment-history-trigger {
+    transition: all 0.3s ease;
+}
+
+.payment-history-trigger:hover {
+    background-color: rgba(33, 150, 243, 0.2) !important;
+}
+
+.payment-history-details {
+    background-color: rgba(0, 0, 0, 0.2);
+}
+
+.payment-history-details table {
+    font-size: 0.9rem;
+}
+
+.payment-history-details table thead {
+    background-color: rgba(33, 150, 243, 0.1);
+}
+</style>
+
+<!-- ✅ HEADER -->
+<div class="page-header mb-4">
+    <h4><i class="fa-solid fa-building-columns me-2 text-primary"></i> Bank Accounts Overview</h4>
+    <div class="d-flex gap-2 flex-wrap">
+        <a href="{% url 'bank-create' %}" class="btn btn-primary btn-sm shadow-sm hover-glow">
+            <i class="fa-solid fa-plus"></i> Add Bank
+        </a>
+        <a href="{% url 'bank-export' %}" class="btn btn-outline-light btn-sm shadow-sm hover-glow">
+            <i class="fa-solid fa-download"></i> Export Excel
+        </a>
+    </div>
+</div>
+
+<div class="row">
+    <!-- ✅ Sidebar -->
+    <div class="col-md-4 mb-4">
+        <div class="card-dark p-3">
+            <h5 class="text-gradient mb-3">Accounts Summary</h5>
+
+            <div class="account-card mb-3 p-3 {% if not selected_account_id %}active{% endif %}">
+                <a href="{% url 'cashbanklist' %}">
+                    <strong>Show All</strong><br>
+                    <small>All accounts overview</small>
+                </a>
+            </div>
+
+            {% for bank in all_bankaccounts %}
+            <div class="account-card mb-3 p-3 {% if selected_account_id == bank.id|stringformat:'s' %}active{% endif %}">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <a href="?account_id={{ bank.id }}" class="{% if selected_account_id == bank.id|stringformat:'s' %}text-info{% endif %}">
+                            <strong>{{ bank.account_name }}</strong><br>
+                            <small>
+                                {% if bank.opening_balance <= 0 %}
+                                    <span class="text-danger">₹{{ bank.opening_balance }}</span>
+                                {% else %}
+                                    <span class="text-primary">₹{{ bank.opening_balance }}</span>
+                                {% endif %}
+                            </small>
+                        </a>
+                    </div>
+                    <a href="{% url 'bank-delete' bank.id %}" class="btn btn-sm btn-outline-danger hover-glow">
+                        <i class="fa fa-trash"></i>
+                    </a>
+                </div>
+            </div>
+            {% empty %}
+            <p class="text-muted">No bank accounts found.</p>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Sidebar -->
+        <!-- <div class="col-md-4 mb-4">
+            <div class="card shadow-sm p-3 h-100">
+                <h5 class="text-success mb-3">Accounts Summary</h5>
+
+                <div class="mb-3 p-2 border rounded d-flex justify-content-between align-items-center bg-light {% if not selected_account_id %}border-success bg-success bg-opacity-10{% endif %}">
+                    <div>
+                        <a href="{% url 'cashbanklist' %}" class="{% if not selected_account_id %}text-success{% endif %}">
+                            <strong>Show All</strong>
+                        </a><br>
+                        <small>View all transactions across accounts</small>
+                    </div>
+                </div>
+
+                {% for bank in all_bankaccounts %}
+                <div class="mb-3 p-2 border rounded d-flex justify-content-between align-items-center bg-light {% if selected_account_id == bank.id|stringformat:"s" %}border-success bg-success bg-opacity-10{% endif %}">
+                    <div>
+                        <a href="?account_id={{ bank.id }}" class="{% if selected_account_id == bank.id|stringformat:"s" %}text-success{% endif %}">
+                            <strong>{{ bank.account_name }}</strong>
+                        </a><br>
+                        <small>
+                            {% if bank.opening_balance <= 0 %}
+                                <span class="text-danger">₹{{ bank.opening_balance }}</span>
+                            {% else %}
+                                <span class="text-success">₹{{ bank.opening_balance }}</span>
+                            {% endif %}
+                        </small>
+                    </div>
+                    <a href="{% url 'bank-delete' bank.id %}" class="btn btn-sm btn-outline-danger">
+                        <i class="fa fa-trash"></i>
+                    </a>
+                </div>
+                {% empty %}
+                <p class="text-muted">No bank accounts found.</p>
+                {% endfor %}
+            </div>
+        </div> -->
+
+
+    <!-- ✅ Transactions -->
+    <div class="col-md-8">
+        <div class="card-dark p-3">
+            <h5 class="mb-3 text-primary">
+                <i class="fa-solid fa-money-bill-transfer me-2"></i> Account Transactions
+                {% if selected_account %}
+                    <span class="badge bg-info ms-2">{{ selected_account.account_name }}</span>
+                {% endif %}
+            </h5>
+
+            <!-- Filters -->
+            <form id="filterForm" class="row g-2 mb-3">
+                <div class="col-md-2"><input type="text" id="filterName" class="form-control" placeholder="Search name"></div>
+                <div class="col-md-2">
+                    <select id="filterType" class="form-control">
+                        <option value="">All Types</option>
+                        <option value="Cash">Cash</option>
+                        <option value="Cheque">Cheque</option>
+                        <option value="Bank">Bank</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <select id="filterDue" class="form-control">
+                        <option value="">All Status</option>
+                        <option value="Paid">Paid</option>
+                        <option value="Unpaid">Unpaid</option>
+                        <option value="Balance">Balance Due</option>
+                    </select>
+                </div>
+                <div class="col-md-2"><input type="date" id="filterDateStart" class="form-control"></div>
+                <div class="col-md-2"><input type="date" id="filterDateEnd" class="form-control"></div>
+                <div class="col-md-1"><button type="button" id="clearFilters" class="btn btn-outline-light w-100">Clear</button></div>
+            </form>
+
+            <div class="table-responsive" style="max-height: 500px;">
+                <table class="table-sm table-dark-custom align-middle text-center mb-0" id="transactionsTable">
+                    <thead>
+                        <tr>
+                            <th>Type</th>
+                            <th>Name</th>
+                            <th>Date</th>
+                            <th>Amount</th>
+                            <th>Received</th>
+                            <th>Due</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for sale in page_obj %}
+                        <tr onclick="togglePaymentHistory({{ sale.id }})" style="cursor: pointer;" class="transaction-row" {% if sale.payment_records.all %}title="Click to see Payment History"{% endif %}>
+                            <td data-label="Type">
+                                {{ sale.payment_type }} - INV{{ sale.id }}
+                                {% if sale.payment_records.all %}
+                                    {% for payment in sale.payment_records.all %}
+                                        {% if payment.payment_mode == "Transfer" and payment.receiving_bank_account_id == selected_account_id|default:0|add:"0" %}
+                                            <br><span class="badge bg-info">📥 Transferred In</span>
+                                        {% endif %}
+                                    {% endfor %}
+                                {% endif %}
+                            </td>
+                            <td data-label="Name" class="name-cell">
+                                {% if sale.transaction_type == "Sale" %}
+                                    {{ sale.customer.first_name }} (Client)
+                                {% elif sale.transaction_type == "Purchase" %}
+                                    {{ sale.vendor.name }} (Vendor)
+                                {% elif sale.transaction_type == "Service" %}
+                                    {{ sale.item_name|default:sale.description }} (Service)
+                                {% endif %}
+                            </td>
+                            <td data-label="Date" class="date-cell">
+                                {% if sale.transaction_type == "Service" %}
+                                    {{ sale.date_created|date:"Y-m-d" }}
+                                {% else %}
+                                    {{ sale.date_added|date:"Y-m-d" }}
+                                {% endif %}
+                            </td>
+                            <td data-label="Grand Amount">
+                                <span class="badge bg-dark">₹{{ sale.grand_total|floatformat:2 }}</span>
+                            </td>
+                            <td data-label="Amount">
+                                <span class="badge bg-success">₹{{ sale.amount_paid|floatformat:2 }}</span>
+                            </td>
+                            <td data-label="Balance Due">
+                                {% if sale.status == "Paid" %}
+                                    <span class="text-primary">₹0.00</span>
+                                {% elif sale.status == "Unpaid" or sale.status == "Balance" %}
+                                    <span class="text-light badge bg-danger">₹{{ sale.amount_change|floatformat:2 }}</span>
+                                {% else %}
+                                    <span>-</span>
+                                {% endif %}
+                            </td>
+                            <td data-label="Action">
+                                {% if sale.status != "Paid" %}
+                                <button type="button" class="btn btn-sm btn-outline-primary hover-glow open-payment-modal"
+                                    data-bs-toggle="modal" data-bs-target="#paymentModal"
+                                    data-transaction-type="{{ sale.transaction_type }}"
+                                    data-balance="{{ sale.amount_change|floatformat:2 }}"
+                                    data-sale-id="{% if sale.transaction_type == 'Sale' %}{{ sale.id }}{% endif %}"
+                                    data-servicebill-id="{% if sale.transaction_type == 'Service' %}{{ sale.id }}{% endif %}"
+                                    data-customer-name="{% if sale.transaction_type == 'Sale' or sale.transaction_type == 'Service' %}{{ sale.customer.first_name }}{% elif sale.transaction_type == 'Purchase' %}{{ sale.vendor.name }}{% endif %}">
+                                    <i class="fa fa-money-bill-wave"></i>
+                                </button>
+                                <button type="button" class="btn btn-sm btn-outline-info hover-glow open-transfer-modal"
+                                    data-bs-toggle="modal" data-bs-target="#transferModal"
+                                    data-transaction-type="{{ sale.transaction_type }}"
+                                    data-transaction-id="{% if sale.transaction_type == 'Sale' %}{{ sale.id }}{% elif sale.transaction_type == 'Purchase' %}{{ sale.id }}{% elif sale.transaction_type == 'Service' %}{{ sale.id }}{% endif %}"
+                                    data-balance="{{ sale.amount_change|floatformat:2 }}"
+                                    data-customer-name="{% if sale.transaction_type == 'Sale' or sale.transaction_type == 'Service' %}{{ sale.customer.first_name }}{% elif sale.transaction_type == 'Purchase' %}{{ sale.vendor.name }}{% endif %}"
+                                    data-current-account-id="{{ selected_account_id|default:'' }}"
+                                    data-current-account-name="{{ selected_account.account_name|default:'' }}"
+                                    title="Transfer payment from one account to another">
+                                    <i class="fa-solid fa-exchange-alt"></i>
+                                </button>
+                                {% else %}
+                                <button type="button" class="btn btn-sm btn-success" disabled>
+                                    <i class="fa fa-check"></i>
+                                </button>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        <!-- Payment History Row - Collapsible -->
+                        {% if sale.payment_records.all %}
+                        <tr class="payment-history-trigger" style="display: none;">
+                            <td colspan="7" class="text-center py-2">
+                                <i class="fa-solid fa-chevron-down me-2" id="chevron-{{ sale.id }}"></i>
+                                <strong>📋 View Payment History ({{ sale.payment_records.count }} records)</strong>
+                            </td>
+                        </tr>
+                        <!-- Hidden Payment Details -->
+                        <tr class="payment-history-details" id="payment-history-{{ sale.id }}" data-toggled="false" style="display: none; background-color: rgba(0, 0, 0, 0.2);">
+                            <td colspan="7" class="p-3">
+                                <h6 class="text-gradient mb-3">💳 Partial Payment History</h6>
+                                <table class="table table-sm table-dark mb-0">
+                                    <thead>
+                                        <tr>
+                                            <th>Date & Time</th>
+                                            <th>Customer</th>
+                                            <th>Amount Received</th>
+                                            <th>From Bank Account</th>
+                                            <th>To Bank Account</th>
+                                            <th>Payment Mode</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for payment in sale.payment_records.all %}
+                                        <tr>
+                                            <td>{{ payment.payment_date|date:"M d, Y H:i" }}</td>
+                                            <td>
+                                                {% if payment.sale and payment.sale.customer %}
+                                                    <strong>{{ payment.sale.customer.first_name }}</strong>
+                                                {% elif payment.servicebill and payment.servicebill.customer %}
+                                                    <strong>{{ payment.servicebill.customer.first_name }}</strong>
+                                                {% elif payment.purchase and payment.purchase.vendor %}
+                                                    <strong>{{ payment.purchase.vendor.name }}</strong>
+                                                {% else %}
+                                                    <small class="text-muted">-</small>
+                                                {% endif %}
+                                            </td>
+                                            <td><span class="badge bg-success">₹{{ payment.payment_amount|floatformat:2 }}</span></td>
+                                            <td>
+                                                {% if payment.source_bank_account %}
+                                                    <small><strong>{{ payment.source_bank_account.account_name }}</strong></small>
+                                                {% else %}
+                                                    <small><strong>💵 Cash Payment</strong></small>
+                                                {% endif %}
+                                            </td>
+                                            <td>
+                                                {% if payment.receiving_bank_account %}
+                                                    <small><strong>📥 {{ payment.receiving_bank_account.account_name }}</strong></small>
+                                                {% else %}
+                                                    <small class="text-muted">-</small>
+                                                {% endif %}
+                                            </td>
+                                            <td>
+                                                {% if payment.payment_mode == "Online" or payment.payment_mode == "Transfer" %}
+                                                    {% if payment.payment_mode == "Transfer" %}
+                                                        <span class="badge bg-info">🔄 Transfer</span>
+                                                    {% else %}
+                                                        <span class="badge bg-info">💳 Online</span>
+                                                    {% endif %}
+                                                    {% if payment.transaction_id %}
+                                                        <br><b><small class="text-gradient">Ref: {{ payment.transaction_id }}</small></b>
+                                                    {% endif %}
+                                                {% else %}
+                                                    <span class="badge bg-warning">💵 Cash</span>
+                                                {% endif %}
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                                <div class="mt-2 text-end">
+                                    <small class="text-white">Total Received: <strong class="text-success">₹{{ sale.amount_paid|floatformat:2 }}</strong> | Remaining: <strong class="text-danger">₹{{ sale.amount_change|floatformat:2 }}</strong></small>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endif %}
+                        {% empty %}
+                        <tr><td colspan="6" class="text-white">No transactions found.</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ✅ Payment Modal -->
+<div class="modal fade" id="paymentModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <form id="paymentForm" method="post">
+      {% csrf_token %}
+      <div class="modal-content modal-dark">
+        <div class="modal-header border-secondary">
+          <h5 class="modal-title text-gradient">
+            <i class="fa-solid fa-money-bill-transfer me-2"></i> Receive Payment
+          </h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
+
+        <div class="modal-body">
+          <input type="hidden" name="sale_id" id="saleIdInput">
+          <input type="hidden" name="servicebill_id" id="serviceBillIdInput">
+
+          <div class="mb-3">
+            <label class="form-label text-light">Customer</label>
+            <input type="text" id="customerName" class="form-control bg-dark text-light border-secondary" readonly>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label text-light">Payment Mode</label>
+            <select id="paymentModeSelect" name="payment_mode" class="form-control bg-dark text-light border-secondary">
+              <option value="Cash">Cash</option>
+              <option value="Online">Online</option>
+            </select>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label text-light">Bank Account</label>
+            <select id="bankAccountSelect" name="bank_account" class="form-control bg-dark text-light border-secondary">
+              <option value="">-- Select Bank Account --</option>
+              {% for bank in all_bankaccounts %}
+                <option value="{{ bank.id }}">{{ bank.account_name }} (₹{{ bank.opening_balance|floatformat:2 }})</option>
+              {% endfor %}
+            </select>
+            <b><small id="cashAccountInfo" class="form-text text-gradient" style="display: none; margin-top: 0.5rem;">
+              💵 Cash payment will use your current/existing account
+            </small></b>
+          </div>
+
+          <!-- Transaction ID field - shown only for Online payments -->
+          <div class="mb-3" id="transactionIdDiv" style="display: none;">
+            <label class="form-label text-light">Transaction ID / Reference Number</label>
+            <input type="text" name="transaction_id" id="transactionIdInput" 
+                   class="form-control bg-dark text-light border-secondary" 
+                   placeholder="e.g., UPI Ref, Check No., Transfer Ref" >
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label text-light">Balance Due</label>
+            <input type="text" id="balanceDue" class="form-control bg-dark text-info border-secondary" >
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label text-light">Received</label>
+            <input type="number" step="0.01" min="0" id="amountReceived" name="amount_received"
+                   class="form-control bg-dark text-light border-secondary" placeholder="Enter amount received" >
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label text-light">Remaining Balance</label>
+            <input type="text" id="remainingBalance" class="form-control bg-dark text-warning border-secondary"  >
+          </div>
+        </div>
+
+        <div class="modal-footer border-secondary">
+          <button type="submit" class="btn btn-success rounded-pill hover-glow" id="submitPaymentBtn">
+            <i class="fa-solid fa-check"></i> Submit Payment
+          </button>
+          <button type="button" class="btn btn-outline-light rounded-pill" data-bs-dismiss="modal">
+            <i class="fa-solid fa-xmark"></i> Close
+          </button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- ✅ Account Transfer Modal -->
+<div class="modal fade" id="transferModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <form id="transferForm" method="post" action="{% url 'transfer-payment' %}">
+      {% csrf_token %}
+      <div class="modal-content modal-dark">
+        <div class="modal-header border-secondary">
+          <h5 class="modal-title text-gradient">
+            <i class="fa-solid fa-exchange-alt me-2"></i> Transfer Payment Between Accounts
+          </h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
+
+        <div class="modal-body">
+          <input type="hidden" name="transaction_type" id="transferTransactionType">
+          <input type="hidden" name="transaction_id" id="transferTransactionId">
+
+          <div class="mb-3">
+            <label class="form-label text-light"><strong>Transaction Details</strong></label>
+            <input type="text" id="transferTransactionInfo" class="form-control bg-dark text-light border-secondary" readonly>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label text-light">From Account</label>
+            <select name="source_bank_account" id="sourceAccountSelect" class="form-control bg-dark text-light border-secondary" required>
+              <option value="">-- Select Source Account --</option>
+              {% for bank in all_bankaccounts %}
+                <option value="{{ bank.id }}">{{ bank.account_name }} (Balance: ₹{{ bank.opening_balance|floatformat:2 }})</option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label text-light">To Account</label>
+            <select name="destination_bank_account" id="destinationAccountSelect" class="form-control bg-dark text-light border-secondary" required>
+              <option value="">-- Select Destination Account --</option>
+              {% for bank in all_bankaccounts %}
+                <option value="{{ bank.id }}">{{ bank.account_name }} (Balance: ₹{{ bank.opening_balance|floatformat:2 }})</option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label text-light">Amount to Transfer</label>
+            <input type="number" step="0.01" min="0" id="transferAmount" name="amount_transferred"
+                   class="form-control bg-dark text-light border-secondary" placeholder="Enter amount" required>
+            <small class="text-warning d-block mt-2">
+              <i class="fa-solid fa-exclamation-triangle"></i> Only the amount is transferred. Items remain in original account.
+            </small>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label text-light">Notes / Reference</label>
+            <input type="text" name="transfer_notes" id="transferNotes"
+                   class="form-control bg-dark text-light border-secondary" placeholder="e.g., Customer payment split across accounts">
+          </div>
+
+          <div class="alert alert-info alert-dismissible fade show" role="alert">
+            <i class="fa-solid fa-info-circle me-2"></i>
+            <strong>Note:</strong> This transfer will create a payment history record and only update the amount paid for this transaction. Items will not be shifted between accounts.
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert"></button>
+          </div>
+        </div>
+
+        <div class="modal-footer border-secondary">
+          <button type="submit" class="btn btn-primary rounded-pill hover-glow" id="submitTransferBtn">
+            <i class="fa-solid fa-arrow-right-arrow-left"></i> Confirm Transfer
+          </button>
+          <button type="button" class="btn btn-outline-light rounded-pill" data-bs-dismiss="modal">
+            <i class="fa-solid fa-xmark"></i> Cancel
+          </button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+
+<style>
+/* 🌙 Dark Modal Theme */
+.modal-dark {
+  background-color: #0d1117;
+  color: #e6edf3;
+  border: 1px solid #30363d;
+  box-shadow: 0 0 15px rgba(88, 166, 255, 0.2);
+  border-radius: 1rem;
+}
+
+/* ✨ Gradient Title */
+.text-gradient {
+  background: linear-gradient(90deg, #00ff9d, #00b3ff);
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* 🪄 Hover Glow */
+.hover-glow:hover {
+  box-shadow: 0 0 10px rgba(88, 166, 255, 0.4);
+  transform: translateY(-1px);
+  transition: all 0.2s ease-in-out;
+}
+
+/* White close button for dark modals */
+.btn-close-white {
+  filter: invert(1);
+}
+</style>
+
+
+<!-- ✅ JS -->
+<script>
+// Toggle Payment History visibility
+function togglePaymentHistory(saleId) {
+    const historyRow = document.getElementById(`payment-history-${saleId}`);
+    const chevron = document.getElementById(`chevron-${saleId}`);
+    
+    if (historyRow.style.display === 'none' || historyRow.style.display === '') {
+        historyRow.style.display = 'table-row';
+        historyRow.setAttribute('data-toggled', 'true');
+        chevron.classList.remove('fa-chevron-down');
+        chevron.classList.add('fa-chevron-up');
+    } else {
+        historyRow.style.display = 'none';
+        historyRow.setAttribute('data-toggled', 'false');
+        chevron.classList.remove('fa-chevron-up');
+        chevron.classList.add('fa-chevron-down');
+    }
+}
+
+document.addEventListener('DOMContentLoaded', function () {
+    const paymentModal = document.getElementById('paymentModal');
+    const balanceDueInput = document.getElementById('balanceDue');
+    const amountReceivedInput = document.getElementById('amountReceived');
+    const remainingBalanceInput = document.getElementById('remainingBalance');
+    const saleIdInput = document.getElementById('saleIdInput');
+    const serviceBillIdInput = document.getElementById('serviceBillIdInput');
+    const customerNameInput = document.getElementById('customerName');
+    const bankAccountSelect = document.getElementById('bankAccountSelect');
+    const paymentModeSelect = document.getElementById('paymentModeSelect');
+    const transactionIdDiv = document.getElementById('transactionIdDiv');
+    const transactionIdInput = document.getElementById('transactionIdInput');
+    const cashAccountInfo = document.getElementById('cashAccountInfo');
+    const paymentForm = document.getElementById('paymentForm');
+
+    // ✅ Toggle Bank Account & Transaction ID fields based on payment mode
+    paymentModeSelect.addEventListener('change', function () {
+        if (this.value === 'Online') {
+            // Online mode: Show bank account dropdown, hide cash info
+            bankAccountSelect.style.display = 'block';
+            bankAccountSelect.required = true;
+            cashAccountInfo.style.display = 'none';
+            transactionIdDiv.style.display = 'block';
+            transactionIdInput.focus();
+        } else {
+            // Cash mode: Hide bank account dropdown, show cash info
+            bankAccountSelect.style.display = 'none';
+            bankAccountSelect.required = false;
+            bankAccountSelect.value = '';  // Clear selection
+            cashAccountInfo.style.display = 'block';
+            transactionIdDiv.style.display = 'none';
+            transactionIdInput.value = '';
+        }
+    });
+
+    paymentModal.addEventListener('show.bs.modal', function (event) {
+        const button = event.relatedTarget;
+        const transactionType = button.getAttribute('data-transaction-type');
+        const balance = parseFloat(button.getAttribute('data-balance'));
+        const saleId = button.getAttribute('data-sale-id');
+        const serviceBillId = button.getAttribute('data-servicebill-id');
+        const customerName = button.getAttribute('data-customer-name');
+
+        customerNameInput.value = customerName;
+        balanceDueInput.value = balance.toFixed(2);
+        remainingBalanceInput.value = balance.toFixed(2);
+        amountReceivedInput.value = '';
+        amountReceivedInput.setAttribute('max', balance.toFixed(2));
+        bankAccountSelect.value = ''; 
+        paymentModeSelect.value = 'Cash'; // Set to Cash by default
+        transactionIdInput.value = '';
+        
+        // Initialize UI state for Cash mode
+        bankAccountSelect.style.display = 'none';
+        bankAccountSelect.required = false;
+        cashAccountInfo.style.display = 'block';
+        transactionIdDiv.style.display = 'none';
+
+        saleIdInput.value = '';
+        serviceBillIdInput.value = '';
+        if (transactionType === 'Service') {
+            paymentForm.action = "{% url 'receive_payment_service' %}";
+            serviceBillIdInput.value = serviceBillId;
+        } else {
+            paymentForm.action = "{% url 'receive-payment' %}";
+            saleIdInput.value = saleId;
+        }
+    });
+
+    amountReceivedInput.addEventListener('input', function () {
+        let received = parseFloat(this.value) || 0;
+        let balance = parseFloat(balanceDueInput.value);
+        if (received > balance) received = balance;
+        remainingBalanceInput.value = (balance - received).toFixed(2);
+    });
+
+    // ✅ Validate form submission
+    paymentForm.addEventListener('submit', function (e) {
+        // For Online payments: require bank account selection
+        if (paymentModeSelect.value === 'Online') {
+            if (!bankAccountSelect.value) {
+                e.preventDefault();
+                alert('Please select a bank account for online payment.');
+                bankAccountSelect.focus();
+                return false;
+            }
+        }
+
+        // For Cash payments: no bank account needed (uses existing account)
+        
+        if (!amountReceivedInput.value || parseFloat(amountReceivedInput.value) <= 0) {
+            e.preventDefault();
+            alert('Please enter a valid payment amount.');
+            amountReceivedInput.focus();
+            return false;
+        }
+        // ✅ Require transaction ID for online payments
+        if (paymentModeSelect.value === 'Online' && !transactionIdInput.value.trim()) {
+            e.preventDefault();
+            alert('Please enter a Transaction ID / Reference Number for online payments.');
+            transactionIdInput.focus();
+            return false;
+        }
+    });
+
+    // ✅ Table Filtering
+    const filterName = document.getElementById('filterName');
+    const filterType = document.getElementById('filterType');
+    const filterDue = document.getElementById('filterDue');
+    const filterDateStart = document.getElementById('filterDateStart');
+    const filterDateEnd = document.getElementById('filterDateEnd');
+    const clearFilters = document.getElementById('clearFilters');
+    const rows = document.querySelectorAll('#transactionsTable tbody tr');
+
+    function filterTable() {
+        const nameVal = filterName.value.trim().toLowerCase();
+        const typeVal = filterType.value.toLowerCase();
+        const dueVal = filterDue.value.toLowerCase();
+        const dateStartVal = filterDateStart.value;
+        const dateEndVal = filterDateEnd.value;
+        
+        // First pass: determine which transaction rows should be visible
+        const visibleTransactions = new Set();
+        
+        rows.forEach(row => {
+            // Only process transaction rows, skip history details
+            if (row.classList.contains('payment-history-details')) {
+                return;
+            }
+            
+            if (!row.classList.contains('transaction-row')) {
+                return;
+            }
+            
+            const nameText = row.querySelector('.name-cell')?.textContent.toLowerCase() || '';
+            const typeText = row.querySelector('td:first-child')?.textContent.toLowerCase() || '';
+            const rowDate = row.querySelector('.date-cell')?.textContent.trim();
+            const receivedCell = row.querySelector('td:nth-child(5)')?.textContent.trim() || '';
+            const dueCell = row.querySelector('td:nth-child(6)')?.textContent.trim() || '';
+            
+            let show = true;
+
+            // Filter by name
+            if (nameVal && !nameText.includes(nameVal)) show = false;
+            
+            // Filter by type (Cash / Cheque / Bank)
+            if (show && typeVal && !typeText.includes(typeVal)) show = false;
+            
+            // Filter by due status (Paid / Unpaid / Balance Due)
+            if (show && dueVal) {
+                // Paid: Due = ₹0.00
+                if (dueVal === 'paid' && !dueCell.includes('₹0.00')) show = false;
+                // Unpaid: Received = ₹0.00 (no payment received yet)
+                if (dueVal === 'unpaid' && !receivedCell.includes('₹0.00')) show = false;
+                // Balance Due: Received > 0 but not fully paid (Due > 0 and Received > 0)
+                if (dueVal === 'balance' && (dueCell.includes('₹0.00') || receivedCell.includes('₹0.00'))) show = false;
+            }
+            
+            // Filter by date range
+            if (show && dateStartVal && rowDate < dateStartVal) show = false;
+            if (show && dateEndVal && rowDate > dateEndVal) show = false;
+
+            row.style.display = show ? '' : 'none';
+            
+            if (show) {
+                const saleId = row.getAttribute('onclick')?.match(/\d+/)?.[0];
+                if (saleId) {
+                    visibleTransactions.add(saleId);
+                }
+            }
+        });
+        
+        // Second pass: manage payment history rows based on visible transactions
+        rows.forEach(row => {
+            if (row.classList.contains('payment-history-details')) {
+                const historyRowId = row.id.replace('payment-history-', '');
+                const saleId = parseInt(historyRowId);
+                
+                // If the parent transaction is visible, allow history row to be shown/hidden by toggle
+                // If the parent transaction is hidden, hide the history row
+                if (!visibleTransactions.has(saleId)) {
+                    row.style.display = 'none';
+                } else {
+                    // Parent is visible, respect the toggle state
+                    if (row.getAttribute('data-toggled') === 'true') {
+                        row.style.display = 'table-row';
+                    } else {
+                        row.style.display = 'none';
+                    }
+                }
+            }
+        });
+    }
+
+    [filterName, filterType, filterDue, filterDateStart, filterDateEnd].forEach(el => el.addEventListener('change', filterTable));
+    [filterName, filterDateStart, filterDateEnd].forEach(el => el.addEventListener('input', filterTable));
+    clearFilters.addEventListener('click', () => {
+        filterName.value = '';
+        filterType.value = '';
+        filterDue.value = '';
+        filterDateStart.value = '';
+        filterDateEnd.value = '';
+        filterTable();
+    });
+
+    // ✅ Transfer Modal Handler
+    const transferModal = document.getElementById('transferModal');
+    const transferTransactionType = document.getElementById('transferTransactionType');
+    const transferTransactionId = document.getElementById('transferTransactionId');
+    const transferTransactionInfo = document.getElementById('transferTransactionInfo');
+    const sourceAccountSelect = document.getElementById('sourceAccountSelect');
+    const destinationAccountSelect = document.getElementById('destinationAccountSelect');
+    const transferAmount = document.getElementById('transferAmount');
+    const transferForm = document.getElementById('transferForm');
+
+    // Handle transfer modal opening
+    document.addEventListener('click', function(event) {
+        if (event.target.closest('.open-transfer-modal')) {
+            const button = event.target.closest('.open-transfer-modal');
+            const transactionType = button.getAttribute('data-transaction-type');
+            const transactionId = button.getAttribute('data-transaction-id');
+            const balance = parseFloat(button.getAttribute('data-balance'));
+            const customerName = button.getAttribute('data-customer-name');
+            const currentAccountId = button.getAttribute('data-current-account-id');
+            const currentAccountName = button.getAttribute('data-current-account-name');
+
+            transferTransactionType.value = transactionType;
+            transferTransactionId.value = transactionId;
+            transferTransactionInfo.value = `${transactionType} #${transactionId} - ${customerName}`;
+            transferAmount.value = '';
+            transferAmount.setAttribute('max', balance.toFixed(2));
+            transferAmount.setAttribute('placeholder', `Max: ₹${balance.toFixed(2)}`);
+            
+            // Auto-populate source account with current account if available
+            if (currentAccountId) {
+                sourceAccountSelect.value = currentAccountId;
+                sourceAccountSelect.disabled = true; // Prevent changing source account
+            } else {
+                sourceAccountSelect.value = '';
+                sourceAccountSelect.disabled = false;
+            }
+            
+            destinationAccountSelect.value = '';
+        }
+    });
+
+    // Validate form submission
+    transferForm.addEventListener('submit', function(e) {
+        const sourceAccountId = sourceAccountSelect.value;
+        const destinationAccountId = destinationAccountSelect.value;
+        const amount = parseFloat(transferAmount.value);
+        const transactionId = transferTransactionId.value;
+
+        if (!transactionId) {
+            e.preventDefault();
+            alert('Transaction ID is missing. Please close and reopen the modal.');
+            return false;
+        }
+
+        if (!sourceAccountId) {
+            e.preventDefault();
+            alert('Please select a source account.');
+            sourceAccountSelect.focus();
+            return false;
+        }
+
+        if (!destinationAccountId) {
+            e.preventDefault();
+            alert('Please select a destination account.');
+            destinationAccountSelect.focus();
+            return false;
+        }
+
+        if (sourceAccountId === destinationAccountId) {
+            e.preventDefault();
+            alert('Source and destination accounts must be different.');
+            return false;
+        }
+
+        if (!amount || amount <= 0) {
+            e.preventDefault();
+            alert('Please enter a valid transfer amount.');
+            transferAmount.focus();
+            return false;
+        }
+
+        const maxBalance = parseFloat(transferAmount.getAttribute('max'));
+        if (amount > maxBalance) {
+            e.preventDefault();
+            alert(`Transfer amount cannot exceed ₹${maxBalance.toFixed(2)}.`);
+            transferAmount.focus();
+            return false;
+        }
+
+        // If all validation passes, form submits normally
+        return true;
+    });
+});
+</script>
+{% endblock %}
