@@ -2021,8 +2021,13 @@ def upload_category_items(request):
                     customer = Customer.objects.filter(
                         Q(first_name__iexact=first) | Q(last_name__iexact=first)
                     ).first()
-                else:
-                    customer = None
+                 
+                # ✅ CREATE if not found
+                if not customer and first:
+                    customer = Customer.objects.create(
+                        first_name=first,
+                        last_name=last
+    )
 
                 # Item creation
                 if purchased_type:

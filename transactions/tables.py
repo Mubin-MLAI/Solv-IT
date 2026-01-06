@@ -55,8 +55,8 @@ class PurchasedItemTable(tables.Table):
         model = Item
         template_name = "django_tables2/semantic.html"
         fields = (
-            'name','customer','purchased_type','purchased_code','created_date','price', 'serialno', 'make_and_models',
-            'processor','processor_qty', 'ram','ram_qty','hdd','hdd_qty','ssd','ssd_qty','smps_status', 'motherboard_status'
+            'name','customer','purchased_type','price', 'serialno', 'make_and_models',
+            'processor','processor_qty', 'ram','ram_qty','hdd','hdd_qty','ssd','ssd_qty','smps_status', 'motherboard_status','purchased_code', 'note'
         )
         order_by_field = 'id'
 
