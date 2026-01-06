@@ -36,6 +36,7 @@ from .views import (
     add_processor1,
     create_processor,
     get_category_items,
+    get_category_items_by_type,
     operativedashboard,
     upload_category_items,
     upload_category_only,
@@ -186,6 +187,7 @@ urlpatterns = [
     path('create-processor/', create_processor, name='create_processor'),
     # path('add-processor/', views.add_processor, name='add_processor')
     path('get-category-items/', get_category_items, name='get-category-items'),
+    path('get-category-items-by-type/', get_category_items_by_type, name='get-category-items-by-type'),
     path('operative-dashboard/', operativedashboard, name='operative-dashboard'),
     path('upload-category-items/', upload_category_items, name='upload_category_items'),
     path('upload-category-only/', upload_category_only, name='upload_category_only'),

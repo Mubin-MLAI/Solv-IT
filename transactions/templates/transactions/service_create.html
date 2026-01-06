@@ -219,6 +219,7 @@ tbody tr:hover {
                 <thead>
                     <tr>
                         <th>#</th>
+                        <th>Item Type</th>
                         <th>Item</th>
                         <th>Description</th>
                         <th>Qty</th>
@@ -393,13 +394,111 @@ $(document).ready(function () {
     }
     customerSearchSuggestions();
 
+    // ------------------ Item Type Selection Handler ------------------ //
+    $(document).on("change", ".item-type", function () {
+        const row = $(this).closest("tr");
+        const itemType = $(this).val();
+        const itemSelectDropdown = row.find(".item-select");
+        const itemNameManual = row.find(".item-name-manual");
+        
+        // Reset fields
+        itemSelectDropdown.empty().append('<option value="">Select Item</option>');
+        itemNameManual.val('');
+        
+        if (!itemType) {
+            itemSelectDropdown.hide();
+            itemNameManual.hide();
+            return;
+        }
+        
+        if (itemType === 'other') {
+            // For "Other", show manual entry field and hide dropdown
+            itemSelectDropdown.hide();
+            itemNameManual.show();
+        } else {
+            // For standard categories, fetch items from API
+            itemSelectDropdown.show();
+            itemNameManual.hide();
+            itemSelectDropdown.empty().append('<option value="">Loading items...</option>');
+            
+            fetch(`/get-category-items-by-type/?category=${itemType}&serial_no=Solv-IT`)
+                .then(response => response.json())
+                .then(data => {
+                    itemSelectDropdown.empty().append('<option value="">Select Item</option>');
+                    if (data.items && data.items.length > 0) {
+                        data.items.forEach(item => {
+                            itemSelectDropdown.append(`
+                                <option value="${item.id}" data-price="${item.unit_price || 0}" data-qty="${item.quantity}">
+                                    ${item.name} (Available: ${item.quantity})
+                                </option>
+                            `);
+                        });
+                    } else {
+                        itemSelectDropdown.append('<option value="">No items available</option>');
+                    }
+                })
+                .catch(err => {
+                    console.error("Error fetching items:", err);
+                    itemSelectDropdown.empty().append('<option value="">Error loading items</option>');
+                });
+        }
+    });
+
+    // ------------------ Item Selection Handler - Auto populate price and description ------------------ //
+    $(document).on("change", ".item-select", function () {
+        const row = $(this).closest("tr");
+        const selectedOption = $(this).find(":selected");
+        const itemPrice = selectedOption.data("price") || 0;
+        const itemQty = selectedOption.data("qty") || 0;
+        const selectedText = selectedOption.text();
+        
+        // Extract item name without "(Available: X)" part
+        const itemName = selectedText.replace(/\s*\(Available:.*?\)\s*$/, '').trim();
+        
+        // Auto-fill amount with the unit price
+        row.find(".amount").val(parseFloat(itemPrice).toFixed(2));
+        
+        // Auto-fill description with item name only (without quantity info)
+        row.find(".description").val(itemName);
+        
+        // Update totals
+        updateSummary();
+    });
+
+    // ------------------ Manual Item Entry Handler (for "Other" type) ------------------ //
+    $(document).on("input", ".item-name-manual", function () {
+        const row = $(this).closest("tr");
+        const itemName = $(this).val().trim();
+        
+        // Update description with manual item name (trimmed)
+        row.find(".description").val(itemName);
+        
+        // Update totals
+        updateSummary();
+    });
+
     // ------------------ Add Row ------------------ //
     $("#addRowBtn").click(function () {
         rowIndex++;
         $("#table_items tbody").append(`
             <tr>
                 <td class="row-number"></td>
-                <td><input type="text" name="items[][item_name]" class="form-control item"></td>
+                <td>
+                    <select name="items[][item_type]" class="form-control item-type">
+                        <option value="">Select Type</option>
+                        <option value="processor">Processor</option>
+                        <option value="ram">RAM</option>
+                        <option value="hdd">HDD</option>
+                        <option value="ssd">SSD</option>
+                        <option value="other">Other</option>
+                    </select>
+                </td>
+                <td>
+                    <select name="items[][item_id]" class="form-control item-select" data-item-type="item-select" style="display: none;">
+                        <option value="">Select Item</option>
+                    </select>
+                    <input type="text" name="items[][item_name_manual]" class="form-control item-name-manual" placeholder="Enter item name" style="display: none;">
+                </td>
                 <td><textarea name="items[][description]" class="form-control description"></textarea></td>
                 <td><input type="number" name="items[][qty]" class="form-control qty" value="1" min="1"></td>
                 <td><input type="number" name="items[][amount]" class="form-control amount" value="0" min="0" step="0.01"></td>
@@ -466,8 +565,24 @@ $(document).ready(function () {
 
         let items = [];
         $("#table_items tbody tr").each(function () {
+            const itemTypeSelect = $(this).find('.item-type');
+            const itemSelect = $(this).find('.item-select');
+            const itemNameManual = $(this).find('.item-name-manual');
+            const itemType = itemTypeSelect.val();
+            const itemId = itemSelect.val();
+            
+            // Determine item name based on type (use category name)
+            let itemName = '';
+            if (itemType === 'other') {
+                itemName = itemNameManual.val() || 'Other Item';
+            } else {
+                itemName = itemType || '';
+            }
+            
             items.push({
-                item_name: $(this).find('.item').val() || '',
+                item_name: itemName,
+                item_type: itemType || '',
+                item_id: itemType === 'other' ? '' : itemId || '',
                 description: $(this).find('.description').val() || '',
                 qty: parseFloat($(this).find('.qty').val()) || 0,
                 amount: parseFloat($(this).find('.amount').val()) || 0,
@@ -502,8 +617,9 @@ $(document).ready(function () {
                     window.location.reload();
                 }
             },
-            error: function() {
-                alert('Server error.');
+            error: function(xhr) {
+                const error = xhr.responseJSON ? xhr.responseJSON.error : 'Server error.';
+                alert('Error: ' + error);
             }
         });
     });

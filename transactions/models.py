@@ -92,7 +92,8 @@ class PaymentRecord(models.Model):
     purchase = models.ForeignKey('Purchase', null=True, blank=True, on_delete=models.CASCADE, related_name='payment_records')
     servicebill = models.ForeignKey('ServiceBillItem', null=True, blank=True, on_delete=models.CASCADE, related_name='payment_records')
     
-    receiving_bank_account = models.ForeignKey(Bankaccount, on_delete=models.CASCADE, related_name='received_payments')
+    receiving_bank_account = models.ForeignKey(Bankaccount, on_delete=models.CASCADE, related_name='received_payments', null=True,
+        blank=True)
     source_bank_account = models.ForeignKey(Bankaccount, null=True, blank=True, on_delete=models.CASCADE, related_name='sent_payments', help_text="Original bank account sending the payment")
     payment_amount = models.DecimalField(max_digits=10, decimal_places=2)
     payment_date = models.DateTimeField(auto_now_add=True)
@@ -105,7 +106,7 @@ class PaymentRecord(models.Model):
 
     def __str__(self):
         source_id = self.sale_id or self.purchase_id or self.servicebill_id
-        return f"₹{self.payment_amount} to {self.receiving_bank_account.account_name} on {self.payment_date.strftime('%Y-%m-%d %H:%M')}"
+        return f"₹{self.payment_amount} on {self.payment_date.strftime('%Y-%m-%d %H:%M')}"
 
 
 

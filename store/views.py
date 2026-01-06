@@ -1831,6 +1831,36 @@ def get_category_items(request):
     
     return JsonResponse(data)
 
+
+@csrf_exempt
+def get_category_items_by_type(request):
+    """
+    API endpoint to get category items by type from Solv-IT serial number.
+    GET parameters:
+    - category: processor, ram, hdd, or ssd
+    """
+    category = request.GET.get("category", "").lower()
+    serial_no = request.GET.get("serial_no", "Solv-IT").strip()
+    
+    if not category:
+        return JsonResponse({"error": "Category parameter is required"}, status=400)
+    
+    if category not in ['processor', 'ram', 'hdd', 'ssd']:
+        return JsonResponse({"error": "Invalid category. Must be: processor, ram, hdd, or ssd"}, status=400)
+    
+    items = catogaryitem.objects.filter(
+        category=category,
+        serial_no__iexact=serial_no,
+        quantity__gte=1
+    ).values("id", "name", "quantity", "unit_price", "serial_no").order_by('name')
+    
+    print(f"Retrieved {items.count()} items for category '{category}' and serial_no '{serial_no}'")
+    return JsonResponse({
+        "category": category,
+        "serial_no": serial_no,
+        "items": list(items)
+    })
+
 @login_required
 @csrf_exempt
 def operativedashboard(request):

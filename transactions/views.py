@@ -53,16 +53,16 @@ def receive_payment_service(request):
                 source_bank_account.save()
         
         # ✅ Record payment history
-        if receiving_bank_account:
-            PaymentRecord.objects.create(
-                servicebill=servicebill,
-                source_bank_account=source_bank_account,
-                receiving_bank_account=receiving_bank_account,
-                payment_amount=Decimal(str(received)),
-                payment_source_type='Service',
-                payment_mode=payment_mode,
-                transaction_id=transaction_id if transaction_id else None
-            )
+        
+        PaymentRecord.objects.create(
+            servicebill=servicebill,
+            source_bank_account=None if payment_mode == 'Cash' else source_bank_account,
+            receiving_bank_account= None if payment_mode == 'Cash' else receiving_bank_account,
+            payment_amount= float(str(received)),
+            payment_source_type='Service',
+            payment_mode=payment_mode,
+            transaction_id=transaction_id if transaction_id else None
+        )
         
         servicebill.save()
         messages.success(request, f"Payment of ₹{received:.2f} received for service bill #{servicebill.id}.")
@@ -1358,6 +1358,10 @@ class cashbankListView(LoginRequiredMixin, ListView):
         return Bankaccount.objects.none()
 
     def get_context_data(self, **kwargs):
+        # Import models at the start of the method
+        from django.db.models import Prefetch, Q
+        from .models import Sale, Purchase, ServiceBillItem, Bankaccount, PaymentRecord
+        
         context = super().get_context_data(**kwargs)
 
         # Provide all bank accounts for sidebar
@@ -1374,15 +1378,37 @@ class cashbankListView(LoginRequiredMixin, ListView):
             except Bankaccount.DoesNotExist:
                 pass
 
-        # Fetch related transactions
-        sales = Sale.objects.select_related('customer').all()
-        purchases = Purchase.objects.select_related('vendor').all()
-        services = ServiceBillItem.objects.select_related('customer').all()
+        # Fetch related transactions with prefetched payment records
+        sales = Sale.objects.select_related('customer').prefetch_related(
+            Prefetch('payment_records', queryset=PaymentRecord.objects.select_related('source_bank_account', 'receiving_bank_account', 'sale', 'sale__customer'))
+        ).all()
+        purchases = Purchase.objects.select_related('vendor').prefetch_related(
+            Prefetch('payment_records', queryset=PaymentRecord.objects.select_related('source_bank_account', 'receiving_bank_account', 'purchase', 'purchase__vendor'))
+        ).all()
+        services = ServiceBillItem.objects.select_related('customer').prefetch_related(
+            Prefetch('payment_records', queryset=PaymentRecord.objects.select_related('source_bank_account', 'receiving_bank_account', 'servicebill'))
+        ).all()
 
         if account_id:
-            sales = sales.filter(bank_account_id=account_id)
-            purchases = purchases.filter(bank_account_id=account_id)
-            services = services.filter(bank_account_id=account_id)
+            # Filter transactions by original bank account OR transferred to this account
+            # Using Q objects to combine conditions without .distinct() issues
+            sales = Sale.objects.select_related('customer').prefetch_related(
+                Prefetch('payment_records', queryset=PaymentRecord.objects.select_related('source_bank_account', 'receiving_bank_account', 'sale', 'sale__customer'))
+            ).filter(
+                Q(bank_account_id=account_id) | Q(payment_records__receiving_bank_account_id=account_id)
+            ).distinct()
+            
+            purchases = Purchase.objects.select_related('vendor').prefetch_related(
+                Prefetch('payment_records', queryset=PaymentRecord.objects.select_related('source_bank_account', 'receiving_bank_account', 'purchase', 'purchase__vendor'))
+            ).filter(
+                Q(bank_account_id=account_id) | Q(payment_records__receiving_bank_account_id=account_id)
+            ).distinct()
+            
+            services = ServiceBillItem.objects.select_related('customer').prefetch_related(
+                Prefetch('payment_records', queryset=PaymentRecord.objects.select_related('source_bank_account', 'receiving_bank_account', 'servicebill'))
+            ).filter(
+                Q(bank_account_id=account_id) | Q(payment_records__receiving_bank_account_id=account_id)
+            ).distinct()
 
         # Add transaction type tag safely
         for s in sales:
@@ -1577,6 +1603,96 @@ def receive_payment_purchase(request):
     
     return redirect('cashbanklist')  # Replace with your actual list view URL name
 
+
+@require_POST
+def transfer_payment_between_accounts(request):
+    """
+    Transfer due amount from one account to another and create a payment history record.
+    - Updates the person's account (Sale/Purchase) with new amount
+    - Creates a PaymentRecord for tracking the transfer
+    - Does NOT shift items between account names
+    """
+    from .forms import PaymentForm
+    from .models import PaymentRecord, Sale, Purchase, Bankaccount, ServiceBillItem
+    from django.shortcuts import get_object_or_404, redirect
+    from django.contrib import messages
+    from decimal import Decimal
+    
+    transaction_type = request.POST.get('transaction_type')  # 'Sale' or 'Purchase'
+    transaction_id = request.POST.get('transaction_id')
+    amount_transferred = Decimal(str(request.POST.get('amount_transferred', '0')))
+    source_bank_account_id = request.POST.get('source_bank_account')
+    destination_bank_account_id = request.POST.get('destination_bank_account')
+    transfer_notes = request.POST.get('transfer_notes', '')
+    
+    try:
+        # Get source and destination bank accounts
+        source_account = get_object_or_404(Bankaccount, id=source_bank_account_id)
+        destination_account = get_object_or_404(Bankaccount, id=destination_bank_account_id)
+        
+        # Validate amount
+        if amount_transferred <= 0:
+            messages.error(request, "Transfer amount must be greater than 0.")
+            return redirect('cashbanklist')
+        
+        # Check if source account has sufficient balance
+        if source_account.opening_balance < amount_transferred:
+            messages.error(request, f"Insufficient balance in {source_account.account_name}. Available: ₹{source_account.opening_balance:.2f}")
+            return redirect('cashbanklist')
+        
+        # Get the transaction object (Sale, Purchase, or Service)
+        if transaction_type == 'Sale':
+            person_transaction = get_object_or_404(Sale, id=transaction_id)
+        elif transaction_type == 'Purchase':
+            person_transaction = get_object_or_404(Purchase, id=transaction_id)
+        elif transaction_type == 'Service':
+            person_transaction = get_object_or_404(ServiceBillItem, id=transaction_id)
+        else:
+            messages.error(request, "Invalid transaction type.")
+            return redirect('cashbanklist')
+        
+        # Update person's account balance only (not shifting items)
+        person_transaction.amount_paid += amount_transferred
+        remaining = person_transaction.grand_total - person_transaction.amount_paid
+        person_transaction.amount_change = max(remaining, Decimal('0.00'))
+        
+        # Update status based on remaining balance
+        if remaining <= 0:
+            person_transaction.status = "Paid"
+        else:
+            person_transaction.status = "Balance"
+        
+        # Update bank account balances
+        source_account.opening_balance -= amount_transferred
+        destination_account.opening_balance += amount_transferred
+        source_account.save()
+        destination_account.save()
+        
+        # Create payment history record for tracking
+        PaymentRecord.objects.create(
+            sale=person_transaction if transaction_type == 'Sale' else None,
+            purchase=person_transaction if transaction_type == 'Purchase' else None,
+            servicebill=person_transaction if transaction_type == 'Service' else None,
+            source_bank_account=source_account,
+            receiving_bank_account=destination_account,
+            payment_amount=amount_transferred,
+            payment_source_type=transaction_type,
+            payment_mode='Transfer',
+            transaction_id=transfer_notes if transfer_notes else f"Transfer from {source_account.account_name} to {destination_account.account_name}"
+        )
+        
+        # Save person's transaction
+        person_transaction.save()
+        
+        messages.success(
+            request, 
+            f"✅ Transfer successful: ₹{amount_transferred:.2f} moved from {source_account.account_name} to {destination_account.account_name}"
+        )
+    
+    except Exception as e:
+        messages.error(request, f"Transfer failed: {str(e)}")
+    
+    return redirect('cashbanklist')
 
 
 @csrf_exempt
