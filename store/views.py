@@ -420,6 +420,7 @@ from django.urls import reverse_lazy
 from django.views.generic.edit import CreateView
 from django.contrib.auth.mixins import LoginRequiredMixin
 from .models import Item, Customer, catogaryitem  # make sure to import Customer
+from .barcode_utils import generate_barcode_file
 
 class ProductCreateView(LoginRequiredMixin, CreateView):
     model = Item
@@ -441,6 +442,16 @@ class ProductCreateView(LoginRequiredMixin, CreateView):
                 return self.form_invalid(form)
 
         item.save()
+
+        # ✅ Generate barcode for the item
+        try:
+            serialno = item.serialno.strip()
+            barcode_file, barcode_path = generate_barcode_file(serialno)
+            item.barcode_file = barcode_path
+            item.save()
+            messages.success(self.request, f"✅ Barcode generated successfully for {serialno}")
+        except Exception as e:
+            messages.warning(self.request, f"⚠️ Barcode generation failed: {str(e)}")
 
         serialno = item.serialno.strip()
         component_fields = ['processor', 'ram', 'hdd', 'ssd']

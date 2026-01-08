@@ -203,6 +203,7 @@ class Item(models.Model):
         db_column="customer"
     )
 
+    barcode_file = models.ImageField(upload_to='barcodes/', null=True, blank=True)
 
     def __str__(self):
         return f"{self.name} - serialno: {self.serialno or 'N/A'}, make_and_models: {self.make_and_models}, customer_name: {self.customer.first_name if self.customer else 'N/A'}"

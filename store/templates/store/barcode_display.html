@@ -1,0 +1,202 @@
+{% load static %}
+
+<!-- Barcode Display and Print Section -->
+<div class="barcode-section card mt-3">
+    <div class="card-header bg-info text-white">
+        <h5 class="mb-0">📦 Product Barcode</h5>
+    </div>
+    <div class="card-body text-center">
+        {% if item.barcode_file %}
+            <div class="barcode-container mb-3">
+                <img src="{{ item.barcode_file.url }}"
+                    alt="Barcode for {{ item.serialno }}"
+                    class="img-fluid barcode-image"
+                    style="max-width: 300px; border: 2px solid #ddd; padding: 10px; border-radius: 5px;"
+                    onerror="this.style.display='none'; document.getElementById('barcode-error').style.display='block';">
+            </div>
+
+            <div id="barcode-error" style="display:none; color:#ff6b6b;">
+                ⚠️ Barcode image could not load.
+            </div>
+
+            <p class="text-muted">
+                <strong>Serial Number:</strong> {{ item.serialno }}
+            </p>
+
+            <button class="btn btn-primary" onclick="printBarcode()">
+                <i class="fas fa-print me-2"></i>Print Barcode
+            </button>
+
+            <a href="{{ item.barcode_file.url }}"
+            class="btn btn-secondary"
+            download="barcode-{{ item.serialno }}.png">
+                <i class="fas fa-download me-2"></i>Download Barcode
+            </a>
+        {% endif %}
+
+    </div>
+</div>
+
+<style>
+    .barcode-section {
+        background: rgba(20, 22, 27, 0.85) !important;
+        backdrop-filter: blur(12px);
+        border: 1px solid rgba(255, 255, 255, 0.05) !important;
+        border-radius: 14px !important;
+    }
+
+    .barcode-section .card-header {
+        background: linear-gradient(135deg, #00eaff, #00ffbf) !important;
+        border-radius: 13px 13px 0 0 !important;
+        border: none !important;
+    }
+
+    .barcode-container {
+        padding: 20px;
+        background: rgba(255, 255, 255, 0.03);
+        border-radius: 10px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 180px;
+    }
+
+    .barcode-image {
+        transition: transform 0.2s ease;
+    }
+
+    .barcode-image:hover {
+        transform: scale(1.05);
+    }
+
+    .barcode-actions {
+        display: flex;
+        gap: 10px;
+        justify-content: center;
+        flex-wrap: wrap;
+        margin-top: 20px;
+    }
+
+    .barcode-actions .btn {
+        border-radius: 25px;
+        padding: 8px 20px;
+        font-weight: 500;
+        transition: all 0.3s ease;
+    }
+
+    .barcode-actions .btn-primary {
+        background: linear-gradient(135deg, #1976d2, #0d47a1);
+        border: none;
+    }
+
+    .barcode-actions .btn-primary:hover {
+        background: linear-gradient(135deg, #2196f3, #1565c0);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(33, 150, 243, 0.4);
+    }
+
+    .barcode-actions .btn-secondary {
+        background: linear-gradient(135deg, #666, #333);
+        border: none;
+    }
+
+    .barcode-actions .btn-secondary:hover {
+        background: linear-gradient(135deg, #888, #555);
+        transform: translateY(-2px);
+    }
+
+    @media print {
+        .barcode-actions,
+        .card-header {
+            display: none;
+        }
+
+        .barcode-section {
+            border: none;
+            box-shadow: none;
+        }
+
+        .barcode-container {
+            background: white;
+            padding: 30px;
+        }
+
+        .barcode-image {
+            border: 2px solid black;
+        }
+    }
+</style>
+
+<script>
+function printBarcode() {
+    const barcodeImage = document.querySelector('.barcode-image');
+    const serialno = '{{ item.serialno }}';
+
+    if (!barcodeImage || !barcodeImage.src) {
+        alert('Barcode image not available');
+        return;
+    }
+
+    const printWindow = window.open('', '_blank');
+
+    printWindow.document.write(`
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <title>Barcode</title>
+            <style>
+                @page {
+                    size: 50mm 25mm;
+                    margin: 0;
+                }
+
+                body {
+                    margin: 0;
+                    padding: 0;
+                    width: 50mm;
+                    height: 25mm;
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                    font-family: Arial, sans-serif;
+                }
+
+                .label {
+                    text-align: center;
+                    width: 100%;
+                }
+
+                img {
+                    max-width: 100%;
+                    max-height: 16mm;
+                }
+
+                .serial {
+                    font-size: 9px;
+                    font-weight: bold;
+                    margin-top: 2mm;
+                }
+            </style>
+        </head>
+        <body>
+            <div class="label">
+                <img src="${barcodeImage.src}">
+            </div>
+
+            <script>
+                window.onload = function () {
+                    window.print();
+                    window.onafterprint = function () {
+                        window.close();
+                    }
+                }
+            <\/script>
+        </body>
+        </html>
+    `);
+
+    printWindow.document.close();
+}
+</script>
+
+

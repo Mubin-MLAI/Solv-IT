@@ -1,3 +1,41 @@
-<div>
-    Product Page
+{% extends "store/base.html" %}
+{% load static %}
+
+{% block title %}Product Detail - {{ item.name }}{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h3 class="mb-0">{{ item.name }}</h3>
+                </div>
+                <div class="card-body">
+                    <h5>Serial Number:</h5>
+                    <p><strong>{{ item.serialno }}</strong></p>
+
+                    <h5>Make & Model:</h5>
+                    <p>{{ item.make_and_models }}</p>
+
+                    <h5>Price:</h5>
+                    <p>{{ item.price }}</p>
+
+                    <h5>Customer:</h5>
+                    <p>{{ item.customer.get_full_name|default:"N/A" }}</p>
+
+                    <h5>Notes:</h5>
+                    <p>{{ item.note|default:"No notes" }}</p>
+
+                    <a href="{% url 'product-update' item.slug %}" class="btn btn-warning">Edit</a>
+                    <a href="{% url 'productslist' %}" class="btn btn-secondary">Back to List</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            {% include "store/barcode_display.html" %}
+        </div>
+    </div>
 </div>
+{% endblock content %}
